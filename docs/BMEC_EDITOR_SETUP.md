@@ -60,15 +60,15 @@ the language server is not connected. TextMate coloring is separate from the
 compiler-backed editor features.
 
 The extension is prepared for BMEC 0.9.1-beta.1 and uses the same `bmec`
-CLI package version. Before Marketplace publication, install the reviewed
-VSIX candidate supplied with the release set:
+CLI package version. Download the extension from the BMEC website and choose
+**Extensions → Install from VSIX**, or install the downloaded file with:
 
 ```sh
 code --install-extension bmec-language-support-0.9.1-beta.1.vsix
 ```
 
-The npm CLI package includes this guide but not the VSIX archive; use `bmec
-lsp` from the installed package or use the repository checkout to install the
-extension. Its grammar is lexical coloring only; BMEC semantics remain
+The npm CLI package includes this guide but not the VSIX archive. The extension
+is distributed only as a website download; updates use the same Install from
+VSIX procedure. Its grammar is lexical coloring only; BMEC semantics remain
 provided by compiler diagnostics and language-server requests. There is no
 debugger.

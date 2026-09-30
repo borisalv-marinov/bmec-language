@@ -10,10 +10,10 @@ extension, a clearer product website and custom-app learning path, accurate
 security and AI guidance, and fresh Windows/Linux validation. It does not add
 language features or claim universal target parity.
 
-This file describes a local release candidate. Registry, Marketplace,
-GitHub, and production website publication require a later direct owner
-authorization. The reviewed candidate's exact commit and artifact hashes
-will be recorded in the release manifest before owner review.
+The VS Code extension is distributed only through the website as a downloadable
+VSIX. Install it using **Extensions → Install from VSIX**. The release manifest
+records the exact downloadable artifact hashes. Public launch status is verified
+separately for GitHub, npm, and the production website.
 
 ## Known boundaries
 

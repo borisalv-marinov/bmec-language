@@ -29,7 +29,7 @@ For archive and source installation, see [Installation](docs/INSTALL.md). Follow
 
 ## Editor
 
-Install the CLI and make `bmec` available on `PATH`, or set `bmec.executable` in VS Code. On Windows, use the path to `bmec.cmd`. The extension is versioned with this beta; install the reviewed VSIX candidate before Marketplace publication. See [editor setup](docs/BMEC_EDITOR_SETUP.md) and the [extension guide](vscode-extension/README.md).
+Install the CLI and make `bmec` available on `PATH`, or set `bmec.executable` in VS Code. On Windows, use the path to `bmec.cmd`. Download the matching extension from the BMEC website, then choose **Extensions → Install from VSIX** in VS Code. See [editor setup](docs/BMEC_EDITOR_SETUP.md) and the [extension guide](vscode-extension/README.md).
 
 ## Documentation
 

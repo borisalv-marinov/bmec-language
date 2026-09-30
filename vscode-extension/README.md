@@ -18,7 +18,9 @@ before granting trust.
 
 Install the CLI with `npm install -g bmec@0.9.1-beta.1`. This extension's
 version tracks the matching BMEC beta; its language contract remains version
-0.1. Local VSIX packaging and Marketplace publication are separate steps.
+0.1. Download the matching `.vsix` from the BMEC website. In VS Code, open
+**Extensions**, choose **Install from VSIX**, and select the file. Updates use
+the same procedure. The extension is distributed only through the website.
 
 Licensed under the MIT License. See [LICENSE](LICENSE).
 
