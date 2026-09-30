@@ -11,7 +11,7 @@ const archive=process.env.BMEC_PACKAGE_ARCHIVE?resolve(process.env.BMEC_PACKAGE_
 if(!existsSync(archive)) throw new Error(`BMEC package archive does not exist: ${archive}`);
 writeFileSync(source,'app Smoke\nmodel Item { name text required }\npage Main { crud Item }\n');
 execNpm(['install','--prefix',install,'--no-audit','--no-fund',archive],{stdio:'inherit'});
-const cli=join(install,'node_modules','bmec','dist','cli','index.js');
+const cli=join(install,'node_modules','@b.marinov','bmec','dist','cli','index.js');
 if(!existsSync(cli)) throw new Error('packed BMEC CLI is missing');
 const barePageText=join(root,'bare-page-text.bmec');
 writeFileSync(barePageText,'app PackageSmoke\npage Home { text "Welcome" }\n');
@@ -34,17 +34,17 @@ writeFileSync(boundAwait,'app PackageSmoke\nmodel Item { name text required }\na
 const boundAwaitResult=JSON.parse(execFileSync(process.execPath,[cli,'check',boundAwait,'--json'],{encoding:'utf8'}));
 if(boundAwaitResult.ok!==true) throw new Error(`packed BMEC rejected the suggested bound-await form: ${JSON.stringify(boundAwaitResult.diagnostics)}`);
 const publicGuides=['docs/INSTALL.md','docs/BMEC_EDITOR_SETUP.md','docs/language-completion.md','docs/AI_AGENT_GUIDE.md','docs/GETTING_STARTED.md','docs/LEARNING_PATH.md','docs/LANGUAGE_BASICS.md','docs/FULL_STACK_GUIDE.md','docs/CUSTOM_APP_READING_QUEUE.md','docs/CAPABILITIES.md','docs/NATIVE_BACKEND_COVERAGE.md','docs/CAPABILITY_COVERAGE.md','docs/SHOWCASE.md','docs/CLI_REFERENCE.md','docs/STANDARD_LIBRARY.md','docs/STYLING_GUIDE.md','docs/SECURITY_MODEL.md','docs/THREAT_MODEL.md','docs/DATABASE_PRODUCTION.md','docs/DEPLOYMENT.md'];
-for(const guide of publicGuides){if(!existsSync(join(install,'node_modules','bmec',guide))) throw new Error(`packed BMEC public guide is missing: ${guide}`);}
-const readmeText=readFileSync(join(install,'node_modules','bmec','README.md'),'utf8');
-for(const file of ['LICENSE','NOTICE'])if(!existsSync(join(install,'node_modules','bmec',file)))throw new Error(`packed BMEC is missing ${file}`);
+for(const guide of publicGuides){if(!existsSync(join(install,'node_modules','@b.marinov','bmec',guide))) throw new Error(`packed BMEC public guide is missing: ${guide}`);}
+const readmeText=readFileSync(join(install,'node_modules','@b.marinov','bmec','README.md'),'utf8');
+for(const file of ['LICENSE','NOTICE'])if(!existsSync(join(install,'node_modules','@b.marinov','bmec',file)))throw new Error(`packed BMEC is missing ${file}`);
 for(const guide of publicGuides){if(!readmeText.includes(guide)) throw new Error(`packed BMEC README does not link ${guide}`);}
 for(const match of readmeText.matchAll(/\]\(([^)]+)\)/g)){
  const target=match[1].split('#')[0];
  if(!target||target.startsWith('http:')||target.startsWith('https:')||target.startsWith('/')) continue;
  if(['website/README.md','examples/','ARCHITECTURE.md','ROADMAP.md','CONTRIBUTING.md','SUPPORT.md','SECURITY.md','CODE_OF_CONDUCT.md','CHANGELOG.md','RELEASE_NOTES.md'].includes(target))continue;
- if(!existsSync(join(install,'node_modules','bmec',target))) throw new Error(`packed BMEC README has a broken local link: ${match[1]}`);
+ if(!existsSync(join(install,'node_modules','@b.marinov','bmec',target))) throw new Error(`packed BMEC README has a broken local link: ${match[1]}`);
 }
-const guideRoot=join(install,'node_modules','bmec','docs');
+const guideRoot=join(install,'node_modules','@b.marinov','bmec','docs');
 const starterGuide=readFileSync(join(guideRoot,'GETTING_STARTED.md'),'utf8');
 const basicsGuide=readFileSync(join(guideRoot,'LANGUAGE_BASICS.md'),'utf8');
 const learningGuide=readFileSync(join(guideRoot,'LEARNING_PATH.md'),'utf8');
@@ -69,7 +69,7 @@ for(const [name,source] of [['getting-started',starterExample],['language-basics
  const result=JSON.parse(execFileSync(process.execPath,[cli,'check',file,'--json'],{encoding:'utf8'}));
  if(result.ok!==true) throw new Error(`installed BMEC CLI rejected the ${name} guide example: ${JSON.stringify(result.diagnostics)}`);
 }
-const aiReference=readFileSync(join(install,'node_modules','bmec','ai','ai-spec.md'),'utf8');
+const aiReference=readFileSync(join(install,'node_modules','@b.marinov','bmec','ai','ai-spec.md'),'utf8');
 if(!aiReference.includes('### Page content and components')||!aiReference.includes('A page body cannot contain a bare text statement.')) throw new Error('packed BMEC AI reference is missing page-content guidance');
 if(!aiReference.includes('databaseCountWhere')) throw new Error('packed BMEC AI reference is missing databaseCountWhere');
 if(!aiReference.includes('where id is jobId')) throw new Error('packed BMEC AI reference is missing implicit model-ID query guidance');
@@ -79,7 +79,7 @@ if(!aiReference.replace(/\s+/g,' ').includes('manually constructed model values 
 const aiSpec=JSON.parse(execFileSync(process.execPath,[cli,'ai-spec','--json'],{encoding:'utf8'}));
 const knowledge=JSON.parse(execFileSync(process.execPath,[cli,'knowledge','send email','--json'],{encoding:'utf8'}));
 if(knowledge.schemaVersion!=='bmec.knowledge-context.v1'||!knowledge.relevant_symbols.some(symbol=>symbol.id==='STDLIB-sendEmail')) throw new Error('packed BMEC is missing its task-specific knowledge context command');
-if(!existsSync(join(install,'node_modules','bmec','llms.txt'))||!existsSync(join(install,'node_modules','bmec','ai','knowledge-index.json'))) throw new Error('packed BMEC is missing its machine-readable AI entry points');
+if(!existsSync(join(install,'node_modules','@b.marinov','bmec','llms.txt'))||!existsSync(join(install,'node_modules','@b.marinov','bmec','ai','knowledge-index.json'))) throw new Error('packed BMEC is missing its machine-readable AI entry points');
 if(!aiSpec.constructs.some(construct=>construct.id==='DB-COUNT-001')) throw new Error('packed BMEC machine spec is missing DB-COUNT-001');
 if(!aiSpec.constructs.some(construct=>construct.id==='DB-QUERY-001'&&construct.syntax.includes('or')&&construct.constraints.some(item=>item.includes('case-sensitive literal substring')))) throw new Error('packed BMEC machine spec is missing typed literal text search');
 if(!aiSpec.constructs.some(construct=>construct.id==='LANG-API-001'&&construct.syntax.includes('requiring authenticated'))) throw new Error('packed BMEC machine spec is missing model API authorization');

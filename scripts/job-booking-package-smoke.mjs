@@ -10,7 +10,7 @@ try {
   const archive=process.env.BMEC_PACKAGE_ARCHIVE?resolve(process.env.BMEC_PACKAGE_ARCHIVE):join(root,JSON.parse(run(['pack','--pack-destination',root,'--json']))[0].filename),install=join(root,'install'),app=join(root,'app');
   run(['install','--prefix',install,'--no-audit','--no-fund',archive],{stdio:'inherit'});
   mkdirSync(app);for(const file of ['bmec.toml','bmec.lock','main.bmec'])cpSync(join(process.cwd(),'examples','job-booking',file),join(app,file));
-  const cli=join(install,'node_modules','bmec','dist','cli','index.js');
+  const cli=join(install,'node_modules','@b.marinov','bmec','dist','cli','index.js');
   if(!existsSync(cli))throw new Error('installed BMEC CLI is missing');
   execFileSync(process.execPath,[cli,'check',join(app,'main.bmec')],{stdio:'inherit'});
   execFileSync(process.execPath,[cli,'build',join(app,'main.bmec'),'--release'],{stdio:'inherit'});

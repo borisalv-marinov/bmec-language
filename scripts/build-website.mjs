@@ -119,7 +119,8 @@ if(!vsixArchive||!existsSync(vsixArchive))throw new Error('Set BMEC_VSIX_ARCHIVE
 const packageFile=basename(packageArchive),vsixPackage=JSON.parse(readFileSync(join(root,'vscode-extension','package.json'),'utf8'));
 if(vsixPackage.publisher!=='bmec')throw new Error(`Unexpected VS Code publisher: ${vsixPackage.publisher}`);
 const vsixFile=`bmec-language-support-${vsixPackage.version}.vsix`;
-if(packageFile!==`${pkg.name}-${pkg.version}.tgz`)throw new Error(`Expected reviewed archive ${pkg.name}-${pkg.version}.tgz, received ${packageFile}`);
+const expectedArchive=`${pkg.name.replace(/^@/,'').replace('/','-')}-${pkg.version}.tgz`;
+if(packageFile!==expectedArchive)throw new Error(`Expected reviewed archive ${expectedArchive}, received ${packageFile}`);
 copyFileSync(packageArchive,join(output,'downloads',packageFile));
 copyFileSync(vsixArchive,join(output,'downloads',vsixFile));
 const artifact=(file,name)=>({file:name,sizeBytes:readFileSync(file).length,sha256:createHash('sha256').update(readFileSync(file)).digest('hex')});

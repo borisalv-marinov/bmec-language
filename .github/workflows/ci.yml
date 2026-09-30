@@ -7,6 +7,11 @@ on:
 permissions:
   contents: read
 
+env:
+  BMEC_SITE_BASE_URL: https://bmec-review.invalid
+  BMEC_PACKAGE_ARCHIVE: ${{ github.workspace }}/.tmp/release-artifacts/b.marinov-bmec-0.9.1-beta.1.tgz
+  BMEC_VSIX_ARCHIVE: ${{ github.workspace }}/.tmp/release-artifacts/bmec-language-support-0.9.1-beta.1.vsix
+
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -36,6 +41,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Prepare exact local downloads for website checks
+        shell: bash
+        run: |
+          mkdir -p .tmp/release-artifacts
+          npm pack --pack-destination .tmp/release-artifacts
+          npm ci --prefix vscode-extension
+          cd vscode-extension
+          npx --yes --package @vscode/vsce@4.0.0 vsce package --pre-release --out ../.tmp/release-artifacts/bmec-language-support-0.9.1-beta.1.vsix
       - run: npm run test:docs
       - run: npm test -- --reporter=dot --testTimeout=20000
         env:
@@ -88,6 +101,14 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
+      - name: Prepare exact local downloads for website checks
+        shell: bash
+        run: |
+          mkdir -p .tmp/release-artifacts
+          npm pack --pack-destination .tmp/release-artifacts
+          npm ci --prefix vscode-extension
+          cd vscode-extension
+          npx --yes --package @vscode/vsce@4.0.0 vsce package --pre-release --out ../.tmp/release-artifacts/bmec-language-support-0.9.1-beta.1.vsix
       - run: npm run test:docs
       - run: npm test -- --reporter=dot --testTimeout=20000
       - run: npm run test:native

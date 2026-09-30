@@ -9,7 +9,7 @@ BMEC is a statically typed programming language and compiler for building full-s
 Use Node.js 22 or newer. Before the reviewed beta is published, install the candidate archive supplied with the release set or build from a source checkout. Once published, install the version-pinned beta:
 
 ```sh
-npm install -g bmec@0.9.1-beta.1
+npm install -g @b.marinov/bmec@0.9.1-beta.1
 bmec doctor
 bmec new my-app
 cd my-app

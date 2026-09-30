@@ -1,8 +1,8 @@
 # Install BMEC 0.9.1 beta
 
-Use Node.js 22 or newer. The beta package is a prerelease and is not yet available from the public npm registry in this review candidate.
+Use Node.js 22 or newer. The beta package is a prerelease, published as `@b.marinov/bmec` with the `beta` tag. The executable is named `bmec`.
 
-Before publication, install the exact reviewed archive supplied with the release set:
+To install an exact downloaded archive from the BMEC website:
 
 ```sh
 npm install -g PATH_TO_REVIEWED_ARCHIVE
@@ -10,10 +10,10 @@ bmec --version
 bmec doctor
 ```
 
-After the approved package is published, use the version-pinned install:
+For a registry install, use the pinned beta version:
 
 ```sh
-npm install -g bmec@0.9.1-beta.1
+npm install -g @b.marinov/bmec@0.9.1-beta.1
 bmec --version
 bmec doctor
 ```
