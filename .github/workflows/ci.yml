@@ -44,7 +44,7 @@ jobs:
       - name: Prepare exact local downloads for website checks
         shell: bash
         run: |
-          mkdir -p .tmp/release-artifacts
+          mkdir -p .tmp/release-artifacts docs/evidence
           npm pack --pack-destination .tmp/release-artifacts
           npm ci --prefix vscode-extension
           cd vscode-extension
@@ -104,7 +104,7 @@ jobs:
       - name: Prepare exact local downloads for website checks
         shell: bash
         run: |
-          mkdir -p .tmp/release-artifacts
+          mkdir -p .tmp/release-artifacts docs/evidence
           npm pack --pack-destination .tmp/release-artifacts
           npm ci --prefix vscode-extension
           cd vscode-extension

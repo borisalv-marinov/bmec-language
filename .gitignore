@@ -12,6 +12,7 @@ website/dist/
 coverage/
 .tmp/
 output/
+docs/evidence/
 *.log
 .env
 .env.*
