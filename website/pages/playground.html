@@ -1,7 +1,7 @@
 <section class="route-section playground" aria-labelledby="playground-title">
   <div class="playground-intro">
     <div>
-      <h2 id="playground-title">A real BMEC check. A safe place to run a function.</h2>
+      <h2 id="playground-title">A real BMEC check. A local place to run a function.</h2>
       <p>Start with a checked program or write your own. BMEC checks it in your browser, then the local runner shows what a supported pure function returns.</p>
     </div>
     <aside class="playground-privacy">
@@ -64,7 +64,7 @@
       <pre class="playground-panel playground-json" id="playground-context" role="region" aria-label="Compiler-generated AI context" hidden>No AI context yet. Check source to create it.</pre>
     </section>
   </div>
-  <p class="playground-footnote">The compiler checks the full BMEC source. The browser can run only bounded pure functions; code that needs files, a database, network, or host capabilities must run in your local project. <a href="/docs/PLAYGROUND_GUIDE.md" download>Download the playground guide</a>.</p>
+  <p class="playground-footnote">The compiler checks the full BMEC source. The browser runs only bounded, synchronous pure functions; code that needs files, a database, network, or host capabilities must run in your local project. <a href="/docs/PLAYGROUND_GUIDE.md" download>Download the playground guide</a>.</p>
   <noscript><p class="route-callout">JavaScript is needed for local checking. Read the <a href="/docs/getting-started/">local install guide</a> to use BMEC from your computer.</p></noscript>
   <script type="module" src="/playground.js"></script>
 </section>

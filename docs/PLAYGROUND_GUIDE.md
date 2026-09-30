@@ -79,8 +79,10 @@ operations.
 Each run occurs in a short-lived browser Worker with limits on source size
 (50,000 characters), steps (20,000), loop iterations (1,000), call depth
 (32), integer range (signed 64-bit), text length (50,000 characters), list
-length (1,000 items), and elapsed time (2 seconds). A run stops when it
-exceeds those bounds. The source is not uploaded to a server.
+length (1,000 items), and elapsed time (2 seconds). JSON input is limited to
+16 arguments, 5,000 values, and 32 nested levels. Results are limited to 5,000
+values and 100,000 text characters in total. A run stops when it exceeds a
+bound. The source is not uploaded to a server.
 
 This page is not an app host. To try pages, routes, databases, or host-backed
 functions, install BMEC locally and follow the [getting started guide](GETTING_STARTED.md).

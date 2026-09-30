@@ -4,7 +4,9 @@ import type { TypeRef } from "../types/type-ref.js";
 interface SafeArray extends Array<SafeValue> {}
 interface SafeObject { [key: string]: SafeValue }
 type SafeValue = null | boolean | number | bigint | string | SafeArray | SafeObject;
-type Environment = Map<string, SafeValue>;
+class MutableCell { constructor(public value: SafeValue) {} }
+type Binding = SafeValue | MutableCell;
+type Environment = Map<string, Binding>;
 type Budget = { steps: number; depth: number };
 
 const MAX_STEPS = 20_000;
@@ -12,6 +14,8 @@ const MAX_DEPTH = 32;
 const MAX_LIST_ITEMS = 1_000;
 const MAX_STRING_LENGTH = 50_000;
 const MAX_ARGUMENT_NODES = 5_000;
+const MAX_OUTPUT_NODES = 5_000;
+const MAX_OUTPUT_TEXT = 100_000;
 const INT_MIN = -(2n ** 63n);
 const INT_MAX = 2n ** 63n - 1n;
 const fail = (message: string): never => { throw new Error(message); };
@@ -49,7 +53,8 @@ function valueOf(expression: CoreExpr, env: Environment, functions: Map<string, 
       const name = expression.name;
       if (!name) return fail("The selected function contains an unnamed value.");
       if (!env.has(name)) return fail(`Unknown value "${name}" in the selected function.`);
-      return env.get(name)!;
+      const binding = env.get(name)!;
+      return binding instanceof MutableCell ? binding.value : binding;
     }
     case "list": {
       const elements = expression.elements ?? [];
@@ -67,8 +72,6 @@ function valueOf(expression: CoreExpr, env: Environment, functions: Map<string, 
     case "binary": {
       const operator = expression.operator;
       const left = valueOf(expression.left!, env, functions, budget);
-      if (operator === "and" && typeof left === "boolean" && !left) return false;
-      if (operator === "or" && typeof left === "boolean" && left) return true;
       const right = valueOf(expression.right!, env, functions, budget);
       if (operator === "and" && typeof left === "boolean" && typeof right === "boolean") return left && right;
       if (operator === "or" && typeof left === "boolean" && typeof right === "boolean") return left || right;
@@ -157,6 +160,22 @@ function checkedText(value: string): string {
   return value;
 }
 
+function checkOutput(value: SafeValue): void {
+  const state = { nodes: 0, text: 0 };
+  const pending: SafeValue[] = [value];
+  while (pending.length) {
+    const item = pending.pop()!;
+    if (++state.nodes > MAX_OUTPUT_NODES) fail("The playground limits results to 5,000 values.");
+    if (typeof item === "string") {
+      state.text += item.length;
+      if (state.text > MAX_OUTPUT_TEXT) fail("The playground limits returned text to 100,000 characters total.");
+    } else if (Array.isArray(item)) {
+      if (item.length > MAX_LIST_ITEMS) fail("The playground limits lists to 1,000 items.");
+      pending.push(...item);
+    }
+  }
+}
+
 function checkedArgument(value: unknown, state: { nodes: number }, depth = 0): SafeValue {
   if (depth > MAX_DEPTH) fail("The playground limits argument nesting to 32 levels.");
   if (++state.nodes > MAX_ARGUMENT_NODES) fail("The playground limits JSON arguments to 5,000 values.");
@@ -178,8 +197,18 @@ function runStatements(body: CoreStatement[], env: Environment, functions: Map<s
   for (const statement of body) {
     step(budget);
     switch (statement.kind) {
-      case "let": env.set(statement.name, valueOf(statement.value, env, functions, budget)); break;
-      case "assign": env.set(statement.name, valueOf(statement.value, env, functions, budget)); break;
+      case "let": {
+        const value = valueOf(statement.value, env, functions, budget);
+        env.set(statement.name, statement.mutable ? new MutableCell(value) : value);
+        break;
+      }
+      case "assign": {
+        const value = valueOf(statement.value, env, functions, budget);
+        const binding = env.get(statement.name);
+        if (binding instanceof MutableCell) binding.value = value;
+        else env.set(statement.name, value);
+        break;
+      }
       case "return": return { returned: true, value: valueOf(statement.value, env, functions, budget) };
       case "if": {
         const condition = valueOf(statement.condition, env, functions, budget);
@@ -274,5 +303,7 @@ export function runPureFunction(functions: CoreFunction[], functionName: string,
   for (const fn of functions) { indexed.set(fn.id, fn); indexed.set(fn.name, fn); }
   const target = indexed.get(functionName);
   if (!target) fail(`Function "${functionName}" is not declared in this source.`);
-  return invoke(target!, args, indexed, { steps: 0, depth: 0 });
+  const result = invoke(target!, args, indexed, { steps: 0, depth: 0 });
+  checkOutput(result);
+  return result;
 }

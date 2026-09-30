@@ -42,7 +42,9 @@ compiler or guarantee that AI-generated programs are correct.
 
 The static website is built from checked-in source, compiler metadata, and
 verified examples. The playground runs the shared checker in a browser worker;
-it does not execute submitted source.
+after a successful full-source check, it can run only its documented bounded
+subset of synchronous pure functions. It does not run a complete application
+or provide host capabilities.
 
 ## Support boundary
 

@@ -59,7 +59,7 @@ try{
       if(!page.url().endsWith('/docs/'))throw new Error('Mobile navigation did not open the selected route');
     }
     if(name==='desktop'){
-      const routes=[['/docs/','Guides for building with BMEC'],['/docs/how-bmec-works/','How BMEC works'],['/learn/','Learn BMEC'],['/library/','BMEC code library'],['/playground/','BMEC playground'],['/ai/','Build with BMEC and coding tools'],['/benchmarks/','Benchmarking BMEC'],['/architecture/','How BMEC works'],['/security/','Security and trust boundaries'],['/deploy/','Deployment and operations'],['/roadmap/','Project status'],['/support/','Support BMEC'],['/contact/','Contact'],['/showcase/','Built with BMEC']];
+        const routes=[['/docs/','Guides for building with BMEC'],['/docs/how-bmec-works/','How BMEC works'],['/learn/','Learn BMEC'],['/library/','BMEC code library'],['/playground/','BMEC playground'],['/ai/','Build with BMEC and coding tools'],['/benchmarks/','Benchmarking BMEC'],['/architecture/','How BMEC works'],['/security/','Security and trust boundaries'],['/deploy/','Deployment and operations'],['/roadmap/','Project status'],['/support/','Support BMEC'],['/contact/','Contact'],['/showcase/','Built with BMEC']];
       for(const [path,title] of routes){
         const response=await page.goto(`${url}${path}`,{waitUntil:'networkidle'});
         if(!response?.ok())throw new Error(`Required website route ${path} returned ${response?.status()}`);
@@ -73,12 +73,20 @@ try{
         const routeAxe=await page.evaluate(async()=>window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
         if(routeAxe.violations.length)throw new Error(`Route ${path} has accessibility violations: ${routeAxe.violations.map(item=>item.id).join(', ')}`);
       }
+      const guide=await page.goto(`${url}/docs/how-bmec-works/`,{waitUntil:'networkidle'});
+      if(!guide?.ok())throw new Error('Rendered How BMEC works guide did not load');
+      const markdownPath=await page.getByRole('link',{name:'Download Markdown'}).getAttribute('href');
+      if(markdownPath!=='/docs/HOW_BMEC_WORKS.md')throw new Error(`Markdown download points to ${markdownPath}`);
+      const markdown=await page.evaluate(async path=>{const response=await fetch(path);return {ok:response.ok,type:response.headers.get('content-type'),body:await response.text()};},markdownPath);
+      if(!markdown.ok||!markdown.type?.includes('text/markdown')||markdown.body!==readFileSync(join(root,'docs','HOW_BMEC_WORKS.md'),'utf8'))throw new Error('Download Markdown does not match the maintained guide source');
+      const raw=await page.goto(`${url}${markdownPath}`,{waitUntil:'networkidle'});
+      if(!raw?.ok()||!await page.locator('body').innerText().then(text=>text.startsWith('# How BMEC works')))throw new Error('View raw Markdown is not readable source text');
     }
     const playgroundRequests=[];
     page.on('request',request=>playgroundRequests.push({url:request.url(),method:request.method(),postData:request.postData()}));
     const playgroundResponse=await page.goto(`${url}/playground/`,{waitUntil:'networkidle'});
     if(!playgroundResponse?.ok())throw new Error(`${name}: playground route returned ${playgroundResponse?.status()}`);
-    await page.getByRole('heading',{name:'A real BMEC check. A safe place to run a function.'}).waitFor();
+    await page.getByRole('heading',{name:'A real BMEC check. A local place to run a function.'}).waitFor();
     const policy=await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
     if(!policy?.includes("default-src 'self'")||!policy.includes("connect-src 'self'")||!policy.includes("worker-src 'self'")||!policy.includes("script-src 'self'"))throw new Error(`${name}: playground content security policy is missing required local-only directives`);
     await page.getByRole('button',{name:'Check code'}).waitFor();
@@ -118,6 +126,22 @@ try{
     await page.getByRole('button',{name:'Run function'}).click();
     await page.waitForFunction(()=>document.querySelector('#playground-status')?.textContent?.startsWith('Run stopped'));
     if(!await page.locator('#playground-run-output').innerText().then(text=>text.includes('Integer overflow')))throw new Error(`${name}: runner did not report signed 64-bit overflow`);
+    if(name==='desktop'){
+      await page.evaluate(()=>{
+        const original=window.Worker;
+        class HungWorker extends EventTarget{
+          postMessage(message){if(message.type==='init')queueMicrotask(()=>this.dispatchEvent(new MessageEvent('message',{data:{type:'ready'}})));}
+          terminate(){window.__bmecTimeoutWorkerTerminated=true;}
+        }
+        window.__bmecOriginalWorker=original;
+        window.__bmecTimeoutWorkerTerminated=false;
+        Object.defineProperty(window,'Worker',{value:HungWorker,configurable:true});
+      });
+      await page.getByRole('button',{name:'Run function'}).click();
+      await page.waitForFunction(()=>document.querySelector('#playground-status')?.textContent?.includes('reached its 2-second limit'));
+      if(!await page.evaluate(()=>window.__bmecTimeoutWorkerTerminated))throw new Error(`${name}: playground did not terminate a timed-out Worker`);
+      await page.evaluate(()=>Object.defineProperty(window,'Worker',{value:window.__bmecOriginalWorker,configurable:true}));
+    }
     await page.locator('#playground-source').fill('app RunnerRecovery\nfunction answer() -> integer { return 42 }');
     await page.getByRole('button',{name:'Check code'}).click();
     await page.waitForFunction(()=>document.querySelector('#playground-status')?.textContent?.startsWith('Check complete'));

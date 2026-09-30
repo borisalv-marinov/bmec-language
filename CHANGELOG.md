@@ -11,13 +11,16 @@ publication.
 - Prepares clean installation, VS Code distribution, custom-app learning,
   compiler-backed AI discovery, and the product website.
 - Adds no language features. Publication awaits owner review.
+- The browser playground can run a documented, resource-bounded subset of
+  synchronous pure functions after checking the complete source; it is not a
+  general BMEC runtime or application host.
 
 ## 0.9.1-beta.1 — private preview, unpublished
 
 - Added an install-to-deployment learning path with compiler-checked BMEC
   examples and exact-package onboarding checks.
-- Added a browser-local playground for compiler diagnostics, typed IR, and AI
-  context. It checks source but does not execute submitted programs.
+- Added a browser-local playground for compiler diagnostics, typed IR, AI
+  context, and a resource-bounded subset of synchronous pure functions.
 - Added the responsive BMEC website source, documentation routes, checked
   example catalog, security guidance, and local browser checks. The website
   has not been deployed.

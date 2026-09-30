@@ -24,10 +24,11 @@ execution notes and historical evidence are not website inputs.
 
 ## Browser playground and editor connection
 
-`/playground/` loads the bundled BMEC compiler and a bounded pure-function
+`/playground/` loads the bundled BMEC compiler and bounded pure-function
 runner into a short-lived browser Worker. It checks the full supported source
 language, reports diagnostics and typed IR, and can run only the documented
-safe subset. No edited source is sent to a website server. Its **Copy context
+resource-bounded subset of synchronous pure functions. No edited source is
+sent to a website server. Its **Copy context
 for AI** action copies compiler-generated context only after the user requests
 it. `/docs/PLAYGROUND_GUIDE.md` explains the interaction and limits.
 

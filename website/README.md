@@ -12,9 +12,11 @@ diagnostics, examples, public capability inventory, and curated showcase.
 The generated coverage files come from `docs/capability-map.json`, canonical
 compiler metadata, and compiler-checked example files.
 
-The live playground uses BMEC's shared pure source checker, bundled into a
-short-lived browser worker. It returns real diagnostics and typed IR without
-running user code. Source is held in page/worker memory only; the page reads
+The live playground uses BMEC's full source checker and bounded pure-function
+runner, bundled into a short-lived browser worker. It returns real diagnostics
+and typed IR, then can run only the documented subset of synchronous pure
+functions. It does not run a complete app or provide host capabilities.
+Source is held in page/worker memory only; the page reads
 the public checked-example catalog and BMEC knowledge index, never transmits
 the edited source, and caps input at 50,000 characters with a 2-second worker
 timeout. The playground route applies a same-origin Content Security Policy.
@@ -25,8 +27,8 @@ no-write network boundary, desktop/tablet/mobile layouts, and axe results.
 The shared static route shell is generated for the docs, learn, playground,
 examples, showcase, AI, benchmarks, architecture, security, deploy, roadmap,
 support, and contact routes. Route copy lives in website/pages/; the required
-routes are checked by `npm run test:website`. The playground is a compiler
-checker; it does not run BMEC functions or build an application in the browser.
+routes are checked by `npm run test:website`. The playground runs supported
+pure functions only and does not build or host an application in the browser.
 
 The builder excludes execution state, internal plans, scratch material, and
 historical QA documents. It copies only the screenshot paths explicitly
