@@ -1,0 +1,41 @@
+{
+  "schemaVersion": "bmec.ai-benchmark.v1",
+  "tasks": [
+    {
+      "id": "hello-world",
+      "tier": 1,
+      "title": "Hello World",
+      "prompt": "Create main.bmec with an app named HelloWorld and a typed greeting() function that returns exactly Hello, world!. Compile it and invoke it through the BMEC CLI."
+    },
+    {
+      "id": "small-cli",
+      "tier": 2,
+      "title": "A small CLI project",
+      "prompt": "Use the public getting-started guide to create a project named greeting-cli. Add a typed greet(name text) function that returns Hello, <name>!, then check, test, build, and execute the function through the BMEC CLI."
+    },
+    {
+      "id": "todo-database",
+      "tier": 3,
+      "title": "Todo data app",
+      "prompt": "In main.bmec, define a persistent Task model with required text title and boolean done defaulting to false. Add a Home page that uses CRUD for Task and its generated /tasks API. Compile and inspect the project facts."
+    },
+    {
+      "id": "notes-api",
+      "tier": 4,
+      "title": "A typed API",
+      "prompt": "Extend main.bmec with a Note model containing required text title and optional text body. Expose the model at /notes and add a Home page with CRUD for Note. Compile the program and inspect its API and model facts."
+    },
+    {
+      "id": "support-dashboard",
+      "tier": 5,
+      "title": "Support dashboard",
+      "prompt": "Build a small full-stack support dashboard. It needs Task and User models, a Dashboard page, TaskRow and TaskForm components, a responsive DashboardStyle, and database-backed list and create functions exposed at /tasks. Use the public docs, examples, and BMEC introspection to discover valid syntax; compile and inspect the project."
+    },
+    {
+      "id": "booking-business-app",
+      "tier": 6,
+      "title": "Booking business app",
+      "prompt": "Build a small booking operations app in main.bmec. Define Customer and Appointment models with a typed Customer relationship; expose Appointment at /appointments; create an AppointmentForm with required-field validation; add a Dashboard CRUD page, responsive ScheduleStyle, and a passing BMEC test. Compile, run the test, and inspect the model, API, page, component, and style facts."
+    }
+  ]
+}
