@@ -4,6 +4,17 @@ This file records notable user-facing changes. Package and language versions
 are separate. Beta entries are prereleases and do not imply registry
 publication.
 
+## 0.9.1-beta.2
+
+- Fixes `bmec inspect` and `bmec affected` to accept app and module roots, as
+  well as every other canonical ID emitted by `bmec graph`.
+- Updates the matching npm and VSIX installation instructions and downloads.
+- Adds a branded BMEC sharing image and a clearer GitHub quick start.
+- Repairs public CI setup after sanitizing the source export; private history
+  and evidence remain excluded.
+- Keeps language contract 0.1 and typed IR 2 unchanged. The browser playground
+  still executes only the documented bounded pure-function subset.
+
 ## 0.9.1-beta.1 — prepared beta candidate
 
 - Carries forward the frozen BMEC 0.8 product source with language 0.1 and IR

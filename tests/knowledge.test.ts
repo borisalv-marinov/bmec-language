@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 
 const examples=JSON.parse(readFileSync('ai/examples.json','utf8'));
 const diagnostics=JSON.parse(readFileSync('ai/diagnostics.json','utf8'));
-const index=createKnowledgeIndex({examples,diagnostics},'0.9.1-beta.1');
+const index=createKnowledgeIndex({examples,diagnostics},'0.9.1-beta.2');
 
 describe('BMEC task knowledge',()=>{
  it('finds stable cursor pagination metadata for an unfamiliar orders task',()=>{
@@ -31,14 +31,14 @@ describe('BMEC task knowledge',()=>{
   expect(result.relevant_symbols.length).toBeLessThanOrEqual(6);
   expect(result.examples.length).toBeLessThanOrEqual(3);
   expect(JSON.stringify(result).length).toBeLessThan(16000);
-  expect(result.version).toEqual({package:'0.9.1-beta.1',language:'0.1',compatibility:'0.1-alpha'});
+  expect(result.version).toEqual({package:'0.9.1-beta.2',language:'0.1',compatibility:'0.1-alpha'});
  });
  it('returns a deterministic machine-readable CLI context pack',()=>{
   const cli='dist/cli/index.js';
   const first=execFileSync(process.execPath,[cli,'knowledge','transaction rollback','--json'],{encoding:'utf8'});
   expect(execFileSync(process.execPath,[cli,'knowledge','transaction rollback','--json'],{encoding:'utf8'})).toBe(first);
   const result=JSON.parse(first);
-  expect(result).toMatchObject({schemaVersion:'bmec.knowledge-context.v1',task:'transaction rollback',version:{package:'0.9.1-beta.1',language:'0.1'}});
+  expect(result).toMatchObject({schemaVersion:'bmec.knowledge-context.v1',task:'transaction rollback',version:{package:'0.9.1-beta.2',language:'0.1'}});
   expect(result.relevant_symbols.map((symbol:{name:string})=>symbol.name).join(' ').toLocaleLowerCase()).toContain('transaction');
  });
 });

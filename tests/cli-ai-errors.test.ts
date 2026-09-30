@@ -5,6 +5,19 @@ import {join} from 'node:path';
 import {execFileSync} from 'node:child_process';
 
 describe('CLI AI error contracts',()=>{
+ it('inspects and finds affected nodes for every emitted graph ID, including app and module roots',()=>{
+  const root=mkdtempSync(join(tmpdir(),'bmec-ai-root-'));const file=join(root,'main.bmec');const cli=join(process.cwd(),'dist','cli','index.js');
+  writeFileSync(file,'app Demo\nmodel Item {}\n');
+  const graph=JSON.parse(execFileSync(process.execPath,[cli,'graph',file,'--json'],{encoding:'utf8'}));
+  expect(graph.nodes.some((node:{id:string})=>node.id==='APP-001')).toBe(true);
+  for(const node of graph.nodes){
+   const inspected=JSON.parse(execFileSync(process.execPath,[cli,'inspect',node.id,file,'--json'],{encoding:'utf8'}));
+   expect(inspected.id).toBe(node.id);
+   const affected=JSON.parse(execFileSync(process.execPath,[cli,'affected',node.id,file,'--json'],{encoding:'utf8'}));
+   expect(affected.schemaVersion).toBe('bmec.affected.v1');
+   expect(Array.isArray(affected.nodes)).toBe(true);
+  }
+ });
  it('exposes the versioned global capability inventory without a source file',()=>{
   const cli=join(process.cwd(),'dist','cli','index.js');const output=JSON.parse(execFileSync(process.execPath,[cli,'capabilities','--json'],{encoding:'utf8'}));
   expect(output.version).toBe('bmec.capabilities.v1');

@@ -1,16 +1,16 @@
 <div align="center">
 
-# BMEC
+[![BMEC — One language. Real applications.](https://bmec-language.vercel.app/assets/bmec-social.png)](https://bmec-language.vercel.app/)
 
-### One language. Real applications.
+# BMEC
 
 **Typed data, server routes, database work, and browser UI in one checked source project.**
 
-[![npm beta](https://img.shields.io/badge/npm-0.9.1--beta.1-18181b?logo=npm)](https://www.npmjs.com/package/@b.marinov/bmec)
+[![npm beta](https://img.shields.io/badge/npm-0.9.1--beta.2-18181b?logo=npm)](https://www.npmjs.com/package/@b.marinov/bmec)
 [![Node.js](https://img.shields.io/badge/Node.js-22%2B-18181b?logo=nodedotjs)](docs/INSTALL.md)
 [![License](https://img.shields.io/badge/license-Apache--2.0-18181b)](LICENSE)
 
-[**Try it in your browser**](https://bmec-language.vercel.app/playground/) · [**Build your first app**](https://bmec-language.vercel.app/learn/) · [**Website**](https://bmec-language.vercel.app/) · [**Download VS Code extension**](https://bmec-language.vercel.app/downloads/bmec-language-support-0.9.1-beta.1.vsix)
+[**Try it in your browser**](https://bmec-language.vercel.app/playground/) · [**Build your first app**](https://bmec-language.vercel.app/learn/) · [**Website**](https://bmec-language.vercel.app/) · [**Download VS Code extension**](https://bmec-language.vercel.app/downloads/bmec-language-support-0.9.1-beta.2.vsix)
 
 </div>
 
@@ -37,14 +37,14 @@ Start with a function in the [playground](https://bmec-language.vercel.app/playg
 | Editor | Compiler diagnostics, completion, navigation, formatting, and more through the local language server |
 | AI workflow | Compiler-backed syntax, constraints, examples, and diagnostics through `bmec knowledge` |
 
-**Developer beta:** package `0.9.1-beta.1`, language contract `0.1`, typed IR `2`. Support varies by target. See [capabilities](docs/CAPABILITIES.md), [coverage](docs/CAPABILITY_COVERAGE.md), and [security boundaries](docs/SECURITY_MODEL.md) before choosing a runtime.
+**Developer beta:** package `0.9.1-beta.2`, language contract `0.1`, typed IR `2`. Support varies by target. See [capabilities](docs/CAPABILITIES.md), [coverage](docs/CAPABILITY_COVERAGE.md), and [security boundaries](docs/SECURITY_MODEL.md) before choosing a runtime.
 
 ## Install and start
 
 Use Node.js 22 or newer and install the pinned beta from [npm](https://www.npmjs.com/package/@b.marinov/bmec):
 
 ```sh
-npm install -g @b.marinov/bmec@0.9.1-beta.1
+npm install -g @b.marinov/bmec@0.9.1-beta.2
 bmec doctor
 bmec new my-app
 cd my-app
@@ -65,7 +65,7 @@ For archive and source installation, see [Installation](docs/INSTALL.md). Follow
 ## Work in VS Code
 
 1. Install the CLI above and make `bmec` available on `PATH`.
-2. [Download the matching VSIX](https://bmec-language.vercel.app/downloads/bmec-language-support-0.9.1-beta.1.vsix).
+2. [Download the matching VSIX](https://bmec-language.vercel.app/downloads/bmec-language-support-0.9.1-beta.2.vsix).
 3. In VS Code, open **Extensions → Install from VSIX** and select the file.
 4. Open a `.bmec` file to connect to the local language server.
 

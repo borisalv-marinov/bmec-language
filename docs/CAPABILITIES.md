@@ -1,6 +1,6 @@
 # BMEC capabilities and support boundaries
 
-This guide describes the public BMEC **0.9.1-beta.1 package** and **0.1 language**
+This guide describes the public BMEC **0.9.1-beta.2 package** and **0.1 language**
 surface. The compiler-owned specification and catalogs are the authoritative
 symbol lists; this guide explains how to use them and where the host remains
 responsible. The [generated coverage inventory](CAPABILITY_COVERAGE.md) links
@@ -294,7 +294,7 @@ language behavior; backend parity is verified only for the tested constructs.
 ## Known limitations
 
 - BMEC is a developer preview. The package and language versions are separate;
-  this guide labels package 0.9.1-beta.1 and language 0.1.
+  this guide labels package 0.9.1-beta.2 and language 0.1.
 - The reference runtime creates SQLite and PostgreSQL model schemas and applies
   safe additive changes. Destructive migration still requires a separate,
   reviewed recovery procedure.

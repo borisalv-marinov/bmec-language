@@ -59,12 +59,12 @@ If colors appear but diagnostics do not, syntax highlighting is working but
 the language server is not connected. TextMate coloring is separate from the
 compiler-backed editor features.
 
-The extension is prepared for BMEC 0.9.1-beta.1 and uses the same `bmec`
+The extension is prepared for BMEC 0.9.1-beta.2 and uses the same `bmec`
 CLI package version. Download the extension from the BMEC website and choose
 **Extensions → Install from VSIX**, or install the downloaded file with:
 
 ```sh
-code --install-extension bmec-language-support-0.9.1-beta.1.vsix
+code --install-extension bmec-language-support-0.9.1-beta.2.vsix
 ```
 
 The npm CLI package includes this guide but not the VSIX archive. The extension

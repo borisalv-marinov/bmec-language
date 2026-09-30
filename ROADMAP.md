@@ -1,6 +1,6 @@
 # BMEC roadmap
 
-BMEC 0.9.1-beta.1 is a prerelease for developer evaluation. This roadmap
+BMEC 0.9.1-beta.2 is a prerelease for developer evaluation. This roadmap
 describes direction, not a schedule or promise.
 
 ## Current focus

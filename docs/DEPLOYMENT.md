@@ -1,7 +1,7 @@
 # BMEC container deployment
 
 This repository includes a reproducible Linux reference deployment for the
-Data Explorer application. It builds and installs the BMEC 0.9.1-beta.1 npm
+Data Explorer application. It builds and installs the BMEC 0.9.1-beta.2 npm
 package inside a Node 24.18 Linux image, then runs it beside PostgreSQL 18.6.
 The container base images are digest-pinned. PostgreSQL data uses a named
 volume, and the runtime starts as the unprivileged `node` user.

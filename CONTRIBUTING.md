@@ -1,7 +1,7 @@
 # Contributing to BMEC
 
 Thanks for considering a contribution to BMEC. The project is an unpublished
-0.9.1-beta.1 developer preview. Read the [README](README.md),
+0.9.1-beta.2 developer preview. Read the [README](README.md),
 [capability limits](docs/CAPABILITIES.md), and [public roadmap](ROADMAP.md)
 before proposing a larger change.
 

@@ -19,7 +19,7 @@ supported by every backend.
 
 ## Canonical facts
 
-- Product package: `0.9.1-beta.1`.
+- Product package: `0.9.1-beta.2`.
 - Language compatibility: `0.1`; typed IR compatibility: `2`.
 - Preserve the existing compiler, reference runtime, typed IR, and explicit
   capability model. This beta is not a language feature programme.

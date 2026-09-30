@@ -2,7 +2,7 @@
 
 > BMEC is a statically typed language and compiler for full-stack applications.
 
-Package: 0.9.1-beta.1
+Package: 0.9.1-beta.2
 Language: 0.1
 
 Start here:

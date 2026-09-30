@@ -21,7 +21,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: bmec:0.9.1-beta.1
+    image: bmec:0.9.1-beta.2
     init: true
     restart: unless-stopped
     stop_grace_period: 30s

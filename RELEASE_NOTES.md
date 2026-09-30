@@ -1,9 +1,13 @@
 # BMEC 0.9.1 beta
 
-`0.9.1-beta.1` is a prepared prerelease candidate for public developer
+`0.9.1-beta.2` is a prepared prerelease candidate for public developer
 evaluation. It carries forward the frozen BMEC 0.8 product source at
 `6176f33254f2c978c691566ddb6696234e5bc3b1`; this release-preparation pass
 does not change the language (0.1) or typed IR (2) compatibility versions.
+
+This patch fixes `inspect` and `affected` for app and module graph IDs. The
+first public npm version, `0.9.1-beta.1`, remains available; install the matching
+`0.9.1-beta.2` CLI and website-distributed VSIX for this patch.
 
 The release work focuses on clean installation, an official VS Code
 extension, a clearer product website and custom-app learning path, accurate

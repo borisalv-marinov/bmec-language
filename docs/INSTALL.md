@@ -13,7 +13,7 @@ bmec doctor
 For a registry install, use the pinned beta version:
 
 ```sh
-npm install -g @b.marinov/bmec@0.9.1-beta.1
+npm install -g @b.marinov/bmec@0.9.1-beta.2
 bmec --version
 bmec doctor
 ```

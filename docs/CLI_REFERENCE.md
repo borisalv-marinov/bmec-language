@@ -2,7 +2,7 @@
 
 Generated from the public CLI command catalog. Do not edit this command list by hand.
 
-Package version: **0.9.1-beta.1**<br>
+Package version: **0.9.1-beta.2**<br>
 Language version: **0.1**
 
 | Command | Usage |

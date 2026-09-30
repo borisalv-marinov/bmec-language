@@ -1,7 +1,7 @@
 # Support and troubleshooting
 
 Start with the [learning path](docs/LEARNING_PATH.md), [capability guide](docs/CAPABILITIES.md),
-and the guide for the command or runtime area involved. BMEC 0.9.1-beta.1 is a
+and the guide for the command or runtime area involved. BMEC 0.9.1-beta.2 is a
 prerelease; a feature's support depends on the documented target and runtime
 boundary.
 
