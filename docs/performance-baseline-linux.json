@@ -1,0 +1,14 @@
+{
+  "commit": "historical-linux-baseline-2026-09-21",
+  "node": "v22.22.1",
+  "platform": "Linux x64",
+  "compilerWarmCheck": {"p95Ms": 1.853},
+  "parser": {"p95Ms": 0.736},
+  "semanticAnalysis": {"p95Ms": 0.163},
+  "interpreter": {"p95Ms": 0.065},
+  "releaseBuild": {"p95Ms": 4.551},
+  "http": {"p95Ms": 1.252},
+  "sqliteCrud": {"p95Ms": 0.151, "p50Ms": 0.128},
+  "postgresCrud": {"p95Ms": 19.198},
+  "browserBundleBytes": {"appJs": 8232}
+}

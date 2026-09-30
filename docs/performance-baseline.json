@@ -1,0 +1,14 @@
+{
+  "commit": "historical-windows-baseline",
+  "node": "v24.18.0",
+  "platform": "Windows x64",
+  "compilerWarmCheck": {"p95Ms": 1.159},
+  "parser": {"p95Ms": 0.077},
+  "semanticAnalysis": {"p95Ms": 0.518},
+  "interpreter": {"p95Ms": 0.011},
+  "releaseBuild": {"p95Ms": 6.351},
+  "http": {"p95Ms": 16.397},
+  "sqliteCrud": {"p95Ms": 0.103, "p50Ms": 0.060},
+  "postgresCrud": {"p95Ms": 5.165},
+  "browserBundleBytes": {"appJs": 6502}
+}
