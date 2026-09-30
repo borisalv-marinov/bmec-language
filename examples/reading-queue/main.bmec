@@ -1,0 +1,59 @@
+app ReadingQueue {
+  description "A personal reading queue with server-checked ownership."
+}
+type Principal {
+  id text role text
+}
+model Book {
+  title text required ownerId text required finished boolean required default false
+}
+type NewBook {
+  title text required
+}
+async function listMyBooks(principal Principal, db capability<database>) -> task<list<Book>> {
+  let userId = principal.id
+  return wait for get books from Book where ownerId is userId ordered by id ascending limited to 100 using db
+}
+async function addMyBook(principal Principal, db capability<database>, body NewBook) -> task<integer> {
+  let book = Book {
+    title :body.title, ownerId :principal.id, finished :false
+  }
+  return wait for add book to Book using db
+}
+serve GET / books requiring authenticated and database with listMyBooks
+serve POST / books requiring authenticated and database with addMyBook
+component NewBookForm form {
+  text "Add a book to your queue"
+  input title text label "Book title" validate nonempty button "Add book" on AddBook
+}
+component BookRow {
+  show book title
+  show book finished
+}
+component PrivacyNote {
+  text "Books saved here are visible only to your account."
+}
+component SignInForm form {
+  text "Sign in to see your reading queue"
+  input id text label "User ID" validate nonempty
+  input password text label "Password" validate nonempty button "Sign in" on Login
+}
+component SignOutButton {
+  button "Sign out" on Logout
+}
+page SignIn {
+  use SignInForm link "Open my reading queue" to ReadingQueue
+}
+page ReadingQueue {
+  use SignOutButton
+  use style ReadingQueueLayout
+  event AddBook(title text) sends POST "/books" use NewBookForm
+  state books list<Book> from GET "/books"
+  use PrivacyNote link "Sign in" to SignIn
+  for each book in books show BookRow empty "Your queue is empty. Add a book to begin."
+}
+style named ReadingQueueLayout {
+  layout is column alignment is stretch gap is 16 padding is 24 on small screens {
+    padding is 12
+  }
+}

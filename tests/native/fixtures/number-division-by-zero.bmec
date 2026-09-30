@@ -1,0 +1,7 @@
+app NativeNumberDivision
+
+function main() -> number {
+  let numerator number = 1.0
+  let denominator number = 0.0
+  return numerator / denominator
+}

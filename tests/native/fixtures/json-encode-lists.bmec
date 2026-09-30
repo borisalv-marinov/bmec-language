@@ -1,0 +1,14 @@
+function main() -> boolean {
+  let integers list<integer> = [-9223372036854775808, 0, 9223372036854775807]
+  let numbers list<number> = [0.0, -2.5, 0.0000001]
+  let flags list<boolean> = [true, false]
+  let words = split("quote \" slash \\ line\nUnicode π 東京", " ")
+  let noIntegers list<integer> = []
+  let noWords list<text> = []
+  return encodeJson(integers) == "{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"-9223372036854775808\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"0\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"9223372036854775807\"}]}" and
+    encodeJson(numbers) == "{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"number\"},\"items\":[{\"version\":1,\"kind\":\"number\",\"value\":0},{\"version\":1,\"kind\":\"number\",\"value\":-2.5},{\"version\":1,\"kind\":\"number\",\"value\":1e-7}]}" and
+    encodeJson(flags) == "{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"boolean\"},\"items\":[{\"version\":1,\"kind\":\"boolean\",\"value\":true},{\"version\":1,\"kind\":\"boolean\",\"value\":false}]}" and
+    encodeJson(words) == "{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"text\"},\"items\":[{\"version\":1,\"kind\":\"text\",\"value\":\"quote\"},{\"version\":1,\"kind\":\"text\",\"value\":\"\\\"\"},{\"version\":1,\"kind\":\"text\",\"value\":\"slash\"},{\"version\":1,\"kind\":\"text\",\"value\":\"\\\\\"},{\"version\":1,\"kind\":\"text\",\"value\":\"line\\nUnicode\"},{\"version\":1,\"kind\":\"text\",\"value\":\"π\"},{\"version\":1,\"kind\":\"text\",\"value\":\"東京\"}]}" and
+    encodeJson(noIntegers) == "{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[]}" and
+    encodeJson(noWords) == "{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"text\"},\"items\":[]}"
+}

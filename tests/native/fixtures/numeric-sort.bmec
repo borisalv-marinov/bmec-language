@@ -1,0 +1,91 @@
+function integerSortIsCorrect() -> boolean {
+  let values = [9223372036854775807, 0, -9223372036854775807 - 1, -9, 5, -9]
+  let sorted = sort(values)
+  var index integer = 0
+  var valid boolean = true
+  for value in sorted {
+    if index == 0 { valid = valid and value == -9223372036854775807 - 1 }
+    if index == 1 { valid = valid and value == -9 }
+    if index == 2 { valid = valid and value == -9 }
+    if index == 3 { valid = valid and value == 0 }
+    if index == 4 { valid = valid and value == 5 }
+    if index == 5 { valid = valid and value == 9223372036854775807 }
+    index = index + 1
+  }
+  return valid and index == 6 and length(sorted) == length(values)
+}
+
+function numberSortIsCorrect() -> boolean {
+  let values = [3.5, -1.25, 2.0, 2.25, -100.0, 2.25, 0.0]
+  let sorted = sort(values)
+  var index integer = 0
+  var valid boolean = true
+  for value in sorted {
+    if index == 0 { valid = valid and value == -100.0 }
+    if index == 1 { valid = valid and value == -1.25 }
+    if index == 2 { valid = valid and value == 0.0 }
+    if index == 3 { valid = valid and value == 2.0 }
+    if index == 4 { valid = valid and value == 2.25 }
+    if index == 5 { valid = valid and value == 2.25 }
+    if index == 6 { valid = valid and value == 3.5 }
+    index = index + 1
+  }
+  var originalIndex integer = 0
+  var originalValid boolean = true
+  for value in values {
+    if originalIndex == 0 { originalValid = originalValid and value == 3.5 }
+    if originalIndex == 1 { originalValid = originalValid and value == -1.25 }
+    if originalIndex == 2 { originalValid = originalValid and value == 2.0 }
+    if originalIndex == 3 { originalValid = originalValid and value == 2.25 }
+    if originalIndex == 4 { originalValid = originalValid and value == -100.0 }
+    if originalIndex == 5 { originalValid = originalValid and value == 2.25 }
+    if originalIndex == 6 { originalValid = originalValid and value == 0.0 }
+    originalIndex = originalIndex + 1
+  }
+  return valid and originalValid and originalIndex == 7 and index == 7 and length(sorted) == length(values)
+}
+
+function numberSortExercisesPartitions() -> boolean {
+  let mixed = [17.0, -8.0, 3.25, 1.5, 22.0, -4.75, 9.0, 0.125, 11.5, -1.0, 7.25, 2.0, 16.0, -6.5, 4.0, 13.75, 5.5, 20.0, -2.25, 8.5, 14.0, 6.0, 19.25, -9.5]
+  let ascending = [0.25, 1.25, 2.25, 3.25, 4.25, 5.25, 6.25, 7.25, 8.25, 9.25, 10.25, 11.25, 12.25, 13.25, 14.25, 15.25, 16.25, 17.25, 18.25, 19.25]
+  let descending = [20.0, 19.0, 18.0, 17.0, 16.0, 15.0, 14.0, 13.0, 12.0, 11.0, 10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0, 2.0, 1.0]
+  let duplicates = [3.0, -1.0, 3.0, 0.5, -1.0, 3.0, 2.0, 0.5, 0.5, -1.0, 2.0, 3.0, 0.5, -1.0, 2.0, 2.0, 0.5, 3.0, -1.0, 0.5]
+  let sortedMixed = sort(mixed)
+  var previousMixed number = 0.0
+  var firstMixed boolean = true
+  var validMixed boolean = true
+  for value in sortedMixed {
+    if firstMixed { firstMixed = false } else { if value < previousMixed { validMixed = false } }
+    previousMixed = value
+  }
+  let sortedAscending = sort(ascending)
+  var previousAscending number = 0.0
+  var firstAscending boolean = true
+  var validAscending boolean = true
+  for value in sortedAscending {
+    if firstAscending { firstAscending = false } else { if value < previousAscending { validAscending = false } }
+    previousAscending = value
+  }
+  let sortedDescending = sort(descending)
+  var previousDescending number = 0.0
+  var firstDescending boolean = true
+  var validDescending boolean = true
+  for value in sortedDescending {
+    if firstDescending { firstDescending = false } else { if value < previousDescending { validDescending = false } }
+    previousDescending = value
+  }
+  let sortedDuplicates = sort(duplicates)
+  var previousDuplicate number = 0.0
+  var firstDuplicate boolean = true
+  var validDuplicates boolean = true
+  for value in sortedDuplicates {
+    if firstDuplicate { firstDuplicate = false } else { if value < previousDuplicate { validDuplicates = false } }
+    previousDuplicate = value
+  }
+  return validMixed and validAscending and validDescending and validDuplicates
+}
+
+function main() -> boolean {
+  let empty list<number> = []
+  return integerSortIsCorrect() and numberSortIsCorrect() and numberSortExercisesPartitions() and length(sort(empty)) == 0
+}

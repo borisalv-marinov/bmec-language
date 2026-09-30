@@ -1,0 +1,49 @@
+<section class="route-section playground" aria-labelledby="playground-title">
+  <div class="playground-intro">
+    <div>
+      <h2 id="playground-title">Check BMEC source in your browser.</h2>
+      <p>Use the same BMEC checker to see diagnostics, typed IR, and an AI context pack from the project’s published language knowledge.</p>
+    </div>
+    <p class="playground-privacy"><strong>Private by design</strong><br>Your source stays in this browser. It is checked, never executed, saved, or sent to a server.</p>
+  </div>
+  <div class="playground-layout">
+    <section class="playground-editor" aria-labelledby="playground-editor-title">
+      <div class="playground-toolbar">
+        <div>
+          <label for="playground-example">Start from a checked example</label>
+          <select id="playground-example" disabled>
+            <option value="">Loading examples…</option>
+          </select>
+        </div>
+        <button id="playground-check" class="button button-dark" type="button" disabled>Check source</button>
+      </div>
+      <label class="playground-source-label" id="playground-editor-title" for="playground-source">BMEC source <span>main.bmec</span></label>
+      <textarea id="playground-source" name="source" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" maxlength="50000" rows="20" aria-describedby="playground-source-help" placeholder="Write BMEC source here…"></textarea>
+      <div class="playground-editor-footer">
+        <p id="playground-source-help">Up to 50,000 characters · Tab indents · Ctrl+Enter (⌘+Enter on Mac) checks</p>
+        <span id="playground-status" role="status" aria-live="polite">Loading the local checker…</span>
+      </div>
+    </section>
+    <section class="playground-output" aria-label="Checker output">
+      <div class="playground-output-heading">
+        <span>Local check</span>
+        <p id="playground-summary" aria-live="polite">Choose an example or enter BMEC source, then select Check source.</p>
+      </div>
+      <div class="playground-tabs" aria-label="Output views">
+        <button type="button" data-playground-panel="result" aria-controls="playground-result-panel" aria-pressed="true">Result</button>
+        <button type="button" data-playground-panel="diagnostics" aria-controls="playground-diagnostics" aria-pressed="false">Diagnostics</button>
+        <button type="button" data-playground-panel="ir" aria-controls="playground-ir" aria-pressed="false">Typed IR</button>
+        <button type="button" data-playground-panel="context" aria-controls="playground-context" aria-pressed="false">AI context</button>
+      </div>
+      <div class="playground-panel" id="playground-result-panel" role="region" aria-label="Check result">
+        <p>The playground runs BMEC’s parser, type checker, and analyzer in a short-lived browser worker. It does not run BMEC functions or access your device.</p>
+      </div>
+      <div class="playground-panel" id="playground-diagnostics" role="region" aria-label="Diagnostics" hidden>No diagnostics yet.</div>
+      <pre class="playground-panel playground-json" id="playground-ir" role="region" aria-label="Typed intermediate representation" hidden>No typed IR yet.</pre>
+      <pre class="playground-panel playground-json" id="playground-context" role="region" aria-label="AI context" hidden>No AI context yet.</pre>
+    </section>
+  </div>
+  <noscript><p class="route-callout">JavaScript is needed to run the local browser checker. You can use the <a href="/examples/">checked source examples</a> and follow the <a href="/docs/GETTING_STARTED.md">local install guide</a>.</p></noscript>
+  <p class="playground-footnote">This page downloads only the checked example catalog and BMEC’s public knowledge index. The source editor does not send code over the network.</p>
+  <script type="module" src="/playground.js"></script>
+</section>

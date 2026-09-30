@@ -1,0 +1,296 @@
+app NorthlineGoods
+
+model Product {
+  sku text required unique
+  name text required
+  category text required
+  price money required
+  stock integer required
+}
+
+model StoreOrder {
+  idempotencyKey text required unique
+  requestFingerprint text required
+  total money required
+  buyerNote text?
+  status text required
+}
+
+model StoreOrderLine {
+  orderId integer required
+  sku text required
+  productName text required
+  quantity integer required
+  unitPrice money required
+  lineTotal money required
+}
+
+type OrderRequest {
+  cupQuantity integer
+  pourOverQuantity integer
+  linenQuantity integer
+  buyerNote text?
+}
+
+async function placeOrder(db capability<database>, body OrderRequest, idempotencyKey text) -> task<result<text,text>> {
+  if textLength(idempotencyKey) == 0 or textLength(idempotencyKey) > 128 {
+    return err("Checkout requires an idempotency key between 1 and 128 characters.")
+  }
+  if body.cupQuantity < 0 or body.pourOverQuantity < 0 or body.linenQuantity < 0 {
+    return err("Cart quantities cannot be negative.")
+  }
+  if body.cupQuantity == 0 and body.pourOverQuantity == 0 and body.linenQuantity == 0 {
+    return err("Add at least one item to your order.")
+  }
+
+  let requestFingerprint = encodeJson(body.cupQuantity) + "|" + encodeJson(body.pourOverQuantity) + "|" + encodeJson(body.linenQuantity) + "|" + encodeJson(body.buyerNote)
+  let existingOrders = wait for get existingOrders from StoreOrder where idempotencyKey is idempotencyKey ordered by idempotencyKey ascending limited to 1 using db
+  if existingOrders[0] != none {
+    let previousFingerprint = match existingOrders[0] { some(existingOrder) => existingOrder.requestFingerprint, none => "" }
+    if previousFingerprint != requestFingerprint {
+      return err("This checkout key was already used for a different request.")
+    }
+    return ok(idempotencyKey)
+  }
+
+  let cups = wait for get products from Product where sku is "cup-01" ordered by sku ascending limited to 1 using db
+  let pourOvers = wait for get products from Product where sku is "pour-over-01" ordered by sku ascending limited to 1 using db
+  let towels = wait for get products from Product where sku is "linen-01" ordered by sku ascending limited to 1 using db
+  let cup = cups[0]
+  let pourOver = pourOvers[0]
+  let towel = towels[0]
+  if cup == none or pourOver == none or towel == none {
+    return err("The catalog is incomplete. Please try again later.")
+  }
+
+  if body.cupQuantity > cup.stock or body.pourOverQuantity > pourOver.stock or body.linenQuantity > towel.stock {
+    return err("There is not enough stock for one or more cart items.")
+  }
+
+  let total = cup.price * body.cupQuantity + pourOver.price * body.pourOverQuantity + towel.price * body.linenQuantity
+  let order = StoreOrder {
+    idempotencyKey: idempotencyKey,
+    requestFingerprint: requestFingerprint,
+    total: total,
+    buyerNote: body.buyerNote,
+    status: "pending-payment"
+  }
+  var orderId integer = 0
+  transaction using db {
+    let insertedOrderId = await databaseInsertIdIfAbsent(db, "StoreOrder", order, "idempotencyKey")
+    if insertedOrderId == none {
+      let previousOrders = wait for get previousOrders from StoreOrder where idempotencyKey is idempotencyKey ordered by idempotencyKey ascending limited to 1 using db
+      let previousFingerprint = match previousOrders[0] { some(existingOrder) => existingOrder.requestFingerprint, none => "" }
+      if previousFingerprint == "" {
+        return err("The previous checkout result is not available yet. Retry with the same key.")
+      }
+      if previousFingerprint != requestFingerprint {
+        return err("This checkout key was already used for a different request.")
+      }
+      return ok(idempotencyKey)
+    }
+    orderId = match insertedOrderId { some(createdId) => createdId, none => 0 }
+    if body.cupQuantity > 0 {
+      let reserved = await databaseDecrementWhere(db, "Product", "stock", body.cupQuantity, "sku", cup.sku)
+      if reserved == 0 {
+        return err("There is not enough stock for one or more cart items.")
+      }
+    }
+    if body.pourOverQuantity > 0 {
+      let reserved = await databaseDecrementWhere(db, "Product", "stock", body.pourOverQuantity, "sku", pourOver.sku)
+      if reserved == 0 {
+        return err("There is not enough stock for one or more cart items.")
+      }
+    }
+    if body.linenQuantity > 0 {
+      let reserved = await databaseDecrementWhere(db, "Product", "stock", body.linenQuantity, "sku", towel.sku)
+      if reserved == 0 {
+        return err("There is not enough stock for one or more cart items.")
+      }
+    }
+
+
+    if body.cupQuantity > 0 {
+      let line = StoreOrderLine { orderId: orderId, sku: cup.sku, productName: cup.name, quantity: body.cupQuantity, unitPrice: cup.price, lineTotal: cup.price * body.cupQuantity }
+      let lineId = wait for add line to StoreOrderLine using db
+    }
+    if body.pourOverQuantity > 0 {
+      let line = StoreOrderLine { orderId: orderId, sku: pourOver.sku, productName: pourOver.name, quantity: body.pourOverQuantity, unitPrice: pourOver.price, lineTotal: pourOver.price * body.pourOverQuantity }
+      let lineId = wait for add line to StoreOrderLine using db
+    }
+    if body.linenQuantity > 0 {
+      let line = StoreOrderLine { orderId: orderId, sku: towel.sku, productName: towel.name, quantity: body.linenQuantity, unitPrice: towel.price, lineTotal: towel.price * body.linenQuantity }
+      let lineId = wait for add line to StoreOrderLine using db
+    }
+  }
+  return ok(idempotencyKey)
+}
+
+http POST /orders headers idempotencyKey returns 200 errors 400 requires database -> placeOrder
+
+style token StoreSurface {
+  spacing is comfortable
+  corners is rounded
+  focus is ringed
+  disabled is guarded
+}
+
+style named PageShell {
+  composes StoreSurface
+  layout is column
+  alignment is stretch
+  padding is 32
+  margin is 16
+  gap is 20
+  background is neutral
+  typography is readable
+  on small screens { padding is 12 }
+  on small screens { margin is 4 }
+  on small screens { gap is 12 }
+}
+
+style named StoreHero {
+  layout is column
+  alignment is start
+  padding is 40
+  margin is 8
+  background is dark blue
+  text color is white
+  border is strong
+  shadow is soft
+  corners is rounded
+  typography is readable
+  font size is 22
+  line height is 1.5
+  on small screens { padding is 20 }
+  on small screens { font size is 18 }
+}
+
+style named ProductGrid {
+  layout is grid
+  columns is 3
+  gap is 16
+  margin is 8
+  on small screens { columns is 1 }
+}
+
+style named ProductCard {
+  layout is column
+  alignment is start
+  padding is 20
+  margin is 4
+  background is blue
+  text color is white
+  border is subtle
+  shadow is soft
+  corners is rounded
+  typography is readable
+  on small screens { padding is 16 }
+}
+
+style named DetailNote {
+  layout is column
+  alignment is start
+  padding is 16
+  margin is 8
+  background is blue
+  text color is white
+  corners is rounded
+  typography is readable
+}
+
+component Wordmark {
+  text "NORTHLINE / EVERYDAY OBJECTS"
+}
+
+component StoreIntroduction uses style StoreHero {
+  text "Made for slower mornings."
+  text "Thoughtful essentials for coffee, home, and the small rituals that make a day feel like yours."
+  text "Small-batch materials · Useful by design · Made to keep"
+}
+
+component CeramicCup uses style ProductCard {
+  text "01 / TABLE"
+  text "Morning ceramic cup"
+  text "SKU cup-01 · $28"
+  text "Hand-thrown stoneware with a soft matte glaze."
+  dialog "View details" title "Morning ceramic cup" message "A hand-thrown, 12-ounce stoneware cup with a comfortable handle and a matte oat glaze. Made in small batches. $28."
+  button "Add cup to cart" on addCup
+}
+
+style named CartSummary {
+  layout is column
+  alignment is start
+  padding is 16
+  margin is 8
+  background is neutral
+  text color is black
+  corners is rounded
+  typography is readable
+}
+
+style named CartSummaryTotal {
+  typography is readable
+  font weight is bold
+}
+
+component PourOver uses style ProductCard {
+  text "02 / COFFEE"
+  text "Northline pour-over set"
+  text "SKU pour-over-01 · $64"
+  text "A simple brewer and reusable steel filter."
+  dialog "View details" title "Northline pour-over set" message "A ceramic dripper paired with a reusable stainless-steel filter. Designed for a balanced two-cup brew. $64."
+  button "Add pour-over to cart" on addPourOver
+}
+
+component LinenTowel uses style ProductCard {
+  text "03 / HOME"
+  text "Everyday linen towel"
+  text "SKU linen-01 · $32"
+  text "Washed linen that gets softer with every use."
+  dialog "View details" title "Everyday linen towel" message "A generously sized, 100% European flax linen towel, garment-washed for a soft hand. $32."
+  button "Add towel to cart" on addTowel
+}
+
+component Collection uses style ProductGrid {
+  use CeramicCup
+  use PourOver
+  use LinenTowel
+}
+
+component CheckoutForm form {
+  text "Set each quantity to choose cart lines; zero removes that item. Totals and stock are checked when submitted. Payment is not collected."
+  input cupQuantity integer label "Morning ceramic cup quantity" placeholder "0" validate number
+  button "Remove cup from cart" on removeCup
+  input pourOverQuantity integer label "Northline pour-over set quantity" placeholder "0" validate number
+  button "Remove pour-over from cart" on removePourOver
+  input linenQuantity integer label "Everyday linen towel quantity" placeholder "0" validate number
+  button "Remove towel from cart" on removeTowel
+  input buyerNote text? label "Order note" placeholder "Optional"
+  button "Place pending order" on placeOrder
+}
+
+component CartSummaryTotal uses style CartSummaryTotal {
+  text "$0.00"
+}
+
+component CartSummary uses style CartSummary {
+  text "Estimated subtotal · validated by the server at checkout"
+  use CartSummaryTotal
+}
+
+page Store {
+  use style PageShell
+  event addCup()
+  event addPourOver()
+  event addTowel()
+  event removeCup()
+  event removePourOver()
+  event removeTowel()
+  event placeOrder(cupQuantity integer, pourOverQuantity integer, linenQuantity integer, buyerNote text?) sends POST "/orders" with idempotency key
+  use Wordmark
+  use StoreIntroduction
+  use Collection
+  use CartSummary
+  use CheckoutForm
+}

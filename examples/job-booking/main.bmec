@@ -1,0 +1,293 @@
+app JobBookingManager
+
+type Principal {
+  id text role text
+}
+
+api / customers from Customer requiring role admin
+api / jobs from Job requiring role admin
+api / job-notes from JobNote requiring role admin
+model User {
+  authId text required unique email text required unique role text required
+}
+model Customer {
+  name text required email text required phone text
+}
+enum JobStatus { Pending Assigned InProgress Done }
+model Job {
+  customer Customer required worker User required workerAuthId text required title text required description text required price money required scheduledDate date required status JobStatus required
+}
+type JobStatusUpdate {
+  status JobStatus
+}
+type NewJob {
+  customer Customer
+  workerAuthId text required
+  title text required
+  description text required
+  price money required
+  scheduledDate date required
+  status JobStatus required
+}
+type NewJobNote {
+  jobId integer required
+  text text required
+  createdAt datetime required
+}
+model JobNote {
+  job Job required author User required
+  text text required createdAt datetime required
+}
+model JobAudit {
+  action text required actor text required targetId integer required
+}
+component LoginForm uses style LoginCard form {
+  text "Job Booking Manager"
+  text "Sign in to manage customers, jobs, and your team"
+  input id text label "User ID" validate nonempty
+  input password text label "Password" validate nonempty button "Log in" on Login
+}
+component AppHeader uses style HeaderBar {
+  text "Job Booking Manager"
+  text "Operations workspace"
+}
+component DashboardCard uses style MetricCard {
+  text "Open jobs"
+  text "Track upcoming work"
+}
+component CustomerCard uses style MetricCard {
+  text "Customers"
+  text "Keep client details current"
+}
+component WorkerCard uses style MetricCard {
+  text "Worker queue"
+  text "Review assigned jobs"
+}
+component MetricGrid uses style DashboardStyle {
+  use DashboardCard
+  use CustomerCard
+  use WorkerCard
+}
+component CustomerForm uses style FormCard form {
+  text "New customer"
+  input name text label "Customer name" validate nonempty
+  input email text label "Email address" validate email
+  input phone text label "Phone number" button "Save customer" on SaveCustomer
+}
+component JobForm uses style FormCard form {
+  text "New job"
+  input title text label "Job title" validate nonempty
+  input description text label "Work description" validate nonempty
+  input price money label "Price" validate number
+  input scheduledDate date label "Scheduled date" validate date
+  input customer Customer label "Customer" button "Save job" on SaveJob
+}
+component JobRow uses style JobCard {
+  show job title
+  use JobStatus
+  show job price
+}
+component CustomerRow uses style JobCard {
+  show customer name
+  show customer email
+  show customer phone
+}
+component JobStatus uses style StatusBadge {
+  show job status
+}
+component WorkerIntro uses style WorkerIntroStyle {
+  text "Assigned jobs"
+  text "Jobs assigned to you appear here"
+}
+
+component LogoutButton {
+  button "Log out" on Logout
+}
+page Login {
+  use LoginForm when Login is clicked
+}
+page Dashboard {
+  state jobs list < Job >
+  state loading boolean = false
+  state error text
+  use AppHeader
+  use MetricGrid
+  use LogoutButton
+  for each job in jobs show JobRow when Refresh is clicked
+}
+page Customers {
+  state customers list < Customer > from GET "/customers" next GET "/customers/pages/:after" cursor by id search GET "/customers/search/:term" next GET "/customers/search/:term/pages/:after" cursor by id
+  use AppHeader
+  use style DashboardStyle
+  use CustomerForm
+  crud Customer
+  for each customer in customers show CustomerRow filter by name label "Search customers by name, email, or phone" paginate 50 empty "No customers found."
+}
+page Jobs {
+  state jobs list < Job > from GET "/jobs" next GET "/jobs/pages/:after" cursor by id search GET "/jobs/search/:term" next GET "/jobs/search/:term/pages/:after" cursor by id
+  use AppHeader
+  use style DashboardStyle
+  use JobForm
+  crud Job
+  for each job in jobs show JobRow filter by title label "Search jobs by title or description" paginate 50 empty "No jobs found."
+}
+page WorkerDashboard {
+  use AppHeader
+  use WorkerIntro
+  state jobs list < Job > from GET "/worker-jobs" next GET "/worker-jobs/pages/:after" cursor by id search GET "/worker-jobs/search/:term" next GET "/worker-jobs/search/:term/pages/:after" cursor by id
+  use style DashboardStyle
+  for each job in jobs show JobRow filter by title label "Search assigned jobs by title or description" paginate 50 empty "No assigned jobs found."
+}
+style token SurfaceBase { theme is calm spacing is comfortable corners is rounded focus is ringed disabled is guarded }
+style named HeaderBar { layout is row alignment is center padding is 16 margin is 8 gap is 16 background is blue text color is white border is subtle shadow is soft corners is rounded }
+style named LoginCard { composes SurfaceBase layout is column alignment is stretch padding is 32 margin is 24 width is 420 theme is light text color is black typography is readable border is subtle surface is elevated responsive is fluid }
+style named FormCard { composes SurfaceBase layout is column alignment is stretch padding is 20 margin is 8 theme is light text color is black border is subtle surface is elevated }
+style named JobCard { layout is column alignment is start padding is 16 margin is 8 background is neutral text color is black border is subtle shadow is soft corners is rounded }
+style named StatusBadge { layout is row alignment is center padding is 8 margin is 8 background is blue text color is white corners is pill typography is compact }
+style named WorkerIntroStyle { layout is column alignment is start gap is 8 margin is 8 text color is black typography is readable }
+style named MetricCard { layout is column alignment is start padding is 20 margin is 8 theme is light text color is black border is subtle shadow is soft corners is rounded typography is readable }
+style named DashboardStyle { composes SurfaceBase layout is grid columns is 2 gap is 16 padding is 24 margin is 8 typography is readable border is subtle surface is elevated on small screens { columns is 1 } }
+async function listCustomers(db capability < database >) -> task < list < Customer > > {
+  return wait for get customers from Customer ordered by id ascending limited to 50 using db
+}
+async function listCustomersAfter(db capability < database >,after integer) -> task < list < Customer > > {
+  return wait for get customers from Customer where id is greater than after ordered by id ascending limited to 50 using db
+}
+async function searchCustomers(db capability < database >,term text) -> task < list < Customer > > {
+  return wait for get customers from Customer where (name contains term or email contains term) or phone contains term ordered by id ascending limited to 50 using db
+}
+async function searchCustomersAfter(db capability < database >,term text,after integer) -> task < list < Customer > > {
+  return wait for get customers from Customer where ((name contains term or email contains term) or phone contains term) and id is greater than after ordered by id ascending limited to 50 using db
+}
+async function addCustomer(db capability < database >,body Customer) -> task < integer > {
+  return wait for add body to Customer using db
+}
+async function listJobs(db capability < database >) -> task < list < Job > > {
+  return wait for get jobs from Job ordered by id ascending limited to 50 using db
+}
+async function listJobsAfter(db capability < database >,after integer) -> task < list < Job > > {
+  return wait for get jobs from Job where id is greater than after ordered by id ascending limited to 50 using db
+}
+async function searchJobs(db capability < database >,term text) -> task < list < Job > > {
+  return wait for get jobs from Job where title contains term or description contains term ordered by id ascending limited to 50 using db
+}
+async function searchJobsAfter(db capability < database >,term text,after integer) -> task < list < Job > > {
+  return wait for get jobs from Job where (title contains term or description contains term) and id is greater than after ordered by id ascending limited to 50 using db
+}
+async function listAssignedJobs(principal Principal,db capability < database >) -> task < list < Job > > {
+  let authId = principal.id
+  return wait for get jobs from Job where workerAuthId is authId ordered by id ascending limited to 50 using db
+}
+async function listAssignedJobsAfter(principal Principal,db capability < database >,after integer) -> task < list < Job > > {
+  let authId = principal.id
+  return wait for get jobs from Job where workerAuthId is authId and id is greater than after ordered by id ascending limited to 50 using db
+}
+async function searchAssignedJobs(principal Principal,db capability < database >,term text) -> task < list < Job > > {
+  let authId = principal.id
+  return wait for get jobs from Job where workerAuthId is authId and (title contains term or description contains term) ordered by id ascending limited to 50 using db
+}
+async function searchAssignedJobsAfter(principal Principal,db capability < database >,term text,after integer) -> task < list < Job > > {
+  let authId = principal.id
+  return wait for get jobs from Job where workerAuthId is authId and (title contains term or description contains term) and id is greater than after ordered by id ascending limited to 50 using db
+}
+async function addJobForWorker(principal Principal,db capability < database >,body NewJob,worker User) -> task < integer > {
+  let job = Job { customer: body.customer, worker: worker, workerAuthId: worker.authId, title: body.title, description: body.description, price: body.price, scheduledDate: body.scheduledDate, status: body.status }
+  var createdId integer = 0
+  transaction using db {
+    createdId = await databaseInsertId(db, "Job", job)
+    let event = JobAudit { action: "job_created", actor: principal.id, targetId: createdId }
+    let auditId = wait for add event to JobAudit using db
+  }
+  return createdId
+}
+async function addJob(principal Principal,db capability < database >,body NewJob) -> task < integer > {
+  let workerAuthId = body.workerAuthId
+  let users = wait for get users from User where authId is workerAuthId ordered by id ascending limited to 1 using db
+  let createTask = match first(users) {
+    some(worker) => addJobForWorker(principal,db,body,worker),
+    none => zeroJobChanges()
+  }
+  return wait for createTask
+}
+async function updateStatusForJob(principal Principal,db capability < database >,id integer,body JobStatusUpdate,workerAuthId text,currentJob Job) -> task < integer > {
+  let statusOnlyJob = Job {
+    customer: currentJob.customer,
+    worker: currentJob.worker,
+    workerAuthId: currentJob.workerAuthId,
+    title: currentJob.title,
+    description: currentJob.description,
+    price: currentJob.price,
+    scheduledDate: currentJob.scheduledDate,
+    status: body.status
+  }
+  var changed integer = 0
+  transaction using db {
+    changed = await databaseUpdateWhere(db,"Job",id,statusOnlyJob,"workerAuthId",workerAuthId)
+    if changed > 0 {
+      let event = JobAudit { action: "job_updated", actor: principal.id, targetId: id }
+      let auditId = wait for add event to JobAudit using db
+    }
+  }
+  return changed
+}
+async function zeroJobChanges() -> task < integer > {
+  return 0
+}
+async function updateJob(principal Principal,db capability < database >,id integer,body JobStatusUpdate) -> task < integer > {
+  let authId = principal.id
+  let assignedJobRows = wait for get jobs from Job where id is id using db
+  let updateTask = match first(assignedJobRows) {
+    some(currentJob) => updateStatusForJob(principal,db,id,body,authId,currentJob),
+    none => zeroJobChanges()
+  }
+  return wait for updateTask
+}
+async function deleteJob(principal Principal,db capability < database >,id integer) -> task < integer > {
+  var changed integer = 0
+  transaction using db {
+    changed = wait for delete id from Job using db
+    if changed > 0 {
+      let event = JobAudit { action: "job_deleted", actor: principal.id, targetId: id }
+      let auditId = wait for add event to JobAudit using db
+    }
+  }
+  return changed
+}
+async function addNoteForUser(db capability < database >,body NewJobNote,author User,job Job) -> task < integer > {
+  if job.workerAuthId == author.authId {
+    let note = JobNote { job: job, author: author, text: body.text, createdAt: body.createdAt }
+    return wait for add note to JobNote using db
+  }
+  return 0
+}
+async function addNote(principal Principal,db capability < database >,body NewJobNote) -> task < integer > {
+  let authId = principal.id
+  let users = wait for get users from User where authId is authId ordered by id ascending limited to 1 using db
+  let jobId = body.jobId
+  let jobs = wait for get jobs from Job where id is jobId using db
+  let noteTask = match first(users) {
+    some(author) => match first(jobs) {
+      some(job) => addNoteForUser(db,body,author,job),
+      none => zeroJobChanges()
+    },
+    none => zeroJobChanges()
+  }
+  return wait for noteTask
+}
+serve GET / customers requiring role admin and database with listCustomers
+serve GET / customers/pages/:after requiring role admin and database with listCustomersAfter
+serve GET / customers/search/:term requiring role admin and database with searchCustomers
+serve GET / customers/search/:term/pages/:after requiring role admin and database with searchCustomersAfter
+serve POST / customers requiring role admin and database with addCustomer
+serve GET / jobs requiring role admin and database with listJobs
+serve GET / jobs/pages/:after requiring role admin and database with listJobsAfter
+serve GET / jobs/search/:term requiring role admin and database with searchJobs
+serve GET / jobs/search/:term/pages/:after requiring role admin and database with searchJobsAfter
+serve POST / jobs requiring role admin and database with addJob
+serve GET / worker-jobs requiring role worker and database with listAssignedJobs
+serve GET / worker-jobs/pages/:after requiring role worker and database with listAssignedJobsAfter
+serve GET / worker-jobs/search/:term requiring role worker and database with searchAssignedJobs
+serve GET / worker-jobs/search/:term/pages/:after requiring role worker and database with searchAssignedJobsAfter
+serve POST / job-notes requiring role worker and database with addNote
+http PATCH /worker-jobs/:id requires role worker, database -> updateJob
+serve DELETE /jobs/:id requiring role admin and database with deleteJob

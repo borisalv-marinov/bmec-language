@@ -1,0 +1,6 @@
+app NativeNumber
+
+function main() -> number {
+  let factor number = 1.25
+  return factor * 2.0 + 0.5
+}

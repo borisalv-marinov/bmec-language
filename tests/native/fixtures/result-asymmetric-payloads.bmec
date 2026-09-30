@@ -1,0 +1,15 @@
+app NativeResultAsymmetricPayloads
+
+type Point { x integer enabled boolean }
+
+function resultPoint(value integer) -> result<Point,integer> {
+  if value > 0 { return ok(Point { x: value, enabled: true }) } else { return err(-value) }
+}
+
+function read(value result<Point,integer>) -> integer {
+  return match value { ok(point) => point.x, err(code) => code }
+}
+
+function main() -> integer {
+  return read(resultPoint(31)) + read(resultPoint(-7))
+}

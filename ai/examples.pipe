@@ -1,0 +1,4 @@
+app Todo
+model Task { title text required done boolean default false }
+page Home { crud Task }
+style clean dark

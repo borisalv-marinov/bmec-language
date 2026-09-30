@@ -1,0 +1,12 @@
+<section class="route-section">
+  <h2>Measure a named workload on a named machine.</h2>
+  <p>BMEC keeps benchmark claims tied to a repeatable command, workload, runtime version, and machine. Local measurements describe that setup; they are not a promise of hosted performance.</p>
+  <div class="route-grid">
+    <article><h3>Run the standard gate</h3><p>Build BMEC, then run the maintained performance gate against its local SQLite and PostgreSQL fixtures.</p><pre><code>npm run performance:gate</code></pre></article>
+    <article><h3>Inspect the workload</h3><p>Use the benchmark command for the compiler and runtime workload suite. Save the JSON output with the machine and Node.js versions.</p><pre><code>npm run benchmark</code></pre></article>
+  </div>
+  <h2>Keep execution modes separate</h2>
+  <ul class="route-list"><li><strong>Reference/interpreter:</strong> reports the BMEC interpreter workload in the benchmark JSON; it is not a compiled-native result.</li><li><strong>Native:</strong> reports workloads compiled through BMEC's generated C backend. Native differential correctness is separate from speed measurements.</li><li><strong>Node.js/C++ comparisons:</strong> available only for named comparison workloads with their own commands and environment; they do not support a general-language ranking.</li></ul>
+  <p>Every result is workload-specific. Do not combine interpreter, native, browser, or database numbers into one ranking. PostgreSQL measurements depend on the local database and network path; browser and native measurements use separate harnesses.</p>
+  <p><a href="/architecture/">Read the architecture</a> · <a href="/docs/CAPABILITY_COVERAGE.md">Browse current support</a></p>
+</section>

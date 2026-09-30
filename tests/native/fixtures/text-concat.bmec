@@ -1,0 +1,11 @@
+app NativeTextConcat
+
+function concatenate(left text, right text) -> text { return left + right }
+
+function main() -> boolean {
+  let unicode = concatenate("héllo ", "🌍")
+  let chained = "" + "BMEC" + " 0.5"
+  let leftEmpty = "" + "head"
+  let rightEmpty = "tail" + ""
+  return unicode == "héllo 🌍" and chained == "BMEC 0.5" and leftEmpty == "head" and rightEmpty == "tail"
+}

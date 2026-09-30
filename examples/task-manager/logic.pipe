@@ -1,0 +1,14 @@
+import { Task } from "./models.pipe"
+
+public function titleLength(task Task) -> integer {
+    return textLength(task.title)
+}
+
+public function configuredName(env capability<environment>) -> text? {
+    return environmentText(env, "APP_NAME")
+}
+
+public function configuredSecretExists(env capability<environment>) -> boolean {
+    let secret = environmentSecret(env, "APP_SECRET")
+    return isSome(secret)
+}

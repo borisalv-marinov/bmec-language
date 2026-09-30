@@ -1,0 +1,26 @@
+enum Event { Started Stopped ExitCode(integer) Message(text) Enabled(boolean) Ratio(number) }
+
+function roundTrip(item Event) -> Event {
+  return item
+}
+
+function matches(item Event) -> boolean {
+  let roundTripped = roundTrip(item)
+  return match roundTripped {
+    Started => false,
+    Stopped => false,
+    ExitCode(code) => code == 7,
+    Message(text) => text == "done",
+    Enabled(flag) => flag,
+    Ratio(value) => value == 1.25
+  }
+}
+
+function main() -> boolean {
+  let noPayload = Event.Started
+  let integerPayload = Event.ExitCode(7)
+  let textPayload = Event.Message("done")
+  let booleanPayload = Event.Enabled(true)
+  let numberPayload = Event.Ratio(1.25)
+  return matches(noPayload) == false and matches(integerPayload) and matches(textPayload) and matches(booleanPayload) and matches(numberPayload)
+}

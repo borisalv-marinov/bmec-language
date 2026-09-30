@@ -1,0 +1,5 @@
+app NativeMultiplyOverflowPositive
+
+function main() -> integer {
+  return 3037000500 * 3037000500
+}

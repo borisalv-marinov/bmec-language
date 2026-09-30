@@ -1,0 +1,16 @@
+import readline from 'node:readline';
+import {compile} from '../compiler.js';
+import {executeValue} from '../core/interpreter.js';
+import {formatDiagnostics} from '../diagnostics/diagnostics.js';
+import {PUBLIC_STDLIB_CONTRACTS} from '../stdlib/stdlib.js';
+import {CAPABILITY_KINDS} from '../runtime/capabilities.js';
+
+export async function runRepl():Promise<void>{
+ const rl=readline.createInterface({input:process.stdin,output:process.stdout,prompt:'pipe> '});let declarations='';const values=new Map<string,{type:string;value:unknown}>();
+ const scope=()=>[...values].sort(([a],[b])=>a.localeCompare(b)).map(([name,item])=>`${name}: ${item.type}`).join('\n');
+ process.stdout.write('PIPE REPL 0.1-alpha (:quit to exit)\n');rl.prompt();
+ for await(const line of rl){const source=line.trim();if(!source){rl.prompt();continue}if(source===':quit'||source===':q'){rl.close();break}if(source.startsWith(':')){if(source===':help'){console.log(':help - show commands\n:type NAME - show a binding type\n:scope - list all binding types\n:stdlib - list typed standard-library contracts\n:capabilities - list compiler capability kinds\n:reset - clear scope\n:quit or :q - exit')}else if(source===':stdlib'){for(const item of PUBLIC_STDLIB_CONTRACTS)console.log(item.name+'('+item.arguments.join(', ')+') -> '+item.returns+(item.capabilities?.length?' [requires '+item.capabilities.join(', ')+']':''))}else if(source===':capabilities'){for(const capability of CAPABILITY_KINDS)console.log(capability)}else if(source===':scope'){console.log(scope()||'scope is empty')}else if(source===':reset'){declarations='';values.clear();console.log('scope reset')}else{const typeMatch=/^:type\s+([A-Za-z_]\w*)$/.exec(source);if(typeMatch){const binding=values.get(typeMatch[1]!);console.log(binding?typeMatch[1]+': '+binding.type:'Unknown binding "'+typeMatch[1]+'"')}else console.log('Unknown command')}rl.prompt();continue}
+   const isDeclaration=/^(app|model|type|enum|function|interface|impl|public|page|api|style)\b/.test(source);if(isDeclaration){const result=compile(`${declarations}\n${source}`,'<repl>');if(result.diagnostics.length)console.log(formatDiagnostics(result.diagnostics,false));else{declarations+=`\n${source}`;console.log('ok')}rl.prompt();continue}
+   const letMatch=/^let\s+([A-Za-z_]\w*)\s*(?:=|is|be)\s*(.+)$/.exec(source);const expression=letMatch?.[2]??source;const parameters=[...values].map(([name,item])=>`${name} ${item.type}`).join(', ');const args=[...values.values()].map(item=>item.value);const candidates=['text','integer','number','boolean'];let result=compile('', '<repl>');for(const type of candidates){const attempt=compile(`${declarations}\nfunction __repl__(${parameters}) -> ${type} { return ${expression} }`,'<repl>');if(!attempt.diagnostics.length){result=attempt;break}result=attempt;}if(result.diagnostics.length)console.log(formatDiagnostics(result.diagnostics,false));else{try{const value=executeValue(result.ir!.functions,'__repl__',args);if(letMatch){values.set(letMatch[1]!,{type:result.ir!.functions.find(f=>f.name==='__repl__')!.returnType,value});console.log('ok')}else console.log(value)}catch(error){console.log(error instanceof Error?error.message:String(error))}}rl.prompt();
+ }
+}

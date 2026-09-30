@@ -1,0 +1,20 @@
+function decode(value text) -> result<text,text> { return base64Decode(value) }
+
+function hasDecoded(value result<text,text>, expected text) -> boolean {
+  if isOk(value) { return value.value == expected } else { return false }
+}
+
+function hasError(value result<text,text>) -> boolean {
+  if isErr(value) { return value.error == "invalid_base64" } else { return false }
+}
+
+function main() -> boolean {
+  return hasDecoded(decode("SGVsbG8g8J+YgA=="), "Hello 😀") and
+    hasDecoded(decode(""), "") and
+    hasDecoded(decode("Zg=="), "f") and
+    hasDecoded(decode("Zm8="), "fo") and
+    hasDecoded(decode("Zm9v"), "foo") and
+    hasError(decode("not-base64")) and
+    hasError(decode("Zh==")) and
+    hasError(decode("/w=="))
+}

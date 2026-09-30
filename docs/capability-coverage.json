@@ -1,0 +1,2573 @@
+{
+  "schemaVersion": "bmec.documentation-coverage.v1",
+  "packageVersion": "0.9.1-beta.1",
+  "languageVersion": "0.1",
+  "capabilities": [
+    {
+      "id": "installation",
+      "title": "Installation",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-APP-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "new",
+          "doctor"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/INSTALL.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-APP-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "new",
+          "doctor"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-SYN",
+        "PIPE-REF"
+      ]
+    },
+    {
+      "id": "cli",
+      "title": "Command-line interface",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../ai/commands.json",
+        "specUrl": "/ai/commands.json",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "new",
+          "run",
+          "exec",
+          "test",
+          "check",
+          "fmt",
+          "build",
+          "repl",
+          "doctor",
+          "lsp",
+          "ai-spec",
+          "stdlib",
+          "capabilities"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CLI_REFERENCE.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "new",
+          "run",
+          "exec",
+          "test",
+          "check",
+          "fmt",
+          "build",
+          "repl",
+          "doctor",
+          "lsp",
+          "ai-spec",
+          "stdlib",
+          "capabilities"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "syntax",
+      "title": "Language syntax",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-APP-001",
+          "LANG-BIND-001",
+          "LANG-COMPARE-001",
+          "LANG-IF-001",
+          "LANG-LOOP-001"
+        ],
+        "stdlib": [
+          "absInt",
+          "absNumber",
+          "addDays",
+          "addSeconds",
+          "all",
+          "any",
+          "base64Decode",
+          "base64Encode",
+          "ceil",
+          "clamp",
+          "contains",
+          "dateDay",
+          "dateDifference",
+          "dateMonth",
+          "dateYear",
+          "datetimeDifference",
+          "distinct",
+          "endsWith",
+          "err",
+          "filter",
+          "find",
+          "first",
+          "floor",
+          "fold",
+          "formatDate",
+          "isErr",
+          "isNone",
+          "isOk",
+          "isSome",
+          "join",
+          "last",
+          "length",
+          "lower",
+          "map",
+          "maxInt",
+          "minInt",
+          "ok",
+          "parseBoolean",
+          "parseDate",
+          "parseDateTime",
+          "parseId",
+          "parseInteger",
+          "parseNumber",
+          "power",
+          "range",
+          "reverse",
+          "round",
+          "slice",
+          "some",
+          "sort",
+          "split",
+          "sqrt",
+          "startsWith",
+          "substring",
+          "textContains",
+          "textIndexOf",
+          "textLength",
+          "textReplace",
+          "trim",
+          "upper"
+        ],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#language-syntax-and-types",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-APP-001",
+          "LANG-BIND-001",
+          "LANG-COMPARE-001",
+          "LANG-IF-001",
+          "LANG-LOOP-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [
+          "absInt",
+          "absNumber",
+          "addDays",
+          "addSeconds",
+          "all",
+          "any",
+          "base64Decode",
+          "base64Encode",
+          "ceil",
+          "clamp",
+          "contains",
+          "dateDay",
+          "dateDifference",
+          "dateMonth",
+          "dateYear",
+          "datetimeDifference",
+          "distinct",
+          "endsWith",
+          "err",
+          "filter",
+          "find",
+          "first",
+          "floor",
+          "fold",
+          "formatDate",
+          "isErr",
+          "isNone",
+          "isOk",
+          "isSome",
+          "join",
+          "last",
+          "length",
+          "lower",
+          "map",
+          "maxInt",
+          "minInt",
+          "ok",
+          "parseBoolean",
+          "parseDate",
+          "parseDateTime",
+          "parseId",
+          "parseInteger",
+          "parseNumber",
+          "power",
+          "range",
+          "reverse",
+          "round",
+          "slice",
+          "some",
+          "sort",
+          "split",
+          "sqrt",
+          "startsWith",
+          "substring",
+          "textContains",
+          "textIndexOf",
+          "textLength",
+          "textReplace",
+          "trim",
+          "upper"
+        ],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-SYN",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "type-system",
+      "title": "Type system",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/types.md",
+        "specUrl": "/spec/types.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-OPTIONAL-001",
+          "LANG-LIST-001",
+          "LANG-RESULT-001",
+          "LANG-TASK-001",
+          "LANG-RECORD-001",
+          "LANG-ENUM-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "types"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#language-syntax-and-types",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-OPTIONAL-001",
+          "LANG-LIST-001",
+          "LANG-RESULT-001",
+          "LANG-TASK-001",
+          "LANG-RECORD-001",
+          "LANG-ENUM-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "types"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "functions",
+      "title": "Functions",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-FUNCTION-001",
+          "LANG-ASYNC-001"
+        ],
+        "stdlib": [],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#functions-and-control-flow",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-FUNCTION-001",
+          "LANG-ASYNC-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-REF"
+      ]
+    },
+    {
+      "id": "control-flow",
+      "title": "Control flow",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-IF-001",
+          "LANG-LOOP-001",
+          "LANG-ERROR-PROPAGATION-001"
+        ],
+        "stdlib": [],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#functions-and-control-flow",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-IF-001",
+          "LANG-LOOP-001",
+          "LANG-ERROR-PROPAGATION-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-SYN",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "collections",
+      "title": "Collections",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/types.md",
+        "specUrl": "/spec/types.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-LIST-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "stdlib"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#collections-records-and-enums",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-LIST-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "stdlib"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/text-sort/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-FUNC"
+      ]
+    },
+    {
+      "id": "records",
+      "title": "Records",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/types.md",
+        "specUrl": "/spec/types.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-RECORD-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "types"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#collections-records-and-enums",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-RECORD-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "types"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "enums",
+      "title": "Enums",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/types.md",
+        "specUrl": "/spec/types.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-ENUM-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "types"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#collections-records-and-enums",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-ENUM-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "types"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "result-optionals",
+      "title": "Result and optionals",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-OPTIONAL-001",
+          "LANG-RESULT-001",
+          "LANG-ERROR-PROPAGATION-001"
+        ],
+        "stdlib": [],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#result-and-optionals",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-OPTIONAL-001",
+          "LANG-RESULT-001",
+          "LANG-ERROR-PROPAGATION-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-RESULT",
+        "PIPE-FUNC",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "json",
+      "title": "JSON",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [
+          "decodeJson",
+          "encodeJson",
+          "httpRequestJson"
+        ],
+        "commands": [
+          "stdlib"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#json-and-serialization",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "stdlib"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [
+          "decodeJson",
+          "encodeJson",
+          "httpRequestJson"
+        ],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/json-decode-bench/main.bmec",
+          "verified": true
+        },
+        {
+          "path": "/examples/json-encode-bench/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-FUNC"
+      ]
+    },
+    {
+      "id": "filesystem-path",
+      "title": "Filesystem and paths",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": "/ai/capabilities.json",
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-CAPABILITY-001"
+        ],
+        "stdlib": [
+          "appendTextFile",
+          "copyTextFile",
+          "createDirectory",
+          "fileExists",
+          "listDirectory",
+          "moveTextFile",
+          "pathBasename",
+          "pathDirname",
+          "pathJoin",
+          "pathRelative",
+          "readTextFile",
+          "removeTextFile",
+          "saveUpload",
+          "uploadFilename",
+          "uploadMediaType",
+          "uploadSize",
+          "writeTextFile"
+        ],
+        "commands": [
+          "exec",
+          "capabilities",
+          "stdlib"
+        ],
+        "capabilities": [
+          "filesystem"
+        ]
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#filesystem-and-paths",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-CAPABILITY-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "exec",
+          "capabilities",
+          "stdlib"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [
+          "filesystem"
+        ],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [
+          "appendTextFile",
+          "copyTextFile",
+          "createDirectory",
+          "fileExists",
+          "listDirectory",
+          "moveTextFile",
+          "pathBasename",
+          "pathDirname",
+          "pathJoin",
+          "pathRelative",
+          "readTextFile",
+          "removeTextFile",
+          "saveUpload",
+          "uploadFilename",
+          "uploadMediaType",
+          "uploadSize",
+          "writeTextFile"
+        ],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/log-analyzer/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-FUNC"
+      ]
+    },
+    {
+      "id": "http",
+      "title": "HTTP",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": "/ai/capabilities.json",
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "HTTP-ROUTE-001",
+          "HTTP-RESULT-STATUS-001"
+        ],
+        "stdlib": [
+          "httpRequest",
+          "httpRequestMultipart"
+        ],
+        "commands": [
+          "run",
+          "build",
+          "capabilities"
+        ],
+        "capabilities": [
+          "http"
+        ]
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#http",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "HTTP-ROUTE-001",
+          "HTTP-RESULT-STATUS-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run",
+          "build",
+          "capabilities"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [
+          "http"
+        ],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [
+          "httpRequest",
+          "httpRequestMultipart"
+        ],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/community-issues/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-SYN",
+        "PIPE-UI",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "database",
+      "title": "Database",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": "/ai/capabilities.json",
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-MODEL-001",
+          "DB-SELECT-001",
+          "DB-QUERY-001",
+          "DB-MUTATION-001",
+          "DB-COUNT-001",
+          "DB-DECREMENT-001",
+          "DB-CURSOR-001",
+          "DB-INSERT-ABSENT-001",
+          "DB-INSERT-ID-001",
+          "DB-INDEX-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "run",
+          "build",
+          "capabilities"
+        ],
+        "capabilities": [
+          "database"
+        ]
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#database-adapters",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-MODEL-001",
+          "DB-SELECT-001",
+          "DB-QUERY-001",
+          "DB-MUTATION-001",
+          "DB-COUNT-001",
+          "DB-DECREMENT-001",
+          "DB-CURSOR-001",
+          "DB-INSERT-ABSENT-001",
+          "DB-INSERT-ID-001",
+          "DB-INDEX-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run",
+          "build",
+          "capabilities"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [
+          "database"
+        ],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/data-explorer/main.pipe",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-MODEL",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "sqlite",
+      "title": "SQLite",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "DB-TRANSACTION-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "run"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#database-adapters",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "DB-TRANSACTION-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-MODEL",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "postgresql",
+      "title": "PostgreSQL",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "DB-SELECT-001",
+          "DB-TRANSACTION-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "run"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#database-adapters",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "DB-SELECT-001",
+          "DB-TRANSACTION-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/pulseboard/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-MODEL",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "migrations-indexes-transactions",
+      "title": "Migrations, indexes, and transactions",
+      "support": "limited",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "DB-TRANSACTION-001",
+          "DB-INDEX-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "run"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/DATABASE_PRODUCTION.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "DB-TRANSACTION-001",
+          "DB-INDEX-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/data-explorer/main.pipe",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-MODEL",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "authentication-authorization",
+      "title": "Authentication and authorization",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-API-001",
+          "HTTP-ROUTE-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "run"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#authentication-and-authorization",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-API-001",
+          "HTTP-ROUTE-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/job-booking/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "security",
+      "title": "Security",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-CAPABILITY-001",
+          "LANG-API-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "run",
+          "build",
+          "exec"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#security-boundaries",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-CAPABILITY-001",
+          "LANG-API-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run",
+          "build",
+          "exec"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/community-issues/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "ui",
+      "title": "UI",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "UI-COMPONENT-001",
+          "UI-NAV-001",
+          "UI-PAGE-ROUTE-001",
+          "UI-CRUD-001",
+          "UI-DIALOG-001",
+          "UI-FEEDBACK-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "pages",
+          "project"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#user-interfaces-and-design-system",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "UI-COMPONENT-001",
+          "UI-NAV-001",
+          "UI-PAGE-ROUTE-001",
+          "UI-CRUD-001",
+          "UI-DIALOG-001",
+          "UI-FEEDBACK-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "pages",
+          "project"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI"
+      ]
+    },
+    {
+      "id": "design-system",
+      "title": "Design system",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "STYLE-TYPED-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "styles"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/STYLING_GUIDE.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "STYLE-TYPED-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "styles"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI"
+      ]
+    },
+    {
+      "id": "frontend-state",
+      "title": "Frontend state",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "UI-PAGE-LIST-001",
+          "UI-PAGE-STATE-SOURCE-001",
+          "UI-PAGE-STATE-UPDATE-001",
+          "UI-PAGE-ACTION-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "pages"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#frontend-state-and-forms",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "UI-PAGE-LIST-001",
+          "UI-PAGE-STATE-SOURCE-001",
+          "UI-PAGE-STATE-UPDATE-001",
+          "UI-PAGE-ACTION-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "pages"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/paper-harbor/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI"
+      ]
+    },
+    {
+      "id": "forms",
+      "title": "Forms",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "UI-INPUT-001",
+          "UI-PAGE-ACTION-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "pages"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#frontend-state-and-forms",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "UI-INPUT-001",
+          "UI-PAGE-ACTION-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "pages"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/controlled-english/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI"
+      ]
+    },
+    {
+      "id": "responsive-design",
+      "title": "Responsive design",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "STYLE-TYPED-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "styles"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/STYLING_GUIDE.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "STYLE-TYPED-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "styles"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/controlled-english/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI"
+      ]
+    },
+    {
+      "id": "accessibility",
+      "title": "Accessibility",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "UI-INPUT-001",
+          "UI-FEEDBACK-001"
+        ],
+        "stdlib": [],
+        "commands": [
+          "build"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#accessibility",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "UI-INPUT-001",
+          "UI-FEEDBACK-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "build"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/controlled-english/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-UI"
+      ]
+    },
+    {
+      "id": "money",
+      "title": "Money",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/types.md",
+        "specUrl": "/spec/types.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "stdlib"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#money-and-time",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "stdlib"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "configuration-secrets",
+      "title": "Configuration and secrets",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": "/ai/capabilities.json",
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-CAPABILITY-001"
+        ],
+        "stdlib": [
+          "environmentArguments",
+          "environmentBoolean",
+          "environmentInteger",
+          "environmentSecret",
+          "environmentText",
+          "readStdin",
+          "revealSecret",
+          "setExitCode",
+          "writeStderr",
+          "writeStdout"
+        ],
+        "commands": [
+          "run",
+          "exec",
+          "stdlib"
+        ],
+        "capabilities": [
+          "environment"
+        ]
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#configuration-and-secrets",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-CAPABILITY-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run",
+          "exec",
+          "stdlib"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [
+          "environment"
+        ],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [
+          "environmentArguments",
+          "environmentBoolean",
+          "environmentInteger",
+          "environmentSecret",
+          "environmentText",
+          "readStdin",
+          "revealSecret",
+          "setExitCode",
+          "writeStderr",
+          "writeStdout"
+        ],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-FUNC"
+      ]
+    },
+    {
+      "id": "email-time-random-base64-crypto",
+      "title": "Email, time, random, Base64, and cryptography",
+      "support": "limited",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": "/ai/ai-spec.json#/constructs",
+          "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": "/ai/capabilities.json",
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [
+          "LANG-CAPABILITY-001"
+        ],
+        "stdlib": [
+          "cancel",
+          "currentTime",
+          "delay",
+          "randomId",
+          "randomInteger",
+          "randomNumber",
+          "scheduleOnce",
+          "secureRandomId",
+          "secureRandomInteger",
+          "sendEmail",
+          "timeout",
+          "today"
+        ],
+        "commands": [
+          "stdlib",
+          "capabilities"
+        ],
+        "capabilities": [
+          "time",
+          "random",
+          "secureRandom",
+          "email"
+        ]
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#email-time-randomness-and-encoding",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [
+          "LANG-CAPABILITY-001"
+        ],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "stdlib",
+          "capabilities"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [
+          "time",
+          "random",
+          "secureRandom",
+          "email"
+        ],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [
+          "cancel",
+          "currentTime",
+          "delay",
+          "randomId",
+          "randomInteger",
+          "randomNumber",
+          "scheduleOnce",
+          "secureRandomId",
+          "secureRandomInteger",
+          "sendEmail",
+          "timeout",
+          "today"
+        ],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "testing",
+      "title": "Testing",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "test"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#testing-and-diagnostics",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "test"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "diagnostics",
+      "title": "Diagnostics",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/diagnostics.md",
+        "specUrl": "/spec/diagnostics.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "check",
+          "doctor"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/spec/diagnostics.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "check",
+          "doctor"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-SYN",
+        "PIPE-TYPE",
+        "PIPE-REF",
+        "PIPE-MODEL",
+        "PIPE-UI",
+        "PIPE-AI",
+        "PIPE-INTERNAL"
+      ]
+    },
+    {
+      "id": "native-compilation",
+      "title": "Native compilation",
+      "support": "limited",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/semantics.md",
+        "specUrl": "/spec/semantics.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "build"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#native-compilation",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "build"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/native-compute-bench/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-TYPE",
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "packaging",
+      "title": "Packaging",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "build",
+          "lock"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/INSTALL.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "build",
+          "lock"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-REF",
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "deployment",
+      "title": "Deployment",
+      "support": "limited",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "build",
+          "run"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/DEPLOYMENT.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "build",
+          "run"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/data-explorer/main.pipe",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-RUNTIME",
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "docker-linux",
+      "title": "Docker and Linux",
+      "support": "limited",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "build",
+          "run"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/DEPLOYMENT.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "build",
+          "run"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/data-explorer/main.pipe",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-RUNTIME",
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "logging-operations",
+      "title": "Logging and operations",
+      "support": "limited",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "run",
+          "doctor"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#deployment-and-operations",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "run",
+          "doctor"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/log-analyzer/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-RUNTIME"
+      ]
+    },
+    {
+      "id": "ai-discovery",
+      "title": "AI discovery",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/diagnostics.md",
+        "specUrl": "/spec/diagnostics.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "ai-spec",
+          "stdlib",
+          "capabilities",
+          "examples",
+          "symbols",
+          "project"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/AI_AGENT_GUIDE.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "ai-spec",
+          "stdlib",
+          "capabilities",
+          "examples",
+          "symbols",
+          "project"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "architecture",
+      "title": "Architecture",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "ir",
+          "expand",
+          "graph",
+          "project"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#ai-discovery-and-compiler-architecture",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "ir",
+          "expand",
+          "graph",
+          "project"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-AI",
+        "PIPE-INTERNAL"
+      ]
+    },
+    {
+      "id": "limitations",
+      "title": "Limitations",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/CAPABILITIES.md#known-limitations",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-RUNTIME",
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "examples",
+      "title": "Examples",
+      "support": "supported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/language.md",
+        "specUrl": "/spec/language.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": "/ai/commands.json",
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [
+          "examples",
+          "check",
+          "build"
+        ],
+        "capabilities": []
+      },
+      "supportNote": null,
+      "human": "/docs/GETTING_STARTED.md",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [
+          "examples",
+          "check",
+          "build"
+        ],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [
+        {
+          "path": "/examples/field-guide/main.bmec",
+          "verified": true
+        },
+        {
+          "path": "/examples/paper-harbor/main.bmec",
+          "verified": true
+        }
+      ],
+      "diagnostics": [
+        "PIPE-SYN",
+        "PIPE-TYPE"
+      ]
+    },
+    {
+      "id": "realtime-websockets",
+      "title": "Realtime and WebSockets",
+      "support": "unsupported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": "No WebSocket/realtime contract is offered.",
+      "human": "/docs/CAPABILITIES.md#known-limitations",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [],
+      "diagnostics": [
+        "PIPE-AI"
+      ]
+    },
+    {
+      "id": "binary-buffers",
+      "title": "General binary buffers and cryptographic primitives",
+      "support": "unsupported",
+      "availability": {
+        "packageVersion": "0.9.1-beta.1",
+        "languageVersion": "0.1"
+      },
+      "canonical": {
+        "spec": "../spec/invariants.md",
+        "specUrl": "/spec/invariants.md",
+        "metadata": {
+          "constructCatalog": null,
+          "stdlibCatalog": null,
+          "commandCatalog": null,
+          "capabilityCatalog": null,
+          "diagnosticCatalog": "/ai/diagnostics.json"
+        },
+        "constructs": [],
+        "stdlib": [],
+        "commands": [],
+        "capabilities": []
+      },
+      "supportNote": "No arbitrary binary-buffer or cryptographic-primitive API is offered.",
+      "human": "/docs/CAPABILITIES.md#known-limitations",
+      "ai": {
+        "href": "/ai/ai-spec.json",
+        "constructIds": [],
+        "commandCatalog": "/ai/commands.json",
+        "commands": [],
+        "capabilityCatalog": "/ai/capabilities.json",
+        "capabilities": [],
+        "stdlibCatalog": "/ai/ai-spec.json#/stdlibContracts",
+        "stdlib": [],
+        "diagnosticCatalog": "/ai/diagnostics.json"
+      },
+      "examples": [],
+      "diagnostics": [
+        "PIPE-AI"
+      ]
+    }
+  ],
+  "registry": {
+    "constructs": 41,
+    "standardLibrarySymbols": 104,
+    "hostCapabilities": 8
+  },
+  "checks": {
+    "mappedConstructs": 41,
+    "verifiedExamples": 12,
+    "publicDocuments": 23
+  }
+}

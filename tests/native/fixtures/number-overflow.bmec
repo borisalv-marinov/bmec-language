@@ -1,0 +1,7 @@
+app NativeNumberOverflow
+
+function main() -> number {
+  var large number = 1.0
+  repeat 1024 { large = large * 2.0 }
+  return large
+}

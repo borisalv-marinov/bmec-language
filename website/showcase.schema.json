@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmec.dev/schemas/showcase-project.schema.json",
+  "title": "BMEC showcase catalog",
+  "type": "object",
+  "required": ["schemaVersion", "projects"],
+  "properties": {
+    "schemaVersion": { "const": "bmec.showcase.v1" },
+    "projects": {
+      "type": "array",
+      "items": { "$ref": "#/$defs/project" }
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "project": {
+      "type": "object",
+      "required": ["id", "name", "tagline", "description", "category", "status", "builtWith", "source", "preview", "disclosure"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$" },
+        "name": { "type": "string", "minLength": 1, "maxLength": 80 },
+        "tagline": { "type": "string", "minLength": 1, "maxLength": 120 },
+        "description": { "type": "string", "minLength": 1, "maxLength": 500 },
+        "category": { "type": "string", "minLength": 1 },
+        "status": { "enum": ["Demo", "Prototype", "In use"] },
+        "builtWith": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "source": { "type": "string", "pattern": "^/" },
+        "preview": {
+          "type": "object", "required": ["src", "alt"], "additionalProperties": false,
+          "properties": { "src": { "type": "string", "pattern": "^/" }, "alt": { "type": "string", "minLength": 1 } }
+        },
+        "disclosure": { "type": "string", "minLength": 1, "maxLength": 500 }
+      },
+      "additionalProperties": false
+    }
+  }
+}

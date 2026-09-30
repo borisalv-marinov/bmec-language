@@ -1,0 +1,45 @@
+app PrimitiveMapCrossType
+
+function main() -> boolean {
+  let integers list<integer> = [1, 2]
+  let numbers list<number> = [1.5, 2.5]
+  let flags list<boolean> = [true, false]
+  let words = split("a|β", "|")
+
+  let integersToNumbers = map(integers, lambda(value integer) -> number { return 1.25 })
+  let integersToFlags = map(integers, lambda(value integer) -> boolean { return true })
+  let integersToWords = map(integers, lambda(value integer) -> text { return "i" })
+  let numbersToIntegers = map(numbers, lambda(value number) -> integer { return 4 })
+  let numbersToFlags = map(numbers, lambda(value number) -> boolean { return false })
+  let numbersToWords = map(numbers, lambda(value number) -> text { return "n" })
+  let flagsToIntegers = map(flags, lambda(value boolean) -> integer { return 5 })
+  let flagsToNumbers = map(flags, lambda(value boolean) -> number { return 2.5 })
+  let flagsToWords = map(flags, lambda(value boolean) -> text { return "b" })
+  let wordsToIntegers = map(words, lambda(value text) -> integer { return 6 })
+  let wordsToNumbers = map(words, lambda(value text) -> number { return 0.5 })
+  let wordsToFlags = map(words, lambda(value text) -> boolean { return true })
+
+  var numberFromIntegers number = 0.0
+  for value in integersToNumbers { numberFromIntegers = numberFromIntegers + value }
+  var flagsFromIntegers integer = 0
+  for value in integersToFlags { if value { flagsFromIntegers = flagsFromIntegers + 1 } }
+  var integersFromNumbers integer = 0
+  for value in numbersToIntegers { integersFromNumbers = integersFromNumbers + value }
+  var flagsFromNumbers integer = 0
+  for value in numbersToFlags { if value { flagsFromNumbers = flagsFromNumbers + 1 } }
+  var integersFromFlags integer = 0
+  for value in flagsToIntegers { integersFromFlags = integersFromFlags + value }
+  var numbersFromFlags number = 0.0
+  for value in flagsToNumbers { numbersFromFlags = numbersFromFlags + value }
+  var integersFromWords integer = 0
+  for value in wordsToIntegers { integersFromWords = integersFromWords + value }
+  var numbersFromWords number = 0.0
+  for value in wordsToNumbers { numbersFromWords = numbersFromWords + value }
+  var flagsFromWords integer = 0
+  for value in wordsToFlags { if value { flagsFromWords = flagsFromWords + 1 } }
+
+  return numberFromIntegers == 2.5 and flagsFromIntegers == 2 and join(integersToWords, ",") == "i,i" and
+    integersFromNumbers == 8 and flagsFromNumbers == 0 and join(numbersToWords, ",") == "n,n" and
+    integersFromFlags == 10 and numbersFromFlags == 5.0 and join(flagsToWords, ",") == "b,b" and
+    integersFromWords == 12 and numbersFromWords == 1.0 and flagsFromWords == 2
+}

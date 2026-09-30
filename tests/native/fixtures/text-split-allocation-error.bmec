@@ -1,0 +1,5 @@
+function main() -> integer {
+  let first = split("a,b", ",")
+  let second = split("c,d", ",")
+  return 1
+}

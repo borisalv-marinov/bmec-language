@@ -1,0 +1,95 @@
+import {afterEach,describe,expect,it} from 'vitest';
+import {mkdtempSync,readFileSync,rmSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {compile} from '../src/compiler.js';
+import {validateSerializedIR} from '../src/ir/validate.js';
+import {startRuntime,type RuntimeHandle} from '../src/runtime/server.js';
+
+const handles:RuntimeHandle[]=[];
+const roots:string[]=[];
+afterEach(async()=>{for(const handle of handles.splice(0))await handle.close();for(const root of roots.splice(0))rmSync(root,{recursive:true,force:true});});
+
+describe('Job Booking search and cursor pagination',()=>{
+ it('bounds pages, searches across pages, and keeps worker results scoped to the authenticated worker',async()=>{
+  const sourcePath=join(process.cwd(),'examples','job-booking','main.bmec');
+  const compiled=compile(readFileSync(sourcePath,'utf8'),sourcePath);
+  expect(compiled.diagnostics).toEqual([]);
+  expect(validateSerializedIR(JSON.parse(JSON.stringify(compiled.ir))).valid).toBe(true);
+  expect(compiled.ir?.http?.routes.filter(route=>route.path.includes('/search/')).map(route=>route.policyId)).toEqual(['role:admin','role:admin','role:admin','role:admin','role:worker','role:worker']);
+  const root=mkdtempSync(join(tmpdir(),'bmec-job-booking-pages-'));roots.push(root);
+  const users=[{id:'admin',password:'admin-pass-123',role:'admin'},{id:'worker',password:'worker-pass-123',role:'worker'},{id:'worker2',password:'worker2-pass-123',role:'worker'}];
+  const handle=await startRuntime(compiled.ir!,join(root,'generated'),join(root,'job-booking.sqlite'),0,{authUsers:users,defaultPolicy:'none'});handles.push(handle);
+  handle.database.create('User',{authId:'admin',email:'admin@example.test',role:'admin'});
+  const worker=handle.database.create('User',{authId:'worker',email:'worker@example.test',role:'worker'});
+  const worker2=handle.database.create('User',{authId:'worker2',email:'worker2@example.test',role:'worker'});
+  handle.database.create('Customer',{name:'Northwind',email:'client@example.test',phone:'555-0100'});
+  for(let index=1;index<=55;index++)handle.database.create('Customer',{name:`Needle Client ${index}`,email:`needle${index}@example.test`,phone:'555-0101'});
+  handle.database.create('Customer',{name:'Phone Only Client',email:'phone-only@example.test',phone:'555-7712'});
+  for(let index=1;index<=110;index++)handle.database.create('Job',{customer:1,worker:Number(worker.id),workerAuthId:'worker',title:`Needle repair ${index}`,description:'Searchable plumbing work',price:1250,scheduledDate:'2026-10-02',status:'Pending'});
+  handle.database.create('Job',{customer:1,worker:Number(worker.id),workerAuthId:'worker',title:'Quiet repair',description:'Needle in the job description',price:1250,scheduledDate:'2026-10-02',status:'Pending'});
+  for(let index=1;index<=5;index++)handle.database.create('Job',{customer:1,worker:Number(worker2.id),workerAuthId:'worker2',title:`Needle other team ${index}`,description:'Searchable plumbing work',price:1250,scheduledDate:'2026-10-02',status:'Pending'});
+  const login=async(id:string)=>{const response=await fetch(`${handle.url}/auth/login`,{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({id,password:`${id}-pass-123`})});expect(response.status).toBe(200);return response.headers.get('set-cookie')!.split(';',1)[0]!;};
+  const admin=await login('admin'),workerCookie=await login('worker'),worker2Cookie=await login('worker2');
+
+  const customers=await fetch(`${handle.url}/customers`,{headers:{cookie:admin}});
+  const customerRows=await customers.json() as {id:number}[];
+  expect(customers.status).toBe(200);
+  expect(customerRows).toHaveLength(50);
+  const customerNext=await fetch(`${handle.url}/customers/pages/${customerRows.at(-1)!.id}`,{headers:{cookie:admin}});
+  expect((await customerNext.json() as {id:number}[])).toHaveLength(7);
+  const customerSearch=await fetch(`${handle.url}/customers/search/Needle`,{headers:{cookie:admin}});
+  const customerMatches=await customerSearch.json() as {id:number}[];
+  expect(customerMatches).toHaveLength(50);
+  const customerSearchNext=await fetch(`${handle.url}/customers/search/Needle/pages/${customerMatches.at(-1)!.id}`,{headers:{cookie:admin}});
+  expect((await customerSearchNext.json() as {id:number}[])).toHaveLength(5);
+  const phoneSearch=await fetch(`${handle.url}/customers/search/7712`,{headers:{cookie:admin}});
+  expect((await phoneSearch.json() as {name:string}[]).map(customer=>customer.name)).toEqual(['Phone Only Client']);
+  expect((await fetch(`${handle.url}/customers/search/Needle`,{headers:{cookie:workerCookie}})).status).toBe(403);
+
+  const firstAdminPage=await fetch(`${handle.url}/jobs`,{headers:{cookie:admin}});
+  expect(firstAdminPage.status).toBe(200);
+  const adminRows=await firstAdminPage.json() as {id:number}[];
+  expect(adminRows).toHaveLength(50);
+  const secondAdminPage=await fetch(`${handle.url}/jobs/pages/${adminRows.at(-1)!.id}`,{headers:{cookie:admin}});
+  expect((await secondAdminPage.json() as {id:number}[])).toHaveLength(50);
+  const firstWorkerPage=await fetch(`${handle.url}/worker-jobs`,{headers:{cookie:workerCookie}});
+  expect(firstWorkerPage.status).toBe(200);
+  const workerRows=await firstWorkerPage.json() as {id:number}[];
+  expect(workerRows).toHaveLength(50);
+  const nextWorkerPage=await fetch(`${handle.url}/worker-jobs/pages/${workerRows.at(-1)!.id}`,{headers:{cookie:workerCookie}});
+  const nextWorkerRows=await nextWorkerPage.json() as {id:number}[];
+  expect(nextWorkerRows).toHaveLength(50);
+  const thirdWorkerPage=await fetch(`${handle.url}/worker-jobs/pages/${nextWorkerRows.at(-1)!.id}`,{headers:{cookie:workerCookie}});
+  expect((await thirdWorkerPage.json() as {title:string}[])).toHaveLength(11);
+
+  const adminSearch=await fetch(`${handle.url}/jobs/search/Needle`,{headers:{cookie:admin}});
+  expect((await fetch(`${handle.url}/jobs/search/Needle`,{headers:{cookie:workerCookie}})).status).toBe(403);
+  expect((await fetch(`${handle.url}/worker-jobs/search/Needle`,{headers:{cookie:admin}})).status).toBe(403);
+  const adminMatches=await adminSearch.json() as {id:number}[];
+  expect(adminMatches).toHaveLength(50);
+  const adminSearchNext=await fetch(`${handle.url}/jobs/search/Needle/pages/${adminMatches.at(-1)!.id}`,{headers:{cookie:admin}});
+  const adminSearchNextRows=await adminSearchNext.json() as {id:number}[];
+  expect(adminSearchNextRows).toHaveLength(50);
+  const adminSearchLast=await fetch(`${handle.url}/jobs/search/Needle/pages/${adminSearchNextRows.at(-1)!.id}`,{headers:{cookie:admin}});
+  expect((await adminSearchLast.json() as {title:string}[]).some(job=>job.title==='Quiet repair')).toBe(true);
+
+  const workerSearch=await fetch(`${handle.url}/worker-jobs/search/Needle`,{headers:{cookie:workerCookie}});
+  const workerMatches=await workerSearch.json() as {id:number;workerAuthId:string}[];
+  expect(workerMatches).toHaveLength(50);
+  expect(workerMatches.every(job=>job.workerAuthId==='worker')).toBe(true);
+  const workerSearchNext=await fetch(`${handle.url}/worker-jobs/search/Needle/pages/${workerMatches.at(-1)!.id}`,{headers:{cookie:workerCookie}});
+  const workerSearchNextRows=await workerSearchNext.json() as {id:number;workerAuthId:string}[];
+  expect(workerSearchNextRows).toHaveLength(50);
+  expect(workerSearchNextRows.every(job=>job.workerAuthId==='worker')).toBe(true);
+  const workerSearchLast=await fetch(`${handle.url}/worker-jobs/search/Needle/pages/${workerSearchNextRows.at(-1)!.id}`,{headers:{cookie:workerCookie}});
+  const workerSearchFinalRows=await workerSearchLast.json() as {title:string}[];
+  expect(workerSearchFinalRows).toHaveLength(11);
+  expect(workerSearchFinalRows.some(job=>job.title==='Quiet repair')).toBe(true);
+  const otherWorkerSearch=await fetch(`${handle.url}/worker-jobs/search/Needle`,{headers:{cookie:worker2Cookie}});
+  const otherWorkerMatches=await otherWorkerSearch.json() as {workerAuthId:string}[];
+  expect(otherWorkerMatches).toHaveLength(5);
+  expect(otherWorkerMatches.every(job=>job.workerAuthId==='worker2')).toBe(true);
+  expect((await fetch(`${handle.url}/jobs/search/Needle`)).status).toBe(403);
+ });
+});

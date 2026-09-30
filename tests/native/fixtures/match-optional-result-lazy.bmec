@@ -1,0 +1,17 @@
+app NativeMatchOptionalResultLazy
+
+function failIfEvaluated() -> integer { return 1 / 0 }
+
+function chooseOptional(value integer?) -> integer {
+  return match value { some(number) => number, none => failIfEvaluated() }
+}
+
+function chooseResult(value result<integer,integer>) -> integer {
+  return match value { ok(number) => number, err(problem) => failIfEvaluated() }
+}
+
+function main() -> integer {
+  let maybe = some(7)
+  let result result<integer,integer> = ok(11)
+  return chooseOptional(maybe) + chooseResult(result)
+}

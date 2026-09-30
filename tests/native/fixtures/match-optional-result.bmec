@@ -1,0 +1,16 @@
+app NativeMatchOptionalResult
+
+type Point { x integer enabled boolean }
+
+function readMaybe(value Point?) -> integer {
+  return match value { some(point) => point.x, none => 0 }
+}
+
+function readResult(value result<Point,Point>) -> integer {
+  return match value { ok(point) => point.x, err(problem) => problem.x }
+}
+
+function main() -> integer {
+  return readMaybe(some(Point { x: 8, enabled: true })) + readMaybe(none) +
+    readResult(err(Point { x: 9, enabled: false })) + readResult(ok(Point { x: 3, enabled: true }))
+}

@@ -1,0 +1,2 @@
+type User { name text nickname text? }
+function bad() -> text { let users list<User> = [User { name: 1 nickname: "x" unknown: true }] return users[true] }

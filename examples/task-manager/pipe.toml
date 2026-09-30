@@ -1,0 +1,7 @@
+[package]
+name = "task-manager"
+version = "0.1.0"
+language = "0.1-alpha"
+entry = "main.pipe"
+
+[dependencies]

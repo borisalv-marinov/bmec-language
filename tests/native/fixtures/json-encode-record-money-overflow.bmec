@@ -1,0 +1,7 @@
+type Sample { total money }
+
+function main() -> boolean {
+  let total money = 92233720368547758.08
+  let sample = Sample { total: total }
+  return textContains(encodeJson(sample), "unreachable")
+}

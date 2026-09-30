@@ -1,0 +1,19 @@
+app NativeTextLiteralsSearch
+
+type Label { name text }
+
+function echo(value text) -> text { return value }
+function containsBeta(value text) -> integer { if textContains(value, "β") { return 1 } else { return 0 } }
+
+function main() -> integer {
+  let text = echo("αβγ")
+  let label = Label { name: text }
+  let maybe text? = some(text)
+  let result result<boolean,text> = err("missing β")
+  let found = match maybe { some(value) => containsBeta(value), none => 0 }
+  if isErr(result) {
+    if textContains(result.error, "β") and text == "αβγ" and textContains(label.name, "β") and textContains(text, "") and textContains(text, "αβγx") == false and textContains("axxxxxab target", "ab target") and textContains("axxxxxab targex", "ab target") == false {
+      return found
+    } else { return 0 }
+  } else { return 0 }
+}

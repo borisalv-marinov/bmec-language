@@ -1,0 +1,8 @@
+app NativeRecord
+
+type Sample { count integer enabled boolean ratio number }
+
+function main() -> integer {
+  let sample = Sample { count: 17, enabled: true, ratio: 1.5 }
+  if sample.enabled { return sample.count } else { return 0 }
+}

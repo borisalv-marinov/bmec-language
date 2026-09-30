@@ -1,0 +1,49 @@
+type Sample { count integer ratio number enabled boolean label text values list<integer> fractions list<number> flags list<boolean> longFlags list<boolean> words list<text> emptyWords list<text> longWords list<text> }
+
+function sampleWire() -> text { return encodeJson(Sample { count: 17, ratio: 1.25, enabled: true, label: "Ada 🌍", values: [1, 2, 3, 4, 5, 6, 7, 8], fractions: [1.25, 0.5], flags: [true, false, true], longFlags: [true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false, true, false], words: ["alpha", "🌍", "beta"], emptyWords: [], longWords: ["item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item", "item"] }) }
+
+function nonCanonicalWire() -> text { return textReplace(sampleWire(), "\"kind\":\"number\"", "\"kind\": \"number\"") }
+function escapedTextWire() -> text { return textReplace(textReplace(sampleWire(), "Ada", "A\\u0064a"), "alpha", "\\u0061lpha") }
+
+function read(source text) -> result<Sample,text> { return decodeJson(source) }
+
+function main() -> boolean {
+  let canonical = read("__BMEC_MIXED_RECORD_WIRE__")
+  let fallback = read("__BMEC_NONCANONICAL_MIXED_RECORD_WIRE__")
+  let escapedText = read("__BMEC_ESCAPED_TEXT_WIRE__")
+  if isOk(canonical) {
+    if isOk(fallback) {
+      let first = canonical.value.values
+      let second = fallback.value.values
+      let firstFractions = canonical.value.fractions
+      let secondFractions = fallback.value.fractions
+      let firstFlags = canonical.value.flags
+      let secondFlags = fallback.value.flags
+      let firstLongFlags = canonical.value.longFlags
+      let secondLongFlags = fallback.value.longFlags
+      let firstWords = canonical.value.words
+      let secondWords = fallback.value.words
+      let firstEmptyWords = canonical.value.emptyWords
+      let firstLongWords = canonical.value.longWords
+      var firstTotal integer = canonical.value.count
+      for item in first { firstTotal = firstTotal + item }
+      var secondTotal integer = fallback.value.count
+      for item in second { secondTotal = secondTotal + item }
+      var firstFraction number = 0.0
+      for item in firstFractions { firstFraction = firstFraction + item }
+      var secondFraction number = 0.0
+      for item in secondFractions { secondFraction = secondFraction + item }
+      var firstFlagsCount integer = 0
+      for item in firstFlags { if item { firstFlagsCount = firstFlagsCount + 1 } }
+      var secondFlagsCount integer = 0
+      for item in secondFlags { if item { secondFlagsCount = secondFlagsCount + 1 } }
+      var firstLongFlagsCount integer = 0
+      for item in firstLongFlags { if item { firstLongFlagsCount = firstLongFlagsCount + 1 } }
+      var secondLongFlagsCount integer = 0
+      for item in secondLongFlags { if item { secondLongFlagsCount = secondLongFlagsCount + 1 } }
+      var longWordCount integer = 0
+      for word in firstLongWords { longWordCount = longWordCount + 1 }
+      if isOk(escapedText) { let escapedWords = escapedText.value.words return canonical.value.label == "Ada 🌍" and fallback.value.label == "Ada 🌍" and escapedText.value.label == "Ada 🌍" and join(firstWords, ",") == "alpha,🌍,beta" and join(secondWords, ",") == "alpha,🌍,beta" and join(escapedWords, ",") == "alpha,🌍,beta" and join(firstEmptyWords, ",") == "" and longWordCount == 20 and canonical.value.ratio == 1.25 and canonical.value.enabled and firstTotal == 53 and firstFraction == 1.75 and firstFlagsCount == 2 and firstLongFlagsCount == 10 and fallback.value.ratio == 1.25 and fallback.value.enabled and secondTotal == 53 and secondFraction == 1.75 and secondFlagsCount == 2 and secondLongFlagsCount == 10 } else { return false }
+    } else { return false }
+  } else { return false }
+}

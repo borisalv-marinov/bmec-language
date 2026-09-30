@@ -1,0 +1,10 @@
+app NativeList
+
+function main() -> integer {
+  var total integer = 0
+  let values list<integer> = [1, 2, 3, 4]
+  for value in values {
+    total = total + value
+  }
+  return total
+}

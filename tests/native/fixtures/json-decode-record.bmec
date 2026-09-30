@@ -1,0 +1,54 @@
+type Payload { count integer label text enabled boolean ratio number values list<integer> fractions list<number> flags list<boolean> names list<text> score integer? }
+type Other { count integer label text enabled boolean ratio number values list<integer> fractions list<number> flags list<boolean> names list<text> score integer? }
+
+function payloadWire() -> text {
+  return encodeJson(Payload { count: 17, label: "native", enabled: true, ratio: 1.25, values: [2, 3], fractions: [1.25, 0.5], flags: [true, false, true], names: ["native", "list"], score: some(9) })
+}
+
+function otherWire() -> text {
+  return encodeJson(Other { count: 17, label: "native", enabled: true, ratio: 1.25, values: [2, 3], fractions: [1.25, 0.5], flags: [true, false, true], names: ["native", "list"], score: some(9) })
+}
+
+function absentScoreWire() -> text {
+  return encodeJson(Payload { count: 17, label: "native", enabled: true, ratio: 1.25, values: [2, 3], fractions: [1.25, 0.5], flags: [true, false, true], names: ["native", "list"], score: none })
+}
+
+function nonCanonicalPayloadWire() -> text { return textReplace(payloadWire(), "\"kind\":\"list\"", "\"kind\": \"list\"") }
+
+function read(source text) -> result<Payload,text> { return decodeJson(source) }
+
+function main() -> boolean {
+  let value = read("__BMEC_PAYLOAD_WIRE__")
+  let wrongType = read("__BMEC_OTHER_WIRE__")
+  let absentScore = read("__BMEC_ABSENT_SCORE_WIRE__")
+  let fallbackPayload = read("__BMEC_NONCANONICAL_LIST_WIRE__")
+  if isOk(value) {
+    let payload = value.value
+    let score = payload.score
+    let values = payload.values
+    var total integer = 0
+    for item in values { total = total + item }
+    let fractions = payload.fractions
+    var fractionTotal number = 0.0
+    for item in fractions { fractionTotal = fractionTotal + item }
+    let flags = payload.flags
+    var enabledCount integer = 0
+    for item in flags { if item { enabledCount = enabledCount + 1 } }
+    let names = payload.names
+    var matchedNames integer = 0
+    for item in names { if item == "native" or item == "list" { matchedNames = matchedNames + 1 } }
+    if isOk(absentScore) {
+      let noScore = absentScore.value.score
+      if score != none {
+      if isNone(noScore) {
+        if isOk(fallbackPayload) {
+          let fallbackValues = fallbackPayload.value.values
+          var fallbackTotal integer = 0
+          for item in fallbackValues { fallbackTotal = fallbackTotal + item }
+          return payload.count == 17 and payload.label == "native" and payload.enabled and payload.ratio == 1.25 and total == 5 and fractionTotal == 1.75 and enabledCount == 2 and matchedNames == 2 and score == 9 and isErr(wrongType) and fallbackPayload.value.count == 17 and fallbackTotal == 5
+        } else { return false }
+      } else { return false }
+      } else { return false }
+    } else { return false }
+  } else { return false }
+}

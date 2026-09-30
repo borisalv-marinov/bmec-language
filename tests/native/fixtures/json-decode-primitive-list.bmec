@@ -1,0 +1,53 @@
+function decodeIntegers(source text) -> result<list<integer>,text> { return decodeJson(source) }
+function decodeNumbers(source text) -> result<list<number>,text> { return decodeJson(source) }
+function decodeBooleans(source text) -> result<list<boolean>,text> { return decodeJson(source) }
+
+function integersMatch(source text, expected integer) -> boolean {
+  let decoded = decodeIntegers(source)
+  if isOk(decoded) {
+    let values = decoded.value
+    var total integer = 0
+    for value in values { total = total + value }
+    return total == expected
+  } else { return false }
+}
+
+function numbersMatch(source text, expected number) -> boolean {
+  let decoded = decodeNumbers(source)
+  if isOk(decoded) {
+    let values = decoded.value
+    var total number = 0
+    for value in values { total = total + value }
+    return total == expected
+  } else { return false }
+}
+
+function booleansMatch(source text, expectedCount integer) -> boolean {
+  let decoded = decodeBooleans(source)
+  if isOk(decoded) {
+    let values = decoded.value
+    var count integer = 0
+    for value in values { if value { count = count + 1 } }
+    return count == expectedCount
+  } else { return false }
+}
+
+function hasListError(value result<list<integer>,text>, expected text) -> boolean {
+  if isErr(value) { return value.error == expected } else { return false }
+}
+
+function main() -> boolean {
+  let integerMismatch = decodeIntegers("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"text\",\"value\":\"wrong\"}]}")
+  let escapedDigit = decodeIntegers("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"\\u0033\"}]}")
+  let overflow = decodeIntegers("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"9223372036854775808\"}]}")
+  let nonCanonical = decodeIntegers("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"01\"}]}")
+  let emptyBoolean = decodeBooleans("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"boolean\"},\"items\":[]}")
+  return integersMatch("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"3\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"-1\"}]}", 2) and
+    numbersMatch("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"number\"},\"items\":[{\"version\":1,\"kind\":\"number\",\"value\":1.25},{\"version\":1,\"kind\":\"number\",\"value\":-0.5}]}", 0.75) and
+    booleansMatch("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"boolean\"},\"items\":[{\"version\":1,\"kind\":\"boolean\",\"value\":true},{\"version\":1,\"kind\":\"boolean\",\"value\":false},{\"version\":1,\"kind\":\"boolean\",\"value\":true}]}", 2) and
+    integersMatch("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[]}", 0) and
+    integersMatch("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"\\u0033\"}]}", 3) and isOk(escapedDigit) and isErr(integerMismatch) and isOk(emptyBoolean) and
+    integersMatch("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"3\",\"extra\":true}]}", 3) and
+    hasListError(overflow, "PIPE-JSON-002: decoded value does not match list") and
+    hasListError(nonCanonical, "PIPE-JSON-002: decoded value does not match list")
+}

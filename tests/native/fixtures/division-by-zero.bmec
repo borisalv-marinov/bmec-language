@@ -1,0 +1,5 @@
+app NativeDivisionByZero
+
+function main() -> integer {
+  return 42 / 0
+}

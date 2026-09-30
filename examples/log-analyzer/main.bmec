@@ -1,0 +1,14 @@
+app LogAnalyzer
+
+function summarize(fs capability<filesystem>, input text, output text) -> result<boolean,text> {
+  let contents = readTextFile(fs, input)?
+  let lines = split(contents, "\n")
+  let errors = filter(lines, lambda(line text) -> boolean { return textContains(line, "ERROR") })
+  let errorCount = fold(errors, 0, lambda(count integer, line text) -> integer {
+    return count + 1
+  })
+  let sortedErrors = sort(errors)
+  let summary = join(sortedErrors, "\n")
+  let written = writeTextFile(fs, output, summary)?
+  return ok(errorCount > 0 and written)
+}

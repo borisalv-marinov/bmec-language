@@ -1,0 +1,8 @@
+function main() -> boolean {
+  let integerWire = encodeJson(9223372036854775807)
+  let booleanWire = encodeJson(true)
+  let textWire = encodeJson("quote \" slash \\ line\nUnicode Привет")
+  return integerWire == "{\"version\":1,\"kind\":\"integer\",\"value\":\"9223372036854775807\"}" and
+    booleanWire == "{\"version\":1,\"kind\":\"boolean\",\"value\":true}" and
+    textWire == "{\"version\":1,\"kind\":\"text\",\"value\":\"quote \\\" slash \\\\ line\\nUnicode Привет\"}"
+}

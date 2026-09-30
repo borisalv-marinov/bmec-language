@@ -1,0 +1,28 @@
+app NativeOptionalInteger
+
+function wrap(value integer) -> integer? {
+  if value > 0 { return some(value) } else { return none }
+}
+
+function unwrap(value integer?) -> integer {
+  if value != none { return value } else { return -1 }
+}
+
+function enabled(value boolean?) -> boolean { return isSome(value) }
+function missingValue(value boolean?) -> boolean { return isNone(value) }
+
+function main() -> integer {
+  let present = wrap(9)
+  let duplicate = wrap(9)
+  let pending integer? = none
+  let first = unwrap(present)
+  let second = unwrap(pending)
+  let absentFromCall = wrap(0)
+  let third = unwrap(absentFromCall)
+  let changed = wrap(5)
+  if enabled(some(true)) {
+    if missingValue(none) {
+      if present == duplicate { return first + second + third + unwrap(changed) } else { return 0 }
+    } else { return 0 }
+  } else { return 0 }
+}

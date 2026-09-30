@@ -1,0 +1,13 @@
+import {describe,expect,it} from 'vitest';
+import {mkdirSync,mkdtempSync,writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
+import {readManifest,writeLock,verifyLock} from '../src/project/manifest.js';
+
+describe('package path reproducibility',()=>{
+ it('canonicalizes Windows separators and emits stable POSIX lock paths',()=>{const root=mkdtempSync(join(tmpdir(),'pipe-paths-'));mkdirSync(join(root,'dep'));const file=join(root,'pipe.toml');writeFileSync(file,'[package]\nname = "demo"\nversion = "1.0.0"\nlanguage = "0.1-alpha"\nentry = "src\\main.pipe"\n[dependencies]\ndep = ".\\dep"\n');const manifest=readManifest(file);expect(manifest.entry).toBe('src/main.pipe');expect(manifest.dependencies[0]?.path).toBe('./dep');const first=writeLock(file);const second=writeLock(file);expect(second).toEqual(first);expect(second.dependencies[0]?.path).toBe('dep');expect(verifyLock(file,second)).toEqual([]);});
+ it('accepts equivalent Windows lock separators and dot prefixes',()=>{const root=mkdtempSync(join(tmpdir(),'pipe-paths-'));mkdirSync(join(root,'dep'));const file=join(root,'pipe.toml');writeFileSync(file,'[package]\nname = "demo"\nversion = "1.0.0"\nlanguage = "0.1-alpha"\nentry = "main.pipe"\n[dependencies]\ndep = "./dep"\n');const lock=writeLock(file);lock.dependencies[0]!.path='.\\dep';expect(verifyLock(file,lock)).toEqual([]);});
+ it('keeps dependency integrity stable across LF and CRLF checkouts',()=>{const roots=[mkdtempSync(join(tmpdir(),'pipe-line-endings-')),mkdtempSync(join(tmpdir(),'pipe-line-endings-'))];const locks=roots.map((root,index)=>{mkdirSync(join(root,'dep'));writeFileSync(join(root,'dep','pipe.toml'),index===0?'[package]\nname = "dep"\n':'[package]\r\nname = "dep"\r\n');const file=join(root,'pipe.toml');writeFileSync(file,'[package]\nname = "demo"\nversion = "1.0.0"\nlanguage = "0.1-alpha"\nentry = "main.pipe"\n[dependencies]\ndep = "./dep"\n');return writeLock(file)});expect(locks[1]).toEqual(locks[0]);});
+ it('rejects absolute package metadata paths before lock generation',()=>{const root=mkdtempSync(join(tmpdir(),'pipe-paths-'));const file=join(root,'pipe.toml');writeFileSync(file,'[package]\nname = "demo"\nversion = "1.0.0"\nlanguage = "0.1-alpha"\nentry = "C:\\checkout\\main.pipe"\n');expect(()=>readManifest(file)).toThrow('PIPE-PKG-002');});
+ it('rejects absolute dependency paths instead of treating them as versions',()=>{const root=mkdtempSync(join(tmpdir(),'pipe-paths-'));const file=join(root,'pipe.toml');writeFileSync(file,'[package]\nname = "demo"\nversion = "1.0.0"\nlanguage = "0.1-alpha"\nentry = "main.pipe"\n[dependencies]\ndep = "C:\\checkout\\dep"\n');expect(()=>readManifest(file)).toThrow('PIPE-PKG-002');});
+});

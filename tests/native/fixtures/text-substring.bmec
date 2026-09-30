@@ -1,0 +1,9 @@
+app NativeTextSubstring
+
+function cut(value text, start integer, end integer) -> text {
+  return substring(value, start, end)
+}
+
+function main() -> boolean {
+  return cut("Aé🌍Z", 1, 3) == "é🌍" and cut("Aé🌍Z", 0, 0) == "" and cut("Aé🌍Z", 3, 99) == "Z" and cut("Aé🌍Z", 99, 100) == "" and cut("é!", 1, 2) == "́"
+}

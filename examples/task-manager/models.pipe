@@ -1,0 +1,10 @@
+public model User {
+    name text required
+    email text required unique
+}
+
+public model Task {
+    title text required
+    done boolean default false
+    owner User
+}

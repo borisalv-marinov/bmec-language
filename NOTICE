@@ -1,0 +1,4 @@
+BMEC includes portions of Ryu, the double-conversion algorithm by Ulf Adams
+(copyright 2018). The vendored files are used under the Boost Software License
+1.0. The license text and upstream attribution are retained in
+src/native/vendor/ryu/LICENSE-Boost and are copied into packaged runtime assets.

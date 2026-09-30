@@ -1,0 +1,6 @@
+function main() -> boolean {
+  let values = ["", "𐀀", "z", "a", "a", "", "", "퟿", "￿", "😀", "😁", "􏿿", "prefix-", "prefix-𐀀", "prefix-😀", "prefix-😁", "prefix-􏿿", "prefix-퟿", "prefix-￿", "prefix-z", "prefix-a", "prefix-"]
+  let sorted = sort(values)
+  let empty list<text> = []
+  return join(sorted, ",") == ",,a,a,prefix-,prefix-a,prefix-z,prefix-퟿,prefix-𐀀,prefix-😀,prefix-😁,prefix-􏿿,prefix-,prefix-￿,z,퟿,𐀀,😀,😁,􏿿,,￿" and join(values, ",") == ",𐀀,z,a,a,,,퟿,￿,😀,😁,􏿿,prefix-,prefix-𐀀,prefix-😀,prefix-😁,prefix-􏿿,prefix-퟿,prefix-￿,prefix-z,prefix-a,prefix-" and join(sort(empty), ",") == ""
+}

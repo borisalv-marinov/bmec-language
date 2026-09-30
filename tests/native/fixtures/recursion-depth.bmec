@@ -1,0 +1,13 @@
+app NativeRecursionDepth
+
+function recurse(value integer) -> integer {
+  if value == 0 {
+    return 0
+  } else {
+    return recurse(value - 1)
+  }
+}
+
+function main() -> integer {
+  return recurse(128)
+}

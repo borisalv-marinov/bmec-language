@@ -1,0 +1,53 @@
+import { Product, StockEntry } from "./models.pipe"
+import { isAffordable } from "./logic.pipe"
+
+component ProductForm {
+    text "Add product"
+    input name text validate nonempty
+}
+
+component StockForm {
+    text "Receive stock"
+    input quantity integer
+}
+
+app Inventory
+
+api /products from Product requiring role manager
+api /stock from StockEntry requiring role manager
+
+page Inventory {
+    state loading boolean = false
+    state filter text?
+    event refresh()
+    event create(name text)
+    input name text on create
+    use ProductForm
+    crud Product
+}
+
+page Stock {
+    state loading boolean = false
+    state error text
+    event refresh()
+    use StockForm
+    crud StockEntry
+}
+
+async function listProducts(db capability<database>) -> task<list<Product>> {
+    return wait for get products from Product ordered by name ascending limited to 50 using db
+}
+
+async function createProduct(db capability<database>, body Product) -> task<integer> {
+    return wait for add body to Product using db
+}
+
+async function listStock(db capability<database>) -> task<list<StockEntry>> {
+    return wait for get entries from StockEntry ordered by received descending limited to 50 using db
+}
+
+serve GET /inventory requiring database with listProducts
+serve POST /products requiring database with createProduct
+serve GET /stock requiring database with listStock
+
+style clean light

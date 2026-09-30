@@ -1,0 +1,3 @@
+public function discount(price money, premium boolean) -> money {
+    if premium { return price * 8 / 10 } else { return price }
+}

@@ -1,0 +1,20 @@
+import {describe,it,expect} from 'vitest';
+import {compile} from '../src/compiler.js';
+import {executeValue,Money} from '../src/core/interpreter.js';
+import {PipeRuntimeError} from '../src/core/interpreter.js';
+
+describe('PIPE executable core',()=>{
+  it('evaluates precedence through typed IR',()=>{const r=compile('function main() -> integer { return 1 + 2 * 3 }');expect(r.diagnostics).toEqual([]);expect(executeValue(r.ir!.functions,'main',[])).toBe(7n);expect(r.ir!.functions[0].body[0].kind).toBe('return')});
+  it('evaluates immutable locals, calls, and conditionals',()=>{const s='function discount(price money, premium boolean) -> money { if premium { return price * 8 / 10 } else { return price } } function main() -> money { let base = discount(10, true) return base }';const r=compile(s);expect(r.diagnostics).toEqual([]);expect(executeValue(r.ir!.functions,'main',[])).toEqual(new Money(800n))});
+  it('rejects invalid return types',()=>expect(compile('function double(value integer) -> integer { return "hello" }').diagnostics.map(x=>x.code)).toContain('PIPE-FUNC-006'));
+  it('rejects unknown variables and wrong calls',()=>{const r=compile('function f(value integer) -> integer { return missing } function g() -> integer { return f() }');expect(r.diagnostics.map(x=>x.code)).toEqual(expect.arrayContaining(['PIPE-REF-004','PIPE-FUNC-008']))});
+  it('rejects non-boolean conditions and duplicate locals',()=>{const r=compile('function f(value integer) -> integer { let x = value let x = 2 if value { return x } else { return x } }');expect(r.diagnostics.map(x=>x.code)).toEqual(expect.arrayContaining(['PIPE-FUNC-005','PIPE-TYPE-003']))});
+  it('requires both branches to return',()=>expect(compile('function f(value integer) -> integer { if value == 1 { return value } }').diagnostics.map(x=>x.code)).toContain('PIPE-FUNC-004'));
+  it('keeps core IR deterministic and graph-visible',()=>{const s='function add(a integer, b integer) -> integer { return a + b }';const r=compile(s);expect(JSON.stringify(r.ir)).toBe(JSON.stringify(compile(s).ir));expect(r.ir!.functions[0].id).toBe('FUNC-001')});
+  it('uses exact fixed-point money arithmetic',()=>{const s='function add(a money, b money) -> money { return a + b } function main() -> money { return add(0.1, 0.2) }';const r=compile(s);expect(r.diagnostics).toEqual([]);expect(executeValue(r.ir!.functions,'main',[])).toEqual(new Money(30n))});
+  it('preserves negative fixed-point money literals in arithmetic',()=>{const r=compile('function main() -> money { return -237.12 + 0.06 }');expect(r.diagnostics).toEqual([]);expect(executeValue(r.ir!.functions,'main',[])).toEqual(new Money(-23706n))});
+  it('rejects mixed numeric operators and cross-type equality',()=>{const r=compile('function f(a integer, b number) -> boolean { return a == b }');expect(r.diagnostics.map(x=>x.code)).toContain('PIPE-TYPE-011');const m=compile('function g(a money, b number) -> money { return a * b }');expect(m.diagnostics.map(x=>x.code)).toContain('PIPE-TYPE-005')});
+  it('rejects parameter and nested shadowing and reports unreachable code',()=>{const r=compile('function f(a integer) -> integer { let a = 1 if true { let a = 2 return a } else { return a } let x = 1 }');expect(r.diagnostics.map(x=>x.code)).toEqual(expect.arrayContaining(['PIPE-FUNC-005','PIPE-FUNC-010']))});
+  it('reports deterministic runtime arithmetic failures',()=>{const zero=compile('function main() -> integer { return 1 / 0 }');expect(()=>executeValue(zero.ir!.functions,'main',[])).toThrowError(PipeRuntimeError);try{executeValue(zero.ir!.functions,'main',[])}catch(e){expect((e as PipeRuntimeError).code).toBe('PIPE-RUNTIME-003')}const over=compile('function main() -> integer { return 9223372036854775807 + 1 }');expect(()=>executeValue(over.ir!.functions,'main',[])).toThrowError(/Integer overflow/)});
+  it('bounds recursive execution',()=>{const r=compile('function loop(x integer) -> integer { return loop(x) }');expect(r.diagnostics).toEqual([]);expect(()=>executeValue(r.ir!.functions,'loop',[1],{maxCallDepth:4})).toThrowError(/Maximum call depth exceeded/)});
+});

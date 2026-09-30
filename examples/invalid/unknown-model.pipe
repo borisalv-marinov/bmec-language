@@ -1,0 +1,3 @@
+app Broken
+model User { age integer default "not a number" }
+page Home { crud Product }

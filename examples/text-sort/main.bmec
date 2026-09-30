@@ -1,0 +1,9 @@
+app TextSort
+
+function sortFile(fs capability<filesystem>, input text, output text) -> result<boolean,text> {
+  let contents = readTextFile(fs, input)?
+  let lines = split(contents, "\n")
+  let sorted = sort(lines)
+  let written = writeTextFile(fs, output, join(sorted, "\n"))?
+  return ok(written)
+}

@@ -1,0 +1,16 @@
+app NativeRecordCall
+
+type Point { x integer enabled boolean }
+
+function shift(point Point, amount integer) -> Point {
+  return Point { x: point.x + amount, enabled: point.enabled }
+}
+
+function read(point Point) -> integer {
+  if point.enabled { return point.x } else { return 0 }
+}
+
+function main() -> integer {
+  let moved = shift(Point { x: 17, enabled: true }, 8)
+  return read(moved)
+}

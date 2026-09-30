@@ -1,0 +1,12 @@
+app NativeResultRecordError
+
+type Point { x integer enabled boolean }
+
+function resultPoint(value integer) -> result<Point,Point> {
+  if value > 0 { return ok(Point { x: value, enabled: true }) } else { return err(Point { x: -value, enabled: false }) }
+}
+
+function main() -> integer {
+  let result = resultPoint(-23)
+  if isOk(result) { return result.value.x } else { return result.error.x }
+}

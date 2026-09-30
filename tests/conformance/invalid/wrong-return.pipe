@@ -1,0 +1,3 @@
+function double(value integer) -> integer {
+    return "hello"
+}

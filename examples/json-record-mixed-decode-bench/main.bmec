@@ -1,0 +1,31 @@
+type Sample { count integer ratio number enabled boolean values list<integer> fractions list<number> flags list<boolean> }
+
+function sampleWire() -> text { return encodeJson(Sample { count: 17, ratio: 1.25, enabled: true, values: [1, 2, 3, 4, 5, 6, 7, 8], fractions: [1.25, 0.5], flags: [true, false, true] }) }
+
+function decodeSample(source text) -> result<Sample,text> { return decodeJson(source) }
+
+function run(source text) -> boolean {
+  repeat 100 {
+    let decoded = decodeSample(source)
+    if isOk(decoded) {
+      let sample = decoded.value
+      let values = sample.values
+      let fractionValues = sample.fractions
+      let flags = sample.flags
+      var total integer = sample.count
+      for value in values { total = total + value }
+      var fractions number = 0.0
+      for value in fractionValues { fractions = fractions + value }
+      var enabledCount integer = 0
+      for value in flags { if value { enabledCount = enabledCount + 1 } }
+      if total != 53 { return false }
+      if sample.ratio != 1.25 { return false }
+      if sample.enabled == false { return false }
+      if fractions != 1.75 { return false }
+      if enabledCount != 2 { return false }
+    } else { return false }
+  }
+  return true
+}
+
+function main() -> boolean { return run("") }

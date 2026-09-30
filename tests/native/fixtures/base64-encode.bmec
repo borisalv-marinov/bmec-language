@@ -1,0 +1,7 @@
+function main() -> boolean {
+  return base64Encode("") == "" and
+    base64Encode("f") == "Zg==" and
+    base64Encode("fo") == "Zm8=" and
+    base64Encode("foo") == "Zm9v" and
+    base64Encode("Hello 😀") == "SGVsbG8g8J+YgA=="
+}

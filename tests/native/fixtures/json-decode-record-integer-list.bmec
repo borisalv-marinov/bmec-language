@@ -1,0 +1,23 @@
+type Sample { count integer values list<integer> }
+
+function sampleWire() -> text { return encodeJson(Sample { count: 17, values: [1, 2, 3, 4, 5, 6, 7, 8] }) }
+
+function nonCanonicalWire() -> text { return textReplace(sampleWire(), "\"kind\":\"list\"", "\"kind\": \"list\"") }
+
+function read(source text) -> result<Sample,text> { return decodeJson(source) }
+
+function main() -> boolean {
+  let canonical = read("__BMEC_RECORD_LIST_WIRE__")
+  let fallback = read("__BMEC_NONCANONICAL_RECORD_LIST_WIRE__")
+  if isOk(canonical) {
+    if isOk(fallback) {
+      let canonicalValues = canonical.value.values
+      let fallbackValues = fallback.value.values
+      var canonicalTotal integer = canonical.value.count
+      for item in canonicalValues { canonicalTotal = canonicalTotal + item }
+      var fallbackTotal integer = fallback.value.count
+      for item in fallbackValues { fallbackTotal = fallbackTotal + item }
+      return canonicalTotal == 53 and fallbackTotal == 53
+    } else { return false }
+  } else { return false }
+}

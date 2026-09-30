@@ -1,0 +1,24 @@
+# BMEC
+
+> BMEC is a statically typed language and compiler for full-stack applications.
+
+Package: 0.9.1-beta.1
+Language: 0.1
+
+Start here:
+- /ai/
+- /ai/index.json
+- /ai/knowledge-index.json
+- /ai/ai-spec.json
+- /ai/commands.json
+- /ai/capabilities.json
+- /ai/diagnostics.json
+- /ai/examples.json
+- /docs/AI_AGENT_GUIDE.md
+- /docs/CAPABILITY_COVERAGE.md
+- /docs/GETTING_STARTED.md
+- /docs/CAPABILITIES.md
+- /version.json
+
+For task-specific machine-readable context, use `bmec knowledge "TASK" --json`.
+Use `bmec check FILE --json` to validate BMEC source and inspect stable diagnostics.

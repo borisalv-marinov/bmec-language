@@ -1,0 +1,7 @@
+function main() -> integer {
+  let pieces = split("Aβ", "")
+  let rebuilt = join(pieces, "")
+  var count integer = 0
+  for piece in pieces { count = count + 1 }
+  if rebuilt == "Aβ" and count == 2 { return 1 } else { return 0 }
+}

@@ -1,0 +1,17 @@
+type Sample { count integer ratio number enabled boolean label text words list<text> }
+
+function make() -> Sample {
+  let words = split("α|東京|line\nfeed", "|")
+  return Sample { count: -9223372036854775807, ratio: 1.25, enabled: true, label: "quote \" π", words: words }
+}
+
+function main() -> boolean {
+  let sample = make()
+  let decoded result<Sample,text> = decodeJson(encodeJson(sample))
+  if isOk(decoded) {
+    let result = decoded.value
+    return result.count == -9223372036854775807 and result.ratio == 1.25 and result.enabled and
+      result.label == "quote \" π" and length(result.words) == 3 and
+      join(result.words, "|") == "α|東京|line\nfeed"
+  } else { return false }
+}

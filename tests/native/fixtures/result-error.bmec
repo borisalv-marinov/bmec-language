@@ -1,0 +1,11 @@
+app NativeResultError
+
+function pass(value result<integer,integer>) -> result<integer,integer> {
+  let number = value?
+  return ok(number)
+}
+
+function main() -> integer {
+  let answer = pass(err(7))
+  if isErr(answer) { return answer.error } else { return -1 }
+}

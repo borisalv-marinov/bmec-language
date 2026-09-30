@@ -1,0 +1,50 @@
+function decodeInteger(source text) -> result<integer,text> { return decodeJson(source) }
+function decodeNumber(source text) -> result<number,text> { return decodeJson(source) }
+function decodeBoolean(source text) -> result<boolean,text> { return decodeJson(source) }
+function decodeText(source text) -> result<text,text> { return decodeJson(source) }
+function hasInteger(value result<integer,text>) -> boolean {
+  if isOk(value) { return value.value == -9223372036854775808 } else { return false }
+}
+function hasNumber(value result<number,text>) -> boolean {
+  if isOk(value) { return value.value == 12.5 } else { return false }
+}
+function hasBoolean(value result<boolean,text>) -> boolean {
+  if isOk(value) { return value.value } else { return false }
+}
+function hasText(value result<text,text>) -> boolean {
+  if isOk(value) { return value.value == "quote \" slash \\ line\nUnicode 😀" } else { return false }
+}
+function hasUnicodeEscape(value result<text,text>) -> boolean {
+  if isOk(value) { return value.value == "Hi" } else { return false }
+}
+function hasEmojiEscape(value result<text,text>) -> boolean {
+  if isOk(value) { return value.value == "😀" } else { return false }
+}
+function hasThree(value result<integer,text>) -> boolean {
+  if isOk(value) { return value.value == 3 } else { return false }
+}
+function hasError(value result<integer,text>, expected text) -> boolean {
+  if isErr(value) { return value.error == expected } else { return false }
+}
+
+function main() -> boolean {
+  let integer = decodeInteger("{ \"value\": \"-9223372036854775808\", \"kind\": \"integer\", \"version\": 1 }")
+  let number = decodeNumber("{\"version\":1,\"kind\":\"number\",\"value\":1.25e1}")
+  let boolean = decodeBoolean("{\"version\":1,\"kind\":\"boolean\",\"value\":true}")
+  let text = decodeText(encodeJson("quote \" slash \\ line\nUnicode 😀"))
+  let escaped = decodeText("{\"version\":1,\"kind\":\"text\",\"value\":\"\\u0048i\"}")
+  let escapedEmoji = decodeText("{\"version\":1,\"kind\":\"text\",\"value\":\"\\uD83D\\uDE00\"}")
+  let duplicate = decodeInteger("{\"version\":1,\"kind\":\"integer\",\"value\":\"2\",\"extra\":{\"a\":[true,null]},\"value\":\"3\"}")
+  let escapedDigit = decodeInteger("{\"version\":1,\"kind\":\"integer\",\"value\":\"\\u0033\"}")
+  let mismatch = decodeInteger(encodeJson(true))
+  let invalid = decodeInteger("{")
+  let contract = decodeInteger("{\"version\":1,\"kind\":\"integer\",\"value\":\"01\"}")
+  let overflow = decodeInteger("{\"version\":1,\"kind\":\"integer\",\"value\":\"9223372036854775808\"}")
+  let invalidStructure = decodeInteger("[]")
+  return hasInteger(integer) and hasNumber(number) and hasBoolean(boolean) and hasText(text) and hasUnicodeEscape(escaped) and hasEmojiEscape(escapedEmoji) and hasThree(duplicate) and hasThree(escapedDigit) and
+    hasError(mismatch, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(invalid, "PIPE-JSON-001: invalid JSON") and
+    hasError(contract, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(overflow, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(invalidStructure, "PIPE-JSON-002: decoded value does not match integer")
+}

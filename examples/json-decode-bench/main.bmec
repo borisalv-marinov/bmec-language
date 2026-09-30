@@ -1,0 +1,11 @@
+function decodeInteger(source text) -> result<integer,text> { return decodeJson(source) }
+
+function main() -> boolean {
+  repeat 1000 {
+    let decoded = decodeInteger("{\"version\":1,\"kind\":\"integer\",\"value\":\"123456789012345\"}")
+    if isOk(decoded) {
+      if decoded.value == 123456789012345 { } else { return false }
+    } else { return false }
+  }
+  return true
+}

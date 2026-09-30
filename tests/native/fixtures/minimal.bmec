@@ -1,0 +1,25 @@
+app NativeSmoke
+
+function add(a integer, b integer) -> integer {
+  return a + b
+}
+
+function descend(start integer) -> integer {
+  var current integer = start
+  while current > 0 {
+    current = current - 1
+  }
+  return current
+}
+
+function main() -> integer {
+  var total integer = 0
+  repeat 5 {
+    total = add(total, 7)
+  }
+  if total == 35 {
+    return descend(total)
+  } else {
+    return 1
+  }
+}

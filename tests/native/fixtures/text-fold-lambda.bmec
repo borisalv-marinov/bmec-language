@@ -1,0 +1,8 @@
+app NativeTextFold
+
+function main() -> integer {
+  let lines = split("ERROR disk\nINFO ready\nERROR timeout", "\n")
+  return fold(lines, 0, lambda(count integer, line text) -> integer {
+    if textContains(line, "ERROR") { return count + 1 } else { return count }
+  })
+}

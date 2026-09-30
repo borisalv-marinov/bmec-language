@@ -1,0 +1,9 @@
+import { Product } from "./models.pipe"
+
+public function isAffordable(product Product, limit money) -> boolean {
+    return product.price <= limit
+}
+
+public function affordable(products list<Product>, limit money) -> list<Product> {
+    return filter(products, lambda(product Product) -> boolean { return isAffordable(product, limit) })
+}

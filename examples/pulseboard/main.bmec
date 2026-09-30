@@ -1,0 +1,640 @@
+app PulseBoard
+
+enum TaskStatus { Inbox Active Done }
+enum TaskPriority { Low Medium High }
+enum WorkspaceRole { Owner Manager Member }
+
+type Principal {
+  id text
+  role text
+}
+
+type DashboardMetric {
+  name text
+  value integer
+  workspaceName text
+}
+
+model Task {
+  title text required
+  status TaskStatus required
+  priority TaskPriority required
+  ownerAuthId text?
+  workspaceId integer?
+}
+
+model UserSettings {
+  ownerAuthId text? unique
+  displayName text required
+  timeZone text required
+  weeklyDigest boolean required
+}
+
+model Workspace {
+  workspaceId integer required unique
+  name text required unique
+}
+
+model WorkspaceMembership {
+  workspaceId integer required
+  authId text required
+  role WorkspaceRole required
+}
+
+model ActiveWorkspace {
+  ownerAuthId text required unique
+  workspaceId integer required
+}
+
+type WorkspaceAccess {
+  workspaceId integer
+  workspaceName text
+  role WorkspaceRole
+  selected text
+}
+
+type WorkspaceChoice {
+  workspaceId integer
+}
+
+type WorkspaceRoleChange {
+  role WorkspaceRole
+}
+
+function canManageWorkspace(memberships list<WorkspaceMembership>, workspaceId integer) -> boolean {
+  for membership in memberships {
+    if membership.workspaceId == workspaceId and (membership.role == WorkspaceRole.Owner() or membership.role == WorkspaceRole.Manager()) { return true }
+  }
+  return false
+}
+
+function hasWorkspace(memberships list<WorkspaceMembership>, workspaceId integer) -> boolean {
+  return any(memberships, lambda(membership WorkspaceMembership) -> boolean { return membership.workspaceId == workspaceId })
+}
+
+function workspaceSelectionLabel(workspaceId integer, selectedWorkspace integer) -> text {
+  if workspaceId == selectedWorkspace { return "Selected" }
+  return "Available"
+}
+
+function chooseCurrentWorkspace(memberships list<WorkspaceMembership>, savedSelections list<ActiveWorkspace>) -> integer {
+  let fallback = match first(memberships) {
+    some(membership) => membership.workspaceId,
+    none => 0
+  }
+  return match first(savedSelections) {
+    some(selection) => validateWorkspaceSelection(memberships, selection, fallback),
+    none => fallback
+  }
+}
+
+function validateWorkspaceSelection(memberships list<WorkspaceMembership>, selection ActiveWorkspace, fallback integer) -> integer {
+  if hasWorkspace(memberships, selection.workspaceId) { return selection.workspaceId }
+  return fallback
+}
+
+function describeWorkspaces(memberships list<WorkspaceMembership>, workspaces list<Workspace>, selectedWorkspace integer) -> list<WorkspaceAccess> {
+  return map(memberships, lambda(membership WorkspaceMembership) -> WorkspaceAccess {
+    let workspaceRecord = find(workspaces, lambda(workspace Workspace) -> boolean { return workspace.workspaceId == membership.workspaceId })
+    let workspaceName = match workspaceRecord {
+      some(workspace) => workspace.name,
+      none => "Workspace unavailable"
+    }
+    return WorkspaceAccess { workspaceId: membership.workspaceId, workspaceName: workspaceName, role: membership.role, selected: workspaceSelectionLabel(membership.workspaceId, selectedWorkspace) }
+  })
+}
+
+async function listMyWorkspaces(principal Principal, db capability<database>) -> task<list<WorkspaceAccess>> {
+  let authId = principal.id
+  let memberships = wait for get memberships from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selections = wait for get selections from ActiveWorkspace where ownerAuthId is authId ordered by id ascending limited to 1 using db
+  let selectedWorkspace = chooseCurrentWorkspace(memberships, selections)
+  let workspaces = wait for get workspaces from Workspace ordered by name ascending limited to 100 using db
+  return describeWorkspaces(memberships, workspaces, selectedWorkspace)
+}
+
+async function resolveSelectedWorkspace(db capability<database>, authId text, memberships list<WorkspaceMembership>) -> task<integer> {
+  let selections = wait for get selections from ActiveWorkspace where ownerAuthId is authId ordered by id ascending limited to 1 using db
+  return chooseCurrentWorkspace(memberships, selections)
+}
+
+async function chooseWorkspace(principal Principal, db capability<database>, body WorkspaceChoice) -> task<result<integer,text>> {
+  let authId = principal.id
+  let memberships = wait for get memberships from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  if hasWorkspace(memberships, body.workspaceId) == false { return err("workspace_membership_required") }
+  let saved = ActiveWorkspace { ownerAuthId: principal.id, workspaceId: body.workspaceId }
+  let created = await databaseInsertIdIfAbsent(db, "ActiveWorkspace", saved, "ownerAuthId")
+  if isSome(created) { return ok(body.workspaceId) }
+  return await updateWorkspaceChoice(db, principal.id, body.workspaceId)
+}
+
+async function updateWorkspaceChoice(db capability<database>, authId text, workspaceId integer) -> task<result<integer,text>> {
+  let saved = ActiveWorkspace { ownerAuthId: authId, workspaceId: workspaceId }
+  let changes = await databaseUpdateUniqueWhere(db, "ActiveWorkspace", authId, "ownerAuthId", saved)
+  if changes > 0 { return ok(workspaceId) }
+  let inserted = await databaseInsertIdIfAbsent(db, "ActiveWorkspace", saved, "ownerAuthId")
+  if isSome(inserted) { return ok(workspaceId) }
+  let retried = await databaseUpdateUniqueWhere(db, "ActiveWorkspace", authId, "ownerAuthId", saved)
+  if retried > 0 { return ok(workspaceId) }
+  return err("workspace_selection_unavailable")
+}
+
+async function listWorkspaceMembers(principal Principal, db capability<database>, workspaceId integer) -> task<result<list<WorkspaceMembership>,text>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  if canManageWorkspace(memberships, workspaceId) == false { return err("workspace_manager_required") }
+  let members = wait for get members from WorkspaceMembership where workspaceId is workspaceId ordered by authId ascending limited to 100 using db
+  return ok(members)
+}
+
+function isWorkspaceOwner(memberships list<WorkspaceMembership>, workspaceId integer) -> boolean {
+  for membership in memberships {
+    if membership.workspaceId == workspaceId and membership.role == WorkspaceRole.Owner() { return true }
+  }
+  return false
+}
+
+async function listSelectedWorkspaceMembers(principal Principal, db capability<database>) -> task<list<WorkspaceMembership>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if canManageWorkspace(memberships, selectedWorkspace) == false { return [] }
+  let members = wait for get records from WorkspaceMembership where workspaceId is selectedWorkspace ordered by authId ascending limited to 100 using db
+  return members
+}
+
+async function readSelectedWorkspaceMember(principal Principal, db capability<database>, id integer) -> task<list<WorkspaceMembership>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if canManageWorkspace(memberships, selectedWorkspace) == false { return [] }
+  let member = wait for get records from WorkspaceMembership where id is id and workspaceId is selectedWorkspace ordered by id ascending limited to 1 using db
+  return member
+}
+
+async function updateSelectedWorkspaceMember(principal Principal, db capability<database>, id integer, body WorkspaceRoleChange) -> task<result<integer,text>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if isWorkspaceOwner(memberships, selectedWorkspace) == false { return err("workspace_owner_required") }
+  if body.role == WorkspaceRole.Owner() { return err("workspace_owner_role_protected") }
+  let targets = wait for get target from WorkspaceMembership where id is id and workspaceId is selectedWorkspace ordered by id ascending limited to 1 using db
+  if length(targets) == 0 { return err("workspace_member_not_found") }
+  let target = match first(targets) {
+    some(member) => member,
+    none => WorkspaceMembership { workspaceId: 0, authId: "", role: WorkspaceRole.Member() }
+  }
+  if target.role == WorkspaceRole.Owner() { return err("workspace_owner_role_protected") }
+  let saved = WorkspaceMembership { workspaceId: selectedWorkspace, authId: target.authId, role: body.role }
+  let changed = await databaseUpdateWhere(db, "WorkspaceMembership", id, saved, "workspaceId", selectedWorkspace)
+  if changed > 0 { return ok(changed) }
+  return err("workspace_member_not_found")
+}
+
+async function listWorkspaces(db capability<database>) -> task<list<Workspace>> {
+  return wait for get workspaces from Workspace ordered by name ascending limited to 100 using db
+}
+
+api /tasks from Task requiring authenticated
+api /settings from UserSettings requiring authenticated
+
+function supportedTimeZone(value text) -> boolean {
+  if value == "UTC" { return true }
+  if value == "Europe/Sofia" { return true }
+  if value == "America/New_York" { return true }
+  return false
+}
+
+async function listUserSettings(principal Principal, db capability<database>) -> task<list<UserSettings>> {
+  let authId = principal.id
+  return wait for get settings from UserSettings where ownerAuthId is authId ordered by id ascending limited to 1 using db
+}
+
+async function createUserSettings(principal Principal, db capability<database>, body UserSettings) -> task<result<integer,text>> {
+  if supportedTimeZone(body.timeZone) == false { return err("invalid_timezone") }
+  let authId = principal.id
+  let existing = wait for get settings from UserSettings where ownerAuthId is authId ordered by id ascending limited to 1 using db
+  if length(existing) > 0 { return err("settings_already_exist") }
+  let saved = UserSettings { ownerAuthId: principal.id, displayName: body.displayName, timeZone: body.timeZone, weeklyDigest: body.weeklyDigest }
+  let id = wait for add saved to UserSettings using db
+  return ok(id)
+}
+
+async function readUserSettings(principal Principal, db capability<database>, id integer) -> task<result<UserSettings,text>> {
+  let rows = wait for get settings from UserSettings where id is id using db
+  return match first(rows) {
+    some(setting) => settingIfOwned(setting, principal.id),
+    none => missingUserSettings()
+  }
+}
+
+function missingUserSettings() -> result<UserSettings,text> { return err("not_found") }
+
+function settingIfOwned(setting UserSettings, ownerAuthId text) -> result<UserSettings,text> {
+  let savedOwner = match setting.ownerAuthId {
+    some(owner) => owner,
+    none => ""
+  }
+  if savedOwner == ownerAuthId { return ok(setting) }
+  return err("not_found")
+}
+
+async function updateUserSettings(principal Principal, db capability<database>, id integer, body UserSettings) -> task<result<integer,text>> {
+  if supportedTimeZone(body.timeZone) == false { return err("invalid_timezone") }
+  let saved = UserSettings { ownerAuthId: principal.id, displayName: body.displayName, timeZone: body.timeZone, weeklyDigest: body.weeklyDigest }
+  let changes = await databaseUpdateWhere(db, "UserSettings", id, saved, "ownerAuthId", principal.id)
+  if changes == 0 { return ok(0) }
+  return ok(changes)
+}
+
+async function deleteUserSettings(principal Principal, db capability<database>, id integer) -> task<integer> {
+  let rows = wait for get settings from UserSettings where id is id using db
+  if settingsBelongTo(rows, principal.id) { return wait for delete id from UserSettings using db }
+  return 0
+}
+
+function settingsBelongTo(rows list<UserSettings>, ownerAuthId text) -> boolean {
+  return match first(rows) {
+    some(setting) => match setting.ownerAuthId {
+      some(owner) => owner == ownerAuthId,
+      none => false
+    },
+    none => false
+  }
+}
+
+async function listTasks(principal Principal, db capability<database>) -> task<list<Task>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if canManageWorkspace(memberships, selectedWorkspace) {
+    return wait for get tasks from Task where workspaceId is selectedWorkspace ordered by id ascending limited to 50 using db
+  }
+  return wait for get tasks from Task where workspaceId is selectedWorkspace and ownerAuthId is authId ordered by id ascending limited to 50 using db
+}
+
+async function listTasksAfter(principal Principal, db capability<database>, after integer) -> task<list<Task>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if canManageWorkspace(memberships, selectedWorkspace) {
+    return wait for get tasks from Task where workspaceId is selectedWorkspace and id is greater than after ordered by id ascending limited to 50 using db
+  }
+  return wait for get tasks from Task where workspaceId is selectedWorkspace and ownerAuthId is authId and id is greater than after ordered by id ascending limited to 50 using db
+}
+
+function taskVisibleTo(task Task, memberships list<WorkspaceMembership>, authId text, selectedWorkspace integer) -> boolean {
+  let workspaceId = match task.workspaceId {
+    some(value) => value,
+    none => 0
+  }
+  return workspaceId == selectedWorkspace and (canManageWorkspace(memberships, workspaceId) or taskOwnedByUser(task, authId))
+}
+
+function taskOwnedByUser(task Task, authId text) -> boolean {
+  return match task.ownerAuthId {
+    some(owner) => owner == authId,
+    none => false
+  }
+}
+
+async function readTask(principal Principal, db capability<database>, id integer) -> task<result<Task,text>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  let rows = wait for get tasks from Task where id is id using db
+  return match first(rows) {
+    some(task) => taskIfVisible(task, memberships, authId, selectedWorkspace),
+    none => missingTask()
+  }
+}
+
+function taskIfVisible(task Task, memberships list<WorkspaceMembership>, authId text, selectedWorkspace integer) -> result<Task,text> {
+  if taskVisibleTo(task, memberships, authId, selectedWorkspace) { return ok(task) }
+  return err("not_found")
+}
+
+function missingTask() -> result<Task,text> { return err("not_found") }
+
+function taskOwnedBy(task Task, ownerAuthId text) -> result<Task,text> {
+  let isOwned = match task.ownerAuthId {
+    some(savedOwner) => savedOwner == ownerAuthId,
+    none => false
+  }
+  if isOwned { return ok(task) }
+  return err("not_found")
+}
+
+async function createTask(principal Principal, db capability<database>, body Task) -> task<integer> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if selectedWorkspace == 0 { return 0 }
+  let ownedTask = Task { title: body.title, status: body.status, priority: body.priority, ownerAuthId: principal.id, workspaceId: selectedWorkspace }
+  return wait for add ownedTask to Task using db
+}
+
+async function updateTask(principal Principal, db capability<database>, id integer, body Task) -> task<integer> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if selectedWorkspace == 0 { return 0 }
+  if canManageWorkspace(memberships, selectedWorkspace) { return await updateTaskPreservingOwner(db, id, body, selectedWorkspace) }
+  let saved = Task { title: body.title, status: body.status, priority: body.priority, ownerAuthId: principal.id, workspaceId: selectedWorkspace }
+  return await databaseUpdateWhere(db, "Task", id, saved, "ownerAuthId", principal.id, "workspaceId", selectedWorkspace)
+}
+
+async function updateTaskPreservingOwner(db capability<database>, id integer, body Task, workspaceId integer) -> task<integer> {
+  let rows = wait for get tasks from Task where id is id using db
+  let owner = match first(rows) {
+    some(task) => taskOwner(task),
+    none => ""
+  }
+  if owner == "" { return 0 }
+  let saved = Task { title: body.title, status: body.status, priority: body.priority, ownerAuthId: owner, workspaceId: workspaceId }
+  return await databaseUpdateWhere(db, "Task", id, saved, "ownerAuthId", owner, "workspaceId", workspaceId)
+}
+
+function taskOwner(task Task) -> text {
+  return match task.ownerAuthId {
+    some(owner) => owner,
+    none => ""
+  }
+}
+
+async function zeroTaskChanges() -> task<integer> { return 0 }
+
+async function deleteIfOwned(db capability<database>, id integer, savedOwner text, ownerAuthId text) -> task<integer> {
+  if savedOwner == ownerAuthId { return wait for delete id from Task using db }
+  return 0
+}
+
+async function deleteTask(principal Principal, db capability<database>, id integer) -> task<integer> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  if selectedWorkspace == 0 { return 0 }
+  if canManageWorkspace(memberships, selectedWorkspace) { return await databaseDeleteWhere(db, "Task", id, "workspaceId", selectedWorkspace) }
+  return await databaseDeleteWhere(db, "Task", id, "ownerAuthId", principal.id, "workspaceId", selectedWorkspace)
+}
+
+async function dashboardMetrics(principal Principal, db capability<database>) -> task<list<DashboardMetric>> {
+  let authId = principal.id
+  let memberships = wait for get access from WorkspaceMembership where authId is authId ordered by workspaceId ascending limited to 100 using db
+  let selectedWorkspace = await resolveSelectedWorkspace(db, authId, memberships)
+  let selected = wait for get workspaces from Workspace where workspaceId is selectedWorkspace using db
+  let workspaceName = match first(selected) {
+    some(workspace) => workspace.name,
+    none => "No workspace selected"
+  }
+  let tasksTracked = await databaseCountWhere(db, "Task", "workspaceId", "=", selectedWorkspace)
+  let activeTasks = await databaseCountWhere(db, "Task", "workspaceId", "=", selectedWorkspace, "status", "=", TaskStatus.Active())
+  let doneTasks = await databaseCountWhere(db, "Task", "workspaceId", "=", selectedWorkspace, "status", "=", TaskStatus.Done())
+  return [
+    DashboardMetric { name: "Tasks tracked", value: tasksTracked, workspaceName: workspaceName },
+    DashboardMetric { name: "In progress", value: activeTasks, workspaceName: workspaceName },
+    DashboardMetric { name: "Completed", value: doneTasks, workspaceName: workspaceName }
+  ]
+}
+
+serve GET /tasks requiring authenticated and database with listTasks
+http GET /tasks/pages/:after requires authenticated, database -> listTasksAfter
+serve POST /tasks requiring authenticated and database with createTask
+http GET /tasks/:id returns 200 errors 404 requires authenticated, database -> readTask
+serve PUT /tasks/:id requiring authenticated and database with updateTask
+serve DELETE /tasks/:id requiring authenticated and database with deleteTask
+
+serve GET /settings requiring authenticated and database with listUserSettings
+serve POST /settings requiring authenticated and database returns 201 errors 400 409 with createUserSettings
+http GET /settings/:id returns 200 errors 404 requires authenticated, database -> readUserSettings
+serve PUT /settings/:id requiring authenticated and database returns 200 errors 400 404 with updateUserSettings
+serve DELETE /settings/:id requiring authenticated and database with deleteUserSettings
+serve GET /workspaces requiring authenticated and database with listMyWorkspaces
+serve POST /workspace-selection requiring authenticated and database returns 200 errors 403 with chooseWorkspace
+http GET /workspaces/:workspaceId/members returns 200 errors 403 requires authenticated, database -> listWorkspaceMembers
+serve GET /workspace-members requiring authenticated and database with listSelectedWorkspaceMembers
+http GET /workspace-members/:id returns 200 errors 403 404 requires authenticated, database -> readSelectedWorkspaceMember
+http PATCH /workspace-members/:id returns 200 errors 403 requires authenticated, database -> updateSelectedWorkspaceMember
+serve GET /workspace-directory requiring role admin and database with listWorkspaces
+
+http GET /dashboard/metrics requires authenticated, database -> dashboardMetrics
+
+style token SurfaceBase {
+  spacing is comfortable
+  corners is rounded
+  focus is ringed
+  disabled is guarded
+  transition duration is 150
+  transition property is background
+  transition easing is ease
+}
+
+style token Accent accent
+
+style named Shell {
+  composes SurfaceBase, Accent
+  layout is column
+  alignment is stretch
+  padding is 40
+  margin is 24
+  gap is 18
+  theme is calm
+  text color is black
+  surface is elevated
+  border is subtle
+  shadow is soft
+  corners is rounded
+  focus is ringed
+  disabled is guarded
+  when hovered { background is dark blue }
+  on small screens { padding is 20 }
+  on small screens { margin is 12 }
+  on small screens { gap is 12 }
+}
+
+style named Badge {
+  layout is row
+  alignment is center
+  padding is 8
+  margin is 8
+  background is blue
+  text color is white
+  corners is pill
+  typography is compact
+}
+
+style named Hero {
+  layout is column
+  alignment is start
+  padding is 34
+  margin is 8
+  background is dark blue
+  text color is white
+  border is strong
+  shadow is strong
+  corners is rounded
+  typography is readable
+  font size is 24
+  font weight is bold
+  line height is 1.4
+  on small screens { padding is 22 }
+  on small screens { font size is 20 }
+}
+
+style named Note {
+  layout is column
+  alignment is start
+  padding is 12
+  margin is 8
+  text color is black
+  typography is compact
+}
+
+style named MetricBlue {
+  layout is column
+  alignment is start
+  padding is 18
+  margin is 4
+  background is neutral
+  text color is black
+  border is subtle
+  shadow is soft
+  corners is rounded
+}
+
+style named CommandPanel {
+  layout is column
+  alignment is start
+  padding is 22
+  margin is 8
+  background is neutral
+  color is blue
+  border is subtle
+  shadow is soft
+  corners is rounded
+  typography is readable
+}
+
+component Eyebrow uses style Badge {
+  text "PERSONAL WORKSPACE"
+}
+
+component HeroBanner uses style Hero {
+  text "PulseBoard"
+  text "Your command center for focused work."
+  text "Plan clearly. Move quickly. Finish well."
+}
+
+component QuickNote uses style Note {
+  text "LIVE WORKSPACE / LOCAL SQLITE"
+}
+
+component MetricCard uses style MetricBlue {
+  show metric workspaceName
+  show metric name
+  show metric value
+}
+
+component CommandPanel uses style CommandPanel {
+  text "Your next move"
+  text "Add a task below, then keep the list lean and actionable."
+}
+
+style named QuickLinks {
+  layout is row
+  alignment is center
+  gap is 12
+  margin is 8
+}
+
+component QuickLinks uses style QuickLinks {
+  link "Personal settings" to Settings
+  link "Workspace access" to Workspaces
+}
+
+component SettingsIntro uses style CommandPanel {
+  text "Personal settings"
+  text "Choose how your workspace appears and when you receive updates."
+}
+
+component WorkspaceCard uses style MetricBlue {
+  show membership workspaceId
+  text "Workspace access"
+  show membership workspaceName
+  show membership role
+  show membership selected
+}
+
+component WorkspacePicker form {
+  text "Choose a workspace, then return to the dashboard to see its tasks and metrics."
+  input workspaceId integer label "Workspace ID" help "Enter an ID shown in the workspace list."
+  button "Use this workspace" on chooseWorkspace
+}
+
+component WorkspaceRosterRow {
+  show membership authId
+  show membership role
+  link "Change role" to WorkspaceMemberRole with id membership.id
+}
+
+component WorkspaceMemberSummary {
+  show member authId
+  show member role
+}
+
+component WorkspaceRoleForm form {
+  show membership authId
+  show membership role
+  input id integer label "Membership ID" readonly
+  input role WorkspaceRole label "New role"
+  button "Save role" on saveRole
+}
+
+component WorkspaceRosterHelp uses style Note {
+  text "Workspace owners can change existing member roles. Managers can view this roster."
+}
+
+page Dashboard {
+  state metrics list<DashboardMetric> from GET "/dashboard/metrics"
+  state tasks list<Task> from GET "/tasks" next GET "/tasks/pages/:after" cursor by id
+  use style Shell
+  use Eyebrow
+  use HeroBanner
+  use QuickNote
+  use CommandPanel
+  use QuickLinks
+  for each metric in metrics show MetricCard empty "No metrics available."
+  crud Task excluding ownerAuthId, workspaceId
+}
+
+page Workspaces {
+  state memberships list<WorkspaceAccess> from GET "/workspaces"
+  event chooseWorkspace(workspaceId integer) sends POST "/workspace-selection"
+  use style Shell
+  link "Back to dashboard" to Dashboard
+  link "Workspace members" to WorkspaceMembers
+  use WorkspacePicker
+  for each membership in memberships show WorkspaceCard empty "No workspace memberships found."
+}
+
+page WorkspaceMembers {
+  state members list<WorkspaceMembership> from GET "/workspace-members"
+  use style Shell
+  link "Back to workspaces" to Workspaces
+  use WorkspaceRosterHelp
+  for each membership in members show WorkspaceRosterRow empty "No members found."
+}
+
+page WorkspaceMemberRole at "/workspace-members/:id" {
+  state member list<WorkspaceMembership> from GET "/workspace-members/:id" for each member in member show WorkspaceMemberSummary empty "Member not found or roster access unavailable."
+  event saveRole(id integer, role WorkspaceRole) sends PATCH "/workspace-members/:id"
+  use style Shell
+  link "Back to workspace members" to WorkspaceMembers
+  use WorkspaceRoleForm
+}
+
+page Settings {
+  use style Shell
+  use SettingsIntro
+  crud UserSettings excluding ownerAuthId
+}

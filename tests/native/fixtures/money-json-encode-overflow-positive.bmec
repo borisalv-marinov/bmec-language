@@ -1,0 +1,6 @@
+function wire(value money) -> text { return encodeJson(value) }
+
+function main() -> integer {
+  let ignored = wire(92233720368547758.08)
+  return 42
+}

@@ -1,0 +1,19 @@
+import {describe,it,expect} from 'vitest';
+import fc from 'fast-check';
+import {compile} from '../src/compiler.js';
+import {PIPE_NONE,executeValue,NoneValue} from '../src/core/interpreter.js';
+import {validateSerializedIR} from '../src/ir/validate.js';
+
+const checked=(source:string)=>{const r=compile(source);expect(r.diagnostics).toEqual([]);return r.ir!};
+
+describe('PIPE core data model',()=>{
+ it('keeps none explicit and narrows optionals',()=>{const ir=checked('function display(name text?) -> text { if name != none { return name } else { return "Unknown" } }');expect(executeValue(ir.functions,'display',[PIPE_NONE])).toBe('Unknown');expect(executeValue(ir.functions,'display',['Ada'])).toBe('Ada')});
+ it('rejects none in non-optional positions and truthiness',()=>{expect(compile('function f() -> text { return none }').diagnostics.map(x=>x.code)).toContain('PIPE-FUNC-006');expect(compile('function f(x text?) -> text { if x { return "x" } else { return "n" } }').diagnostics.map(x=>x.code)).toContain('PIPE-TYPE-003')});
+ it('types homogeneous and contextual empty lists',()=>{const ir=checked('function f() -> list<integer> { return [] }');expect(ir.functions[0].returnType).toBe('list<integer>');expect(compile('function f() -> list<integer> { return [1, true] }').diagnostics.map(x=>x.code)).toContain('PIPE-TYPE-008')});
+ it('returns none for invalid list indexes',()=>{const ir=checked('function at(xs list<integer>, i integer) -> integer? { return xs[i] }');expect(executeValue(ir.functions,'at',[[4,5],0])).toBe(4n);expect(executeValue(ir.functions,'at',[[4,5],-1])).toBeInstanceOf(NoneValue);expect(executeValue(ir.functions,'at',[[4,5],99])).toBeInstanceOf(NoneValue)});
+ it('supports records and field access',()=>{const ir=checked('type User { name text nickname text? } function nameOf(user User) -> text { if user.nickname != none { return user.nickname } else { return user.name } }');expect(executeValue(ir.functions,'nameOf',[{name:'Ada',nickname:'A'}])).toBe('A');expect(executeValue(ir.functions,'nameOf',[{name:'Ada',nickname:PIPE_NONE}])).toBe('Ada');expect(ir.records[0].name).toBe('User')});
+ it('does not treat a loop as a guaranteed return',()=>{const r=compile('function first(xs list<integer>) -> integer { for x in xs { return x } }');expect(r.diagnostics.map(x=>x.code)).toContain('PIPE-FUNC-004');const ir=checked('function positive(xs list<integer>) -> boolean { for x in xs { if x <= 0 { return false } } return true }');expect(executeValue(ir.functions,'positive',[[]])).toBe(true);expect(executeValue(ir.functions,'positive',[[1,-1]])).toBe(false)});
+ it('checks generated list length and safe indexing properties',()=>{const ir=checked('function at(xs list<integer>, i integer) -> integer? { return xs[i] }');fc.assert(fc.property(fc.array(fc.integer({min:-100,max:100}),{maxLength:20}),fc.integer({min:-25,max:25}),(xs,i)=>{const value=executeValue(ir.functions,'at',[xs,i]);return i>=0&&i<xs.length?value===BigInt(xs[i]):value instanceof NoneValue}),{numRuns:100,seed:20260915})});
+  it('validates the serialized IR boundary',()=>{const ir=checked('type Point { x integer } function f() -> Point { return Point { x: 1 } }');expect(validateSerializedIR(JSON.parse(JSON.stringify(ir))).valid).toBe(true);expect(validateSerializedIR({version:'0.1-alpha',app:{}}).valid).toBe(false)});
+  it('rejects malformed function bodies and inconsistent TypeRefs',()=>{const ir=checked('function f(x integer) -> integer { return x }');const malformed=JSON.parse(JSON.stringify(ir));malformed.functions[0].body[0].value.typeRef={kind:'primitive',name:'text'};expect(validateSerializedIR(malformed).valid).toBe(false);const nested=JSON.parse(JSON.stringify(ir));nested.functions[0].body=[{kind:'if',condition:{kind:'literal',typeRef:{kind:'primitive',name:'boolean'},type:'boolean',value:true},thenBody:[{kind:'wat'}]}];expect(validateSerializedIR(nested).valid).toBe(false)});
+});

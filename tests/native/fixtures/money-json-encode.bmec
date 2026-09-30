@@ -1,0 +1,9 @@
+function wire(value money) -> text { return encodeJson(value) }
+
+function main() -> boolean {
+  return wire(12.34) == "{\"version\":1,\"kind\":\"money\",\"minor\":\"1234\",\"scale\":2}" and
+    wire(-0.05) == "{\"version\":1,\"kind\":\"money\",\"minor\":\"-5\",\"scale\":2}" and
+    wire(0.00) == "{\"version\":1,\"kind\":\"money\",\"minor\":\"0\",\"scale\":2}" and
+    wire(92233720368547758.07) == "{\"version\":1,\"kind\":\"money\",\"minor\":\"9223372036854775807\",\"scale\":2}" and
+    wire(-92233720368547758.08) == "{\"version\":1,\"kind\":\"money\",\"minor\":\"-9223372036854775808\",\"scale\":2}"
+}

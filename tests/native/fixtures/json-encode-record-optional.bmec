@@ -1,0 +1,18 @@
+type Sample { count integer? ratio number? enabled boolean? label text? }
+
+function encoded() -> text {
+  let count = some(42)
+  let ratio number? = none
+  let enabled = some(true)
+  let label = some("optional text")
+  let sample = Sample { count: count, ratio: ratio, enabled: enabled, label: label }
+  return encodeJson(sample)
+}
+
+function main() -> boolean {
+  let wire = encoded()
+  return textContains(wire, "\"count\":{\"version\":1,\"kind\":\"integer\",\"value\":\"42\"}") and
+    textContains(wire, "\"ratio\":{\"version\":1,\"kind\":\"none\"}") and
+    textContains(wire, "\"enabled\":{\"version\":1,\"kind\":\"boolean\",\"value\":true}") and
+    textContains(wire, "\"label\":{\"version\":1,\"kind\":\"text\",\"value\":\"optional text\"}")
+}

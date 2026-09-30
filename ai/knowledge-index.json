@@ -1,0 +1,3670 @@
+{
+  "schemaVersion": "bmec.knowledge-index.v1",
+  "packageVersion": "0.9.1-beta.1",
+  "languageVersion": "0.1",
+  "compatibility": "0.1-alpha",
+  "symbols": [
+    {
+      "id": "DB-COUNT-001",
+      "name": "database-side counts",
+      "purpose": "Count model rows in the database, optionally matching one or two typed field comparisons.",
+      "syntax": "await databaseCount(db, \"Model\"); await databaseCountWhere(db, \"Model\", \"field\", \"=\", value); await databaseCountWhere(db, \"Model\", \"field\", \"=\", value, \"otherField\", \"=\", otherValue)",
+      "types": [
+        "capability<database>",
+        "task<integer>",
+        "one or two typed comparison values"
+      ],
+      "constraints": [
+        "The count and optional predicates execute as SQL COUNT(*), without loading model rows into BMEC memory.",
+        "The model name and each filtered field are checked against the declared database schema.",
+        "Each comparison value must match its field TypeRef and is bound as a query parameter.",
+        "When two predicates are supplied, both must match (SQL AND)."
+      ],
+      "errors": [
+        "Unknown models/fields, mismatched values, invalid operators, and missing capabilities are rejected."
+      ],
+      "example": "enum Status { Open Done } model Task { ownerAuthId text required status Status required } async function active(db capability<database>, owner text) -> task<integer> { return await databaseCountWhere(db, \"Task\", \"ownerAuthId\", \"=\", owner, \"status\", \"=\", Status.Open()) }",
+      "related": [
+        "typed database read",
+        "model declaration",
+        "database capability"
+      ],
+      "properties": [
+        "count",
+        "where"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-CURSOR-001",
+      "name": "server-side keyset pagination",
+      "purpose": "Page through a large model result by a stable cursor using a database predicate, order, and fixed row limit.",
+      "syntax": "wait for get items from Model where uniqueField is greater than after ordered by uniqueField ascending limited to 50 using db",
+      "types": [
+        "typed cursor value matching the ordered field",
+        "bounded page of list<Model>"
+      ],
+      "constraints": [
+        "The cursor comparison, ordering, and limit execute in the database; they do not filter a list already loaded into the browser.",
+        "The ordered field must be unique for this single-field query; composite cursor support is not provided by this form.",
+        "A typed HTTP handler can receive the cursor as a path or query parameter.",
+        "Independent page requests do not share a database snapshot; concurrent writes may change traversal.",
+        "This is keyset pagination; it does not provide arbitrary offset or composite cursor pagination.",
+        "Use the filtered-read query form to combine a cursor comparison with owner/workspace filters."
+      ],
+      "errors": [
+        "Unknown fields, mismatched cursor types, invalid directions, and invalid limits are rejected."
+      ],
+      "example": "model Record { name text required unique } async function nextPage(db capability<database>, after text) -> task<list<Record>> { return wait for get records from Record where name is greater than after ordered by name ascending limited to 50 using db } http GET /records/page/:after requires database -> nextPage",
+      "related": [
+        "filtered and ordered database read",
+        "typed route declaration",
+        "database capability"
+      ],
+      "properties": [
+        "cursor",
+        "where",
+        "ordered by",
+        "limited to"
+      ],
+      "events": [],
+      "effects": [
+        "database",
+        "http"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-DECREMENT-001",
+      "name": "conditional integer decrement",
+      "purpose": "Atomically decrease a typed integer field only when the row matches a typed key and enough value remains.",
+      "syntax": "await databaseDecrementWhere(db, \"Model\", \"quantityField\", positiveAmount, \"keyField\", keyValue)",
+      "types": [
+        "capability<database>",
+        "integer field and positive integer amount",
+        "typed key field/value",
+        "task<integer> affected-row count"
+      ],
+      "constraints": [
+        "The model and field names are checked against the declared schema; the field must be integer and the amount must be positive. The generated integer model id is also a valid key field.",
+        "One parameterized UPDATE subtracts the amount only when the key matches and the field is at least the requested amount.",
+        "The operation affects zero rows when the key is missing or the amount is unavailable; it never writes a negative value.",
+        "Use the operation inside a transaction when reserving several rows so an unavailable later item rolls back earlier decrements."
+      ],
+      "errors": [
+        "Unknown models/fields, mismatched key values, non-integer fields, non-positive amounts, and missing capabilities are rejected."
+      ],
+      "example": "model Product { sku text required unique stock integer required } async function reserve(db capability<database>, sku text, quantity integer) -> task<integer> { return await databaseDecrementWhere(db, \"Product\", \"stock\", quantity, \"sku\", sku) }",
+      "related": [
+        "database transaction block",
+        "typed database mutations",
+        "capability"
+      ],
+      "properties": [
+        "field",
+        "amount",
+        "key"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-INDEX-001",
+      "name": "declared database index",
+      "purpose": "Declare a safe additive composite index for a persistent model.",
+      "syntax": "index name on Model by field, field",
+      "types": [
+        "model name",
+        "one or more model fields"
+      ],
+      "constraints": [
+        "Every indexed field must exist on the declared model.",
+        "SQLite startup migrations and transactional PostgreSQL startup migrations create declared indexes.",
+        "Declared indexes are safe additive migrations; a changed definition under the same name fails migration. Add a new index name and review old-index cleanup separately."
+      ],
+      "errors": [
+        "Unknown models, unknown fields, duplicate index names, and invalid index declarations are rejected."
+      ],
+      "example": "model Record { region text required name text required }\nindex record_region_name on Record by region, name",
+      "related": [
+        "model declaration",
+        "safe additive migration",
+        "keyset pagination"
+      ],
+      "properties": [
+        "name",
+        "model",
+        "fields"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-INSERT-ABSENT-001",
+      "name": "unique-key insert if absent",
+      "purpose": "Insert a typed model only if its declared unique key is unused, for replay-safe database workflows.",
+      "syntax": "await databaseInsertIdIfAbsent(db, \"Model\", value, \"uniqueField\")",
+      "types": [
+        "model value",
+        "capability<database>",
+        "schema-declared unique field",
+        "task<integer?> generated ID or none when already present"
+      ],
+      "constraints": [
+        "The conflict field must be a declared single-field unique or primary-key field.",
+        "SQLite and PostgreSQL use one parameterized INSERT ... ON CONFLICT (field) DO NOTHING RETURNING id statement.",
+        "A returned ID means this call inserted the row; none means the unique key already existed.",
+        "Use inside a transaction and read the existing row to verify the request fingerprint before replaying a result."
+      ],
+      "errors": [
+        "Unknown models/fields, non-unique conflict fields, invalid payloads, and missing capability are rejected."
+      ],
+      "example": "model Checkout { key text required unique total integer required } async function create(db capability<database>, checkout Checkout) -> task<integer?> { return await databaseInsertIdIfAbsent(db, \"Checkout\", checkout, \"key\") }",
+      "related": [
+        "typed insert with generated ID",
+        "database transaction block",
+        "unique field"
+      ],
+      "properties": [
+        "insert",
+        "unique key"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-INSERT-ID-001",
+      "name": "typed insert with generated row ID",
+      "purpose": "Insert a typed model and return its generated integer primary key for related writes such as audit records.",
+      "syntax": "await databaseInsertId(db, \"Model\", value)",
+      "types": [
+        "model value",
+        "capability<database>",
+        "task<integer> generated row ID"
+      ],
+      "constraints": [
+        "Model and payload types are checked before adapter execution.",
+        "SQLite reads the inserted row ID from the driver; PostgreSQL uses INSERT ... RETURNING \"id\".",
+        "The database schema must generate or accept an integer id for the insert.",
+        "The existing databaseInsert operation continues to return its affected-row count."
+      ],
+      "errors": [
+        "Unknown models, invalid payloads, missing capability, and unavailable generated IDs produce errors."
+      ],
+      "example": "model Job { title text required } async function create(db capability<database>, job Job) -> task<integer> { return await databaseInsertId(db, \"Job\", job) }",
+      "related": [
+        "typed database mutations",
+        "model declaration",
+        "capability",
+        "audit record"
+      ],
+      "properties": [
+        "insert",
+        "generated ID"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-MUTATION-001",
+      "name": "typed database mutations",
+      "purpose": "Insert, update, or delete rows using values with the target model type and typed keys.",
+      "syntax": "wait for add body to Model using db; wait for update body in Model with id using db; wait for update body in Model with id where ownerId is principalId using db; wait for delete id from Model using db; await databaseDeleteWhere(db, \"Model\", id, \"ownerId\", owner); await databaseDeleteWhere(db, \"Model\", id, \"ownerId\", owner, \"workspaceId\", workspace); await databaseUpdateUniqueWhere(db, \"Model\", uniqueValue, \"uniqueField\", payload)",
+      "types": [
+        "model payload",
+        "model key",
+        "capability<database>",
+        "task<integer> affected-row count"
+      ],
+      "constraints": [
+        "Payload fields and key types are validated against the model.",
+        "An insert value must have the target model type; map a narrower request DTO to a typed model value and fill server-owned fields before inserting.",
+        "Database mutations require explicit capability authority.",
+        "A guarded update combines its primary key and one or two equality guards into one database operation. Guard fields are held at their guard values during the update, so the operation cannot transfer a row out of the guarded scope. A guarded delete uses the same atomic equality predicates.",
+        "Required fields reject absent values and empty required text at insertion. Model-typed fields declare relationships; an integer field alone does not.",
+        "Adapter parameters are bound values, not interpolated SQL."
+      ],
+      "errors": [
+        "Unknown models, invalid payload fields, key type mismatches, and missing capabilities are rejected."
+      ],
+      "example": "app Store model Item { name text required } async function add(db capability<database>, body Item) -> task<integer> { return wait for add body to Item using db }",
+      "related": [
+        "model declaration",
+        "typed database read",
+        "capability",
+        "transaction"
+      ],
+      "properties": [
+        "add",
+        "update",
+        "delete",
+        "key"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-QUERY-001",
+      "name": "filtered and ordered database read",
+      "purpose": "Filter and order a model query, with an optional bounded result count. Predicate values are literals, parameters, or simple local identifiers; bind a member expression to a typed local before querying.",
+      "syntax": "wait for get items from Model [where predicate [and|or predicate...]] [ordered by field ascending|descending] [limited to N] using db",
+      "types": [
+        "typed comparison or literal text-contains predicate",
+        "orderBy field",
+        "non-negative integer limit"
+      ],
+      "constraints": [
+        "Comparison fields and values must match the declared model TypeRef.",
+        "A predicate value must be a literal, parameter, or simple local identifier; bind member/property expressions to a typed local before querying.",
+        "Queries support mixed and/or connectors with parentheses; and binds more tightly than or. Use parentheses to express another grouping.",
+        "contains matches a case-sensitive literal substring on text fields only; percent and underscore have no wildcard meaning and the value remains a bound parameter.",
+        "The runtime uses parameterized adapter operations.",
+        "Limit must be a non-negative integer."
+      ],
+      "errors": [
+        "Unknown fields, mismatched values, invalid directions, invalid limits, and malformed parenthesized groups are rejected."
+      ],
+      "example": "app CommunityIssues model Issue { title text required description text required } async function search(db capability<database>, term text, after integer) -> task<list<Issue>> { return wait for get issues from Issue where (title contains term or description contains term) and id is greater than after ordered by id ascending limited to 50 using db }",
+      "related": [
+        "typed database read",
+        "model declaration",
+        "database capability"
+      ],
+      "properties": [
+        "where",
+        "and",
+        "or",
+        "contains",
+        "ordered by",
+        "ascending",
+        "descending",
+        "limited to"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-SELECT-001",
+      "name": "typed database read",
+      "purpose": "Read typed model rows through the explicit database capability.",
+      "syntax": "wait for get items from Model using db",
+      "types": [
+        "model",
+        "list<Model>",
+        "capability<database>",
+        "task<list<Model>>"
+      ],
+      "constraints": [
+        "Model identity is canonical and checked before adapter execution.",
+        "Database access requires explicit capability authority.",
+        "Results preserve typed model fields."
+      ],
+      "errors": [
+        "Unknown models/fields, invalid capability use, and incompatible result types are rejected."
+      ],
+      "example": "app Store model Item { name text required } async function list(db capability<database>) -> task<list<Item>> { return wait for get items from Item using db }",
+      "related": [
+        "model declaration",
+        "database filter/order/limit",
+        "capability",
+        "async function"
+      ],
+      "properties": [
+        "projection",
+        "model"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "DB-TRANSACTION-001",
+      "name": "database transaction block",
+      "purpose": "Run multiple awaited database operations atomically through one transaction-scoped adapter.",
+      "syntax": "transaction using db { statements }",
+      "types": [
+        "capability<database>",
+        "async function body"
+      ],
+      "constraints": [
+        "The block is available only in an async function and requires a database capability.",
+        "Database operations in the block use one transaction-scoped adapter; SQLite begins with BEGIN IMMEDIATE, serializes operations on the shared client and competing writers, and PostgreSQL keeps one leased client.",
+        "Normal completion commits, including a returned Result error value created outside the block. A thrown failure rolls back.",
+        "A return, break, or continue that leaves the block rolls back first, then propagates its control flow; this lets a typed Result error abort a multi-write operation.",
+        "Nested transactions are rejected.",
+        "Keep external side effects outside the block because database rollback cannot undo them."
+      ],
+      "errors": [
+        "Synchronous use, missing database capability, and nesting are compile errors.",
+        "A thrown database failure or early control-flow exit rolls back the block."
+      ],
+      "example": "model Item { name text required }\nasync function save(db capability<database>, item Item) -> task<integer> { transaction using db { let inserted = await add item to Item using db } return 1 }",
+      "related": [
+        "async function",
+        "typed database mutations",
+        "capability",
+        "Result"
+      ],
+      "properties": [
+        "commit",
+        "rollback",
+        "isolation"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "HTTP-RESULT-STATUS-001",
+      "name": "typed result HTTP error status",
+      "purpose": "Send a declared HTTP error status when a source handler returns a typed Result error.",
+      "syntax": "serve POST /jobs requiring role admin and database returns 200 errors 400 with create",
+      "types": [
+        "source handler returning task<result<T,E>>",
+        "success status",
+        "one or more declared 4xx/5xx error statuses"
+      ],
+      "constraints": [
+        "An ok result keeps the route success status.",
+        "An err result uses the first status in the route error-status list.",
+        "The JSON response body remains the typed Result value.",
+        "If the route declares no error status, an err result retains the success status for compatibility.",
+        "Controlled-English routes put the status clause before or after requiring and before with.",
+        "Canonical http routes put the status clause before requires and use commas between authorization policy and capabilities."
+      ],
+      "errors": [
+        "Error statuses must be distinct integers from 400 through 599 and must differ from the success status."
+      ],
+      "example": "async function create(db capability<database>) -> task<result<integer,text>> { return err(\"invalid_input\") } serve POST /jobs requiring role admin and database returns 200 errors 400 with create",
+      "related": [
+        "typed route declaration",
+        "Result",
+        "HTTP request/response",
+        "database mutation"
+      ],
+      "properties": [
+        "success status",
+        "error statuses"
+      ],
+      "events": [],
+      "effects": [
+        "http"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "HTTP-ROUTE-001",
+      "name": "typed route declaration",
+      "purpose": "Bind a typed handler to an HTTP method and path with explicit authorization and capability requirements.",
+      "syntax": "serve METHOD /path requiring policy and capability with handler",
+      "types": [
+        "HTTP method",
+        "path parameters and query fields",
+        "typed request/response",
+        "capability set"
+      ],
+      "constraints": [
+        "Route identities and handler contracts are validated.",
+        "Authorization and capabilities are checked before handlers run. Exact method/path alternatives are allowed only with distinct role policies and an identical request/response contract; the first role policy that allows the request selects the handler. Routes that declare the time capability receive it for server-side timestamps.",
+        "Server-only credentials and session internals are not projected to browser artifacts. A handler parameter using a declared record type named Principal receives verified session identity and attributes for authorization checks; the handler runs only after the declared route policy passes. The parameter is never populated from path, query, header, or body input. Routes requesting Principal must declare an authorization policy."
+      ],
+      "errors": [
+        "Invalid methods/paths, handler contracts, authorization policies, and capability declarations are rejected."
+      ],
+      "example": "app Health\nfunction ready() -> boolean { return true }\nserve GET /health requiring authenticated with ready",
+      "related": [
+        "function declaration",
+        "capability",
+        "release boundary",
+        "HTTP request/response"
+      ],
+      "properties": [
+        "method",
+        "path",
+        "policy",
+        "capabilities",
+        "request body",
+        "response body",
+        "status"
+      ],
+      "events": [],
+      "effects": [
+        "http",
+        "declared route capabilities"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-API-001",
+      "name": "typed model CRUD API",
+      "purpose": "Expose generated model CRUD routes with a declared authorization policy.",
+      "syntax": "api /route from Model [requiring authenticated|role Name|attribute Name]",
+      "types": [
+        "model API routes",
+        "HTTP policy identifier",
+        "database capability"
+      ],
+      "constraints": [
+        "A declared policy applies to all generated list, create, read, update, and delete routes.",
+        "A custom HTTP handler replacing a generated route inherits the API policy unless the handler declares its own policy.",
+        "The router checks authorization before route capability and typed request validation; policy callbacks receive the raw request.",
+        "The host must register the required authentication or authorization policy; an unknown policy denies access.",
+        "Omitting requiring leaves the API public unless the host applies a default route policy."
+      ],
+      "errors": [
+        "Unknown authorization requirements are parse errors.",
+        "Routes with a required policy fail closed when the host has no matching policy."
+      ],
+      "example": "model Task { title text required } api /tasks from Task requiring authenticated",
+      "related": [
+        "model declaration",
+        "HTTP route",
+        "authentication",
+        "authorization",
+        "database capability"
+      ],
+      "properties": [
+        "route",
+        "model",
+        "policyId"
+      ],
+      "events": [],
+      "effects": [
+        "http",
+        "database"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-APP-001",
+      "name": "app declaration",
+      "purpose": "Name the application represented by the source module and optionally provide static-site metadata.",
+      "syntax": "app Name [ { description \"...\" canonical \"https://...\" } ]",
+      "types": [],
+      "constraints": [
+        "Use one application declaration for the project entry module.",
+        "Optional description and absolute HTTP(S) canonical URL values are escaped into generated static HTML and Open Graph tags."
+      ],
+      "errors": [
+        "A missing or malformed application declaration is rejected during parsing or validation.",
+        "Empty descriptions and canonical URLs with credentials, query, fragment, or a non-HTTP(S) scheme are rejected."
+      ],
+      "example": "app FieldGuide { description \"A concise field guide.\" canonical \"https://example.org/guide\" }",
+      "related": [
+        "module",
+        "project",
+        "static release metadata"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-ASYNC-001",
+      "name": "async function",
+      "purpose": "Declare a function that returns a task and can await task-valued operations.",
+      "syntax": "async function name(parameters) -> task<Type> { statements }",
+      "types": [
+        "task<T>",
+        "Result"
+      ],
+      "constraints": [
+        "Asynchronous effects are explicit in the function signature and capabilities.",
+        "Awaited failures remain represented by their declared Result type."
+      ],
+      "errors": [
+        "Invalid task return types and incompatible awaited values are rejected."
+      ],
+      "example": "async function ready() -> task<result<boolean,text>> { return ok(true) }",
+      "related": [
+        "function declaration",
+        "task",
+        "Result",
+        "capability"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-BIND-001",
+      "name": "local binding",
+      "purpose": "Give an expression a local name, optionally with an explicit type.",
+      "syntax": "let name = expression | let name Type = expression",
+      "types": [
+        "inferred or declared TypeRef",
+        "immutable local value"
+      ],
+      "constraints": [
+        "Recommended first-use spelling is `let name = value`, matching the main examples and AI examples.",
+        "`let name is value` and `let name be value` remain supported compatibility spellings with identical binding semantics.",
+        "The formatter preserves the spelling in source; use one binding style consistently within a project."
+      ],
+      "errors": [
+        "Duplicate local names and values incompatible with an explicit TypeRef are rejected."
+      ],
+      "example": "function double(value integer) -> integer { let result = value * 2 return result }",
+      "related": [
+        "function declaration",
+        "TypeRef",
+        "formatter"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-CAPABILITY-001",
+      "name": "capability type",
+      "purpose": "Require explicit authority for host services such as database or filesystem access.",
+      "syntax": "capability<CapabilityName>",
+      "types": [
+        "canonical capability name"
+      ],
+      "constraints": [
+        "Capabilities are passed explicitly to functions and routes.",
+        "No ambient filesystem, database, environment, network, or randomness authority is implied."
+      ],
+      "errors": [
+        "Missing or unsupported capabilities are rejected at validation or runtime boundaries."
+      ],
+      "example": "function read(fs capability<filesystem>, path text) -> result<text,text> { return readTextFile(fs, path) }",
+      "related": [
+        "effect",
+        "route",
+        "database query",
+        "filesystem operation"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-COMPARE-001",
+      "name": "comparison expression",
+      "purpose": "Compare compatible typed values and produce a boolean.",
+      "syntax": "left == right | left != right | left < right | left <= right | left > right | left >= right",
+      "types": [
+        "compatible operand TypeRefs",
+        "boolean result"
+      ],
+      "constraints": [
+        "Recommended first-use spelling uses the symbolic comparison operators, matching the main examples and AI examples.",
+        "Controlled-English expressions including `age is at least 18`, `age is at most 18`, and `age is greater than 18` are also accepted and lower to the same typed operators.",
+        "Use one comparison style consistently within a project."
+      ],
+      "errors": [
+        "Incompatible operand types and non-boolean conditional expressions are rejected."
+      ],
+      "example": "function isAdult(age integer) -> boolean { return age >= 18 }",
+      "related": [
+        "if statement",
+        "boolean",
+        "database query"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-ENUM-001",
+      "name": "enum declaration",
+      "purpose": "Declare a finite set of named variants, optionally carrying typed payloads.",
+      "syntax": "enum Name { Variant OtherVariant(Type) }",
+      "types": [
+        "enum values",
+        "variant payload TypeRef"
+      ],
+      "constraints": [
+        "Match expressions account for each declared variant.",
+        "Payload bindings match the variant payload type."
+      ],
+      "errors": [
+        "Missing, duplicate, or unknown variants and invalid payloads are rejected."
+      ],
+      "example": "enum Status { Pending Assigned Done }",
+      "related": [
+        "match expression",
+        "TypeRef",
+        "Result"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-ERROR-PROPAGATION-001",
+      "name": "Result propagation",
+      "purpose": "Return a compatible error immediately when a Result or Optional-producing expression fails.",
+      "syntax": "expression?",
+      "types": [
+        "result<T,E> or T?"
+      ],
+      "constraints": [
+        "Propagation target must accept the expression error or absence.",
+        "Propagation does not convert errors into exceptions."
+      ],
+      "errors": [
+        "Incompatible propagation types are diagnosed."
+      ],
+      "example": "function read(fs capability<filesystem>, path text) -> result<text,text> { return readTextFile(fs, path)? }",
+      "related": [
+        "Result",
+        "optional type",
+        "capability"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-FUNCTION-001",
+      "name": "function declaration",
+      "purpose": "Declare a named function with explicit parameter and return types.",
+      "syntax": "function name(parameter Type, ...) -> Type { statements }",
+      "types": [
+        "parameter TypeRef values",
+        "return TypeRef"
+      ],
+      "constraints": [
+        "Arguments and return values are checked against TypeRef.",
+        "Functions return explicitly; no implicit truthiness or coercion.",
+        "Host effects require explicit capability parameters."
+      ],
+      "errors": [
+        "Argument and return mismatches are type errors.",
+        "Unknown names and invalid calls are compiler diagnostics."
+      ],
+      "example": "function double(value integer) -> integer { return value * 2 }",
+      "related": [
+        "TypeRef",
+        "capability",
+        "Result",
+        "async function"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-IF-001",
+      "name": "if statement",
+      "purpose": "Choose a branch using an explicit boolean condition.",
+      "syntax": "if condition { statements } [else { statements }]",
+      "types": [
+        "boolean condition"
+      ],
+      "constraints": [
+        "Conditions must be boolean; values are never tested through host-language truthiness.",
+        "Use `else` as the recommended first-use branch spelling; `otherwise` is an accepted alias with the same meaning."
+      ],
+      "errors": [
+        "Non-boolean conditions are type errors."
+      ],
+      "example": "function positive(value integer) -> boolean { if (value > 0) { return true } else { return false } }",
+      "related": [
+        "boolean",
+        "comparison",
+        "control flow"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-LIST-001",
+      "name": "list type",
+      "purpose": "Represent an immutable homogeneous sequence.",
+      "syntax": "list<T>",
+      "types": [
+        "element TypeRef"
+      ],
+      "constraints": [
+        "Elements share one type.",
+        "Empty lists need a contextual list type.",
+        "Safe indexing returns an optional element."
+      ],
+      "errors": [
+        "Mixed element types and invalid indexes are diagnosed."
+      ],
+      "example": "function first(values list<integer>) -> integer? { return values[0] }",
+      "related": [
+        "optional type",
+        "map",
+        "filter",
+        "fold"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-LOOP-001",
+      "name": "for loop",
+      "purpose": "Visit each value in a typed list.",
+      "syntax": "for item in values { statements }",
+      "types": [
+        "list<T> source",
+        "T binding"
+      ],
+      "constraints": [
+        "The loop binding has the list element type.",
+        "Loop control follows BMEC execution limits."
+      ],
+      "errors": [
+        "Non-list sources and invalid binding use are rejected."
+      ],
+      "example": "function allPositive(values list<integer>) -> boolean { for value in values { if (value <= 0) { return false } } return true }",
+      "related": [
+        "list",
+        "while loop",
+        "break",
+        "continue"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-MODEL-001",
+      "name": "model declaration",
+      "purpose": "Define a database-backed entity and its typed fields.",
+      "syntax": "model Name { field Type [required] [unique] [default value] }",
+      "types": [
+        "TypeRef field types",
+        "model relations"
+      ],
+      "constraints": [
+        "Field names are unique within the model.",
+        "Required, unique, and default constraints are explicit.",
+        "Relations use declared model types."
+      ],
+      "errors": [
+        "Unknown field types, duplicate fields, invalid defaults, and invalid relations are rejected."
+      ],
+      "example": "model Task { title text required done boolean default false }",
+      "related": [
+        "record declaration",
+        "TypeRef",
+        "database query",
+        "page CRUD"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-OPTIONAL-001",
+      "name": "optional type",
+      "purpose": "Represent a value that may be absent without null or truthiness.",
+      "syntax": "T?",
+      "types": [
+        "inner TypeRef",
+        "none"
+      ],
+      "constraints": [
+        "`none` is the absence value.",
+        "Optional values must be handled explicitly or propagated with a compatible `?`."
+      ],
+      "errors": [
+        "Invalid optional access and incompatible propagation are rejected."
+      ],
+      "example": "function nickname() -> text? { return none }",
+      "related": [
+        "none",
+        "Result",
+        "safe indexing"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-RECORD-001",
+      "name": "record declaration",
+      "purpose": "Define a plain typed record value.",
+      "syntax": "type Name { field Type }",
+      "types": [
+        "TypeRef field types"
+      ],
+      "constraints": [
+        "Record construction supplies each required field exactly once.",
+        "Unknown and duplicate fields are rejected."
+      ],
+      "errors": [
+        "Missing, extra, duplicate, or mistyped fields are type errors."
+      ],
+      "example": "type Point { x integer y integer }",
+      "related": [
+        "model declaration",
+        "record value",
+        "TypeRef"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-RESULT-001",
+      "name": "Result type",
+      "purpose": "Represent success or failure explicitly.",
+      "syntax": "result<T,E>",
+      "types": [
+        "success TypeRef",
+        "error TypeRef"
+      ],
+      "constraints": [
+        "A value is either `ok(value)` or `err(error)`.",
+        "Propagation with `?` requires a compatible error type."
+      ],
+      "errors": [
+        "Mismatched success/error payloads and incompatible propagation are rejected."
+      ],
+      "example": "function parse(value text) -> result<integer,text> { return err(\"invalid integer\") }",
+      "related": [
+        "Optional",
+        "error propagation",
+        "async function"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "LANG-TASK-001",
+      "name": "task type",
+      "purpose": "Represent an asynchronous computation with a typed result.",
+      "syntax": "task<T>",
+      "types": [
+        "result TypeRef"
+      ],
+      "constraints": [
+        "Tasks are produced by declared asynchronous operations and consumed in async contexts."
+      ],
+      "errors": [
+        "Using task values as completed values without awaiting is rejected."
+      ],
+      "example": "async function answer() -> task<integer> { return 42 }",
+      "related": [
+        "async function",
+        "Result",
+        "capability"
+      ],
+      "properties": [],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "STDLIB-absInt",
+      "kind": "stdlib",
+      "name": "absInt",
+      "namespace": "core",
+      "purpose": "absInt is a built-in core standard-library function.",
+      "syntax": "absInt(arg1)",
+      "types": [
+        "integer",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-absNumber",
+      "kind": "stdlib",
+      "name": "absNumber",
+      "namespace": "core",
+      "purpose": "absNumber is a built-in core standard-library function.",
+      "syntax": "absNumber(arg1)",
+      "types": [
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-addDays",
+      "kind": "stdlib",
+      "name": "addDays",
+      "namespace": "time",
+      "purpose": "addDays is a built-in time standard-library function.",
+      "syntax": "addDays(arg1, arg2)",
+      "types": [
+        "date",
+        "integer",
+        "result<date,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-addSeconds",
+      "kind": "stdlib",
+      "name": "addSeconds",
+      "namespace": "time",
+      "purpose": "addSeconds is a built-in time standard-library function.",
+      "syntax": "addSeconds(arg1, arg2)",
+      "types": [
+        "datetime",
+        "integer",
+        "result<datetime,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-all",
+      "kind": "stdlib",
+      "name": "all",
+      "namespace": "list",
+      "purpose": "all is a built-in list standard-library function.",
+      "syntax": "all(arg1, arg2)",
+      "types": [
+        "list<T>",
+        "function(T)->boolean",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-any",
+      "kind": "stdlib",
+      "name": "any",
+      "namespace": "list",
+      "purpose": "any is a built-in list standard-library function.",
+      "syntax": "any(arg1, arg2)",
+      "types": [
+        "list<T>",
+        "function(T)->boolean",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-appendTextFile",
+      "kind": "stdlib",
+      "name": "appendTextFile",
+      "namespace": "file",
+      "purpose": "appendTextFile is a built-in file standard-library function.",
+      "syntax": "appendTextFile(arg1, arg2, arg3)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-base64Decode",
+      "kind": "stdlib",
+      "name": "base64Decode",
+      "namespace": "core",
+      "purpose": "base64Decode is a built-in core standard-library function.",
+      "syntax": "base64Decode(arg1)",
+      "types": [
+        "text",
+        "result<text,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-base64Encode",
+      "kind": "stdlib",
+      "name": "base64Encode",
+      "namespace": "core",
+      "purpose": "base64Encode is a built-in core standard-library function.",
+      "syntax": "base64Encode(arg1)",
+      "types": [
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-cancel",
+      "kind": "stdlib",
+      "name": "cancel",
+      "namespace": "time",
+      "purpose": "cancel is a built-in time standard-library function.",
+      "syntax": "cancel(arg1, arg2)",
+      "types": [
+        "capability<time>",
+        "task<T>",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "time"
+      ],
+      "capabilities": [
+        "time"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-ceil",
+      "kind": "stdlib",
+      "name": "ceil",
+      "namespace": "core",
+      "purpose": "ceil is a built-in core standard-library function.",
+      "syntax": "ceil(arg1)",
+      "types": [
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-clamp",
+      "kind": "stdlib",
+      "name": "clamp",
+      "namespace": "core",
+      "purpose": "clamp is a built-in core standard-library function.",
+      "syntax": "clamp(arg1, arg2, arg3)",
+      "types": [
+        "number",
+        "number",
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-contains",
+      "kind": "stdlib",
+      "name": "contains",
+      "namespace": "list",
+      "purpose": "contains is a built-in list standard-library function.",
+      "syntax": "contains(arg1, arg2)",
+      "types": [
+        "list<T>",
+        "T",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-copyTextFile",
+      "kind": "stdlib",
+      "name": "copyTextFile",
+      "namespace": "file",
+      "purpose": "copyTextFile is a built-in file standard-library function.",
+      "syntax": "copyTextFile(arg1, arg2, arg3)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-createDirectory",
+      "kind": "stdlib",
+      "name": "createDirectory",
+      "namespace": "file",
+      "purpose": "createDirectory is a built-in file standard-library function.",
+      "syntax": "createDirectory(arg1, arg2)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-currentTime",
+      "kind": "stdlib",
+      "name": "currentTime",
+      "namespace": "time",
+      "purpose": "currentTime is a built-in time standard-library function.",
+      "syntax": "currentTime(arg1)",
+      "types": [
+        "capability<time>",
+        "integer"
+      ],
+      "effects": [
+        "time"
+      ],
+      "capabilities": [
+        "time"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-dateDay",
+      "kind": "stdlib",
+      "name": "dateDay",
+      "namespace": "time",
+      "purpose": "dateDay is a built-in time standard-library function.",
+      "syntax": "dateDay(arg1)",
+      "types": [
+        "date|datetime",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-dateDifference",
+      "kind": "stdlib",
+      "name": "dateDifference",
+      "namespace": "time",
+      "purpose": "dateDifference is a built-in time standard-library function.",
+      "syntax": "dateDifference(arg1, arg2)",
+      "types": [
+        "date",
+        "date",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-dateMonth",
+      "kind": "stdlib",
+      "name": "dateMonth",
+      "namespace": "time",
+      "purpose": "dateMonth is a built-in time standard-library function.",
+      "syntax": "dateMonth(arg1)",
+      "types": [
+        "date|datetime",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-datetimeDifference",
+      "kind": "stdlib",
+      "name": "datetimeDifference",
+      "namespace": "time",
+      "purpose": "datetimeDifference is a built-in time standard-library function.",
+      "syntax": "datetimeDifference(arg1, arg2)",
+      "types": [
+        "datetime",
+        "datetime",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-dateYear",
+      "kind": "stdlib",
+      "name": "dateYear",
+      "namespace": "time",
+      "purpose": "dateYear is a built-in time standard-library function.",
+      "syntax": "dateYear(arg1)",
+      "types": [
+        "date|datetime",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-decodeJson",
+      "kind": "stdlib",
+      "name": "decodeJson",
+      "namespace": "json",
+      "purpose": "decodeJson is a built-in json standard-library function.",
+      "syntax": "decodeJson(arg1)",
+      "types": [
+        "text",
+        "result<T,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-delay",
+      "kind": "stdlib",
+      "name": "delay",
+      "namespace": "time",
+      "purpose": "delay is a built-in time standard-library function.",
+      "syntax": "delay(arg1, arg2)",
+      "types": [
+        "capability<time>",
+        "integer",
+        "task<result<boolean,text>>"
+      ],
+      "effects": [
+        "time"
+      ],
+      "capabilities": [
+        "time"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-distinct",
+      "kind": "stdlib",
+      "name": "distinct",
+      "namespace": "list",
+      "purpose": "distinct is a built-in list standard-library function.",
+      "syntax": "distinct(arg1)",
+      "types": [
+        "list<T>",
+        "list<T>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-encodeJson",
+      "kind": "stdlib",
+      "name": "encodeJson",
+      "namespace": "json",
+      "purpose": "encodeJson is a built-in json standard-library function.",
+      "syntax": "encodeJson(arg1)",
+      "types": [
+        "T",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-endsWith",
+      "kind": "stdlib",
+      "name": "endsWith",
+      "namespace": "text",
+      "purpose": "endsWith is a built-in text standard-library function.",
+      "syntax": "endsWith(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-environmentArguments",
+      "kind": "stdlib",
+      "name": "environmentArguments",
+      "namespace": "env",
+      "purpose": "environmentArguments is a built-in env standard-library function.",
+      "syntax": "environmentArguments(arg1)",
+      "types": [
+        "capability<environment>",
+        "list<text>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-environmentBoolean",
+      "kind": "stdlib",
+      "name": "environmentBoolean",
+      "namespace": "env",
+      "purpose": "environmentBoolean is a built-in env standard-library function.",
+      "syntax": "environmentBoolean(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-environmentInteger",
+      "kind": "stdlib",
+      "name": "environmentInteger",
+      "namespace": "env",
+      "purpose": "environmentInteger is a built-in env standard-library function.",
+      "syntax": "environmentInteger(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "text",
+        "result<integer,text>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-environmentSecret",
+      "kind": "stdlib",
+      "name": "environmentSecret",
+      "namespace": "env",
+      "purpose": "environmentSecret is a built-in env standard-library function.",
+      "syntax": "environmentSecret(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "text",
+        "secret<text>?"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-environmentText",
+      "kind": "stdlib",
+      "name": "environmentText",
+      "namespace": "env",
+      "purpose": "environmentText is a built-in env standard-library function.",
+      "syntax": "environmentText(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "text",
+        "text?"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-err",
+      "kind": "stdlib",
+      "name": "err",
+      "namespace": "core",
+      "purpose": "err is a built-in core standard-library function.",
+      "syntax": "err(arg1)",
+      "types": [
+        "E",
+        "result<T,E>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-fileExists",
+      "kind": "stdlib",
+      "name": "fileExists",
+      "namespace": "file",
+      "purpose": "fileExists is a built-in file standard-library function.",
+      "syntax": "fileExists(arg1, arg2)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-filter",
+      "kind": "stdlib",
+      "name": "filter",
+      "namespace": "list",
+      "purpose": "filter is a built-in list standard-library function.",
+      "syntax": "filter(arg1, arg2)",
+      "types": [
+        "list<T>",
+        "function(T)->boolean",
+        "list<T>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-find",
+      "kind": "stdlib",
+      "name": "find",
+      "namespace": "list",
+      "purpose": "find is a built-in list standard-library function.",
+      "syntax": "find(arg1, arg2)",
+      "types": [
+        "list<T>",
+        "function(T)->boolean",
+        "T?"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-first",
+      "kind": "stdlib",
+      "name": "first",
+      "namespace": "list",
+      "purpose": "first is a built-in list standard-library function.",
+      "syntax": "first(arg1)",
+      "types": [
+        "list<T>",
+        "T?"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-floor",
+      "kind": "stdlib",
+      "name": "floor",
+      "namespace": "core",
+      "purpose": "floor is a built-in core standard-library function.",
+      "syntax": "floor(arg1)",
+      "types": [
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-fold",
+      "kind": "stdlib",
+      "name": "fold",
+      "namespace": "list",
+      "purpose": "fold is a built-in list standard-library function.",
+      "syntax": "fold(arg1, arg2, arg3)",
+      "types": [
+        "list<T>",
+        "U",
+        "function(U,T)->U",
+        "U"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-formatDate",
+      "kind": "stdlib",
+      "name": "formatDate",
+      "namespace": "time",
+      "purpose": "formatDate is a built-in time standard-library function.",
+      "syntax": "formatDate(arg1)",
+      "types": [
+        "date|datetime",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-httpRequest",
+      "kind": "stdlib",
+      "name": "httpRequest",
+      "namespace": "http",
+      "purpose": "httpRequest is a built-in http standard-library function.",
+      "syntax": "httpRequest(arg1, arg2, arg3, arg4, arg5, arg6, arg7)",
+      "types": [
+        "capability<http>",
+        "text",
+        "text",
+        "text?",
+        "list<text>",
+        "list<text>",
+        "integer",
+        "task<result<text,text>>"
+      ],
+      "effects": [
+        "http"
+      ],
+      "capabilities": [
+        "http"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-httpRequestJson",
+      "kind": "stdlib",
+      "name": "httpRequestJson",
+      "namespace": "http",
+      "purpose": "httpRequestJson is a built-in http standard-library function.",
+      "syntax": "httpRequestJson(arg1, arg2, arg3, arg4, arg5, arg6, arg7)",
+      "types": [
+        "capability<http>",
+        "text",
+        "text",
+        "T?",
+        "list<text>",
+        "list<text>",
+        "integer",
+        "task<result<T,text>>"
+      ],
+      "effects": [
+        "http"
+      ],
+      "capabilities": [
+        "http"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-httpRequestMultipart",
+      "kind": "stdlib",
+      "name": "httpRequestMultipart",
+      "namespace": "http",
+      "purpose": "httpRequestMultipart is a built-in http standard-library function.",
+      "syntax": "httpRequestMultipart(arg1, arg2, arg3, arg4, arg5, arg6, arg7)",
+      "types": [
+        "capability<http>",
+        "text",
+        "text",
+        "list<text>",
+        "list<text>",
+        "list<upload>",
+        "integer",
+        "task<result<text,text>>"
+      ],
+      "effects": [
+        "http"
+      ],
+      "capabilities": [
+        "http"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-isErr",
+      "kind": "stdlib",
+      "name": "isErr",
+      "namespace": "core",
+      "purpose": "isErr is a built-in core standard-library function.",
+      "syntax": "isErr(arg1)",
+      "types": [
+        "result<T,E>",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-isNone",
+      "kind": "stdlib",
+      "name": "isNone",
+      "namespace": "core",
+      "purpose": "isNone is a built-in core standard-library function.",
+      "syntax": "isNone(arg1)",
+      "types": [
+        "T?",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-isOk",
+      "kind": "stdlib",
+      "name": "isOk",
+      "namespace": "core",
+      "purpose": "isOk is a built-in core standard-library function.",
+      "syntax": "isOk(arg1)",
+      "types": [
+        "result<T,E>",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-isSome",
+      "kind": "stdlib",
+      "name": "isSome",
+      "namespace": "core",
+      "purpose": "isSome is a built-in core standard-library function.",
+      "syntax": "isSome(arg1)",
+      "types": [
+        "T?",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-join",
+      "kind": "stdlib",
+      "name": "join",
+      "namespace": "list",
+      "purpose": "join is a built-in list standard-library function.",
+      "syntax": "join(arg1, arg2)",
+      "types": [
+        "list<text>",
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-last",
+      "kind": "stdlib",
+      "name": "last",
+      "namespace": "list",
+      "purpose": "last is a built-in list standard-library function.",
+      "syntax": "last(arg1)",
+      "types": [
+        "list<T>",
+        "T?"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-length",
+      "kind": "stdlib",
+      "name": "length",
+      "namespace": "list",
+      "purpose": "length is a built-in list standard-library function.",
+      "syntax": "length(arg1)",
+      "types": [
+        "list<T>",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-listDirectory",
+      "kind": "stdlib",
+      "name": "listDirectory",
+      "namespace": "file",
+      "purpose": "listDirectory is a built-in file standard-library function.",
+      "syntax": "listDirectory(arg1, arg2)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "result<list<text>,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-lower",
+      "kind": "stdlib",
+      "name": "lower",
+      "namespace": "text",
+      "purpose": "lower is a built-in text standard-library function.",
+      "syntax": "lower(arg1)",
+      "types": [
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-map",
+      "kind": "stdlib",
+      "name": "map",
+      "namespace": "list",
+      "purpose": "map is a built-in list standard-library function.",
+      "syntax": "map(arg1, arg2)",
+      "types": [
+        "list<T>",
+        "function(T)->U",
+        "list<U>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-maxInt",
+      "kind": "stdlib",
+      "name": "maxInt",
+      "namespace": "core",
+      "purpose": "maxInt is a built-in core standard-library function.",
+      "syntax": "maxInt(arg1, arg2)",
+      "types": [
+        "integer",
+        "integer",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-minInt",
+      "kind": "stdlib",
+      "name": "minInt",
+      "namespace": "core",
+      "purpose": "minInt is a built-in core standard-library function.",
+      "syntax": "minInt(arg1, arg2)",
+      "types": [
+        "integer",
+        "integer",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-moveTextFile",
+      "kind": "stdlib",
+      "name": "moveTextFile",
+      "namespace": "file",
+      "purpose": "moveTextFile is a built-in file standard-library function.",
+      "syntax": "moveTextFile(arg1, arg2, arg3)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-ok",
+      "kind": "stdlib",
+      "name": "ok",
+      "namespace": "core",
+      "purpose": "ok is a built-in core standard-library function.",
+      "syntax": "ok(arg1)",
+      "types": [
+        "T",
+        "result<T,E>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-parseBoolean",
+      "kind": "stdlib",
+      "name": "parseBoolean",
+      "namespace": "text",
+      "purpose": "parseBoolean is a built-in text standard-library function.",
+      "syntax": "parseBoolean(arg1)",
+      "types": [
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-parseDate",
+      "kind": "stdlib",
+      "name": "parseDate",
+      "namespace": "time",
+      "purpose": "parseDate is a built-in time standard-library function.",
+      "syntax": "parseDate(arg1)",
+      "types": [
+        "text",
+        "result<date,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-parseDateTime",
+      "kind": "stdlib",
+      "name": "parseDateTime",
+      "namespace": "time",
+      "purpose": "parseDateTime is a built-in time standard-library function.",
+      "syntax": "parseDateTime(arg1)",
+      "types": [
+        "text",
+        "result<datetime,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-parseId",
+      "kind": "stdlib",
+      "name": "parseId",
+      "namespace": "core",
+      "purpose": "parseId is a built-in core standard-library function.",
+      "syntax": "parseId(arg1)",
+      "types": [
+        "text",
+        "result<id,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-parseInteger",
+      "kind": "stdlib",
+      "name": "parseInteger",
+      "namespace": "text",
+      "purpose": "parseInteger is a built-in text standard-library function.",
+      "syntax": "parseInteger(arg1)",
+      "types": [
+        "text",
+        "result<integer,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-parseNumber",
+      "kind": "stdlib",
+      "name": "parseNumber",
+      "namespace": "text",
+      "purpose": "parseNumber is a built-in text standard-library function.",
+      "syntax": "parseNumber(arg1)",
+      "types": [
+        "text",
+        "result<number,text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-pathBasename",
+      "kind": "stdlib",
+      "name": "pathBasename",
+      "namespace": "path",
+      "purpose": "pathBasename is a built-in path standard-library function.",
+      "syntax": "pathBasename(arg1)",
+      "types": [
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-pathDirname",
+      "kind": "stdlib",
+      "name": "pathDirname",
+      "namespace": "path",
+      "purpose": "pathDirname is a built-in path standard-library function.",
+      "syntax": "pathDirname(arg1)",
+      "types": [
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-pathJoin",
+      "kind": "stdlib",
+      "name": "pathJoin",
+      "namespace": "path",
+      "purpose": "pathJoin is a built-in path standard-library function.",
+      "syntax": "pathJoin(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-pathRelative",
+      "kind": "stdlib",
+      "name": "pathRelative",
+      "namespace": "path",
+      "purpose": "pathRelative is a built-in path standard-library function.",
+      "syntax": "pathRelative(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-power",
+      "kind": "stdlib",
+      "name": "power",
+      "namespace": "core",
+      "purpose": "power is a built-in core standard-library function.",
+      "syntax": "power(arg1, arg2)",
+      "types": [
+        "number",
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-randomId",
+      "kind": "stdlib",
+      "name": "randomId",
+      "namespace": "random",
+      "purpose": "randomId is a built-in random standard-library function.",
+      "syntax": "randomId(arg1)",
+      "types": [
+        "capability<random>",
+        "id"
+      ],
+      "effects": [
+        "random"
+      ],
+      "capabilities": [
+        "random"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-randomInteger",
+      "kind": "stdlib",
+      "name": "randomInteger",
+      "namespace": "random",
+      "purpose": "randomInteger is a built-in random standard-library function.",
+      "syntax": "randomInteger(arg1, arg2, arg3)",
+      "types": [
+        "capability<random>",
+        "integer",
+        "integer",
+        "integer"
+      ],
+      "effects": [
+        "random"
+      ],
+      "capabilities": [
+        "random"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-randomNumber",
+      "kind": "stdlib",
+      "name": "randomNumber",
+      "namespace": "random",
+      "purpose": "randomNumber is a built-in random standard-library function.",
+      "syntax": "randomNumber(arg1)",
+      "types": [
+        "capability<random>",
+        "number"
+      ],
+      "effects": [
+        "random"
+      ],
+      "capabilities": [
+        "random"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-range",
+      "kind": "stdlib",
+      "name": "range",
+      "namespace": "list",
+      "purpose": "range is a built-in list standard-library function.",
+      "syntax": "range(arg1, arg2)",
+      "types": [
+        "integer",
+        "integer",
+        "list<integer>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-readStdin",
+      "kind": "stdlib",
+      "name": "readStdin",
+      "namespace": "core",
+      "purpose": "readStdin is a built-in core standard-library function.",
+      "syntax": "readStdin(arg1)",
+      "types": [
+        "capability<environment>",
+        "task<result<text,text>>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-readTextFile",
+      "kind": "stdlib",
+      "name": "readTextFile",
+      "namespace": "file",
+      "purpose": "readTextFile is a built-in file standard-library function.",
+      "syntax": "readTextFile(arg1, arg2)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "result<text,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-removeTextFile",
+      "kind": "stdlib",
+      "name": "removeTextFile",
+      "namespace": "file",
+      "purpose": "removeTextFile is a built-in file standard-library function.",
+      "syntax": "removeTextFile(arg1, arg2)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-revealSecret",
+      "kind": "stdlib",
+      "name": "revealSecret",
+      "namespace": "core",
+      "purpose": "revealSecret is a built-in core standard-library function.",
+      "syntax": "revealSecret(arg1, arg2)",
+      "types": [
+        "secret<text>",
+        "capability<environment>",
+        "text"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-reverse",
+      "kind": "stdlib",
+      "name": "reverse",
+      "namespace": "list",
+      "purpose": "reverse is a built-in list standard-library function.",
+      "syntax": "reverse(arg1)",
+      "types": [
+        "list<T>",
+        "list<T>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-round",
+      "kind": "stdlib",
+      "name": "round",
+      "namespace": "core",
+      "purpose": "round is a built-in core standard-library function.",
+      "syntax": "round(arg1)",
+      "types": [
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-saveUpload",
+      "kind": "stdlib",
+      "name": "saveUpload",
+      "namespace": "file",
+      "purpose": "saveUpload is a built-in file standard-library function.",
+      "syntax": "saveUpload(arg1, arg2, arg3)",
+      "types": [
+        "capability<filesystem>",
+        "upload",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-scheduleOnce",
+      "kind": "stdlib",
+      "name": "scheduleOnce",
+      "namespace": "time",
+      "purpose": "scheduleOnce is a built-in time standard-library function.",
+      "syntax": "scheduleOnce(arg1, arg2, arg3)",
+      "types": [
+        "capability<time>",
+        "integer",
+        "()->task<result<boolean,text>>",
+        "task<result<boolean,text>>"
+      ],
+      "effects": [
+        "time"
+      ],
+      "capabilities": [
+        "time"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-secureRandomId",
+      "kind": "stdlib",
+      "name": "secureRandomId",
+      "namespace": "random",
+      "purpose": "secureRandomId is a built-in random standard-library function.",
+      "syntax": "secureRandomId(arg1)",
+      "types": [
+        "capability<secureRandom>",
+        "id"
+      ],
+      "effects": [
+        "secureRandom"
+      ],
+      "capabilities": [
+        "secureRandom"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-secureRandomInteger",
+      "kind": "stdlib",
+      "name": "secureRandomInteger",
+      "namespace": "random",
+      "purpose": "secureRandomInteger is a built-in random standard-library function.",
+      "syntax": "secureRandomInteger(arg1, arg2, arg3)",
+      "types": [
+        "capability<secureRandom>",
+        "integer",
+        "integer",
+        "integer"
+      ],
+      "effects": [
+        "secureRandom"
+      ],
+      "capabilities": [
+        "secureRandom"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-sendEmail",
+      "kind": "stdlib",
+      "name": "sendEmail",
+      "namespace": "email",
+      "purpose": "sendEmail is a built-in email standard-library function.",
+      "syntax": "sendEmail(arg1, arg2, arg3, arg4)",
+      "types": [
+        "capability<email>",
+        "text",
+        "text",
+        "text",
+        "task<result<boolean,text>>"
+      ],
+      "effects": [
+        "email"
+      ],
+      "capabilities": [
+        "email"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-setExitCode",
+      "kind": "stdlib",
+      "name": "setExitCode",
+      "namespace": "core",
+      "purpose": "setExitCode is a built-in core standard-library function.",
+      "syntax": "setExitCode(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "integer",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-slice",
+      "kind": "stdlib",
+      "name": "slice",
+      "namespace": "list",
+      "purpose": "slice is a built-in list standard-library function.",
+      "syntax": "slice(arg1, arg2, arg3)",
+      "types": [
+        "list<T>",
+        "integer",
+        "integer",
+        "list<T>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-some",
+      "kind": "stdlib",
+      "name": "some",
+      "namespace": "core",
+      "purpose": "some is a built-in core standard-library function.",
+      "syntax": "some(arg1)",
+      "types": [
+        "T",
+        "T?"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-sort",
+      "kind": "stdlib",
+      "name": "sort",
+      "namespace": "list",
+      "purpose": "sort is a built-in list standard-library function.",
+      "syntax": "sort(arg1)",
+      "types": [
+        "list<T>",
+        "list<T>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-split",
+      "kind": "stdlib",
+      "name": "split",
+      "namespace": "list",
+      "purpose": "split is a built-in list standard-library function.",
+      "syntax": "split(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "list<text>"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-sqrt",
+      "kind": "stdlib",
+      "name": "sqrt",
+      "namespace": "core",
+      "purpose": "sqrt is a built-in core standard-library function.",
+      "syntax": "sqrt(arg1)",
+      "types": [
+        "number",
+        "number"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-startsWith",
+      "kind": "stdlib",
+      "name": "startsWith",
+      "namespace": "text",
+      "purpose": "startsWith is a built-in text standard-library function.",
+      "syntax": "startsWith(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-substring",
+      "kind": "stdlib",
+      "name": "substring",
+      "namespace": "text",
+      "purpose": "substring is a built-in text standard-library function.",
+      "syntax": "substring(arg1, arg2, arg3)",
+      "types": [
+        "text",
+        "integer",
+        "integer",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-textContains",
+      "kind": "stdlib",
+      "name": "textContains",
+      "namespace": "text",
+      "purpose": "textContains is a built-in text standard-library function.",
+      "syntax": "textContains(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "boolean"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-textIndexOf",
+      "kind": "stdlib",
+      "name": "textIndexOf",
+      "namespace": "text",
+      "purpose": "textIndexOf is a built-in text standard-library function.",
+      "syntax": "textIndexOf(arg1, arg2)",
+      "types": [
+        "text",
+        "text",
+        "integer?"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-textLength",
+      "kind": "stdlib",
+      "name": "textLength",
+      "namespace": "text",
+      "purpose": "textLength is a built-in text standard-library function.",
+      "syntax": "textLength(arg1)",
+      "types": [
+        "text",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-textReplace",
+      "kind": "stdlib",
+      "name": "textReplace",
+      "namespace": "text",
+      "purpose": "textReplace is a built-in text standard-library function.",
+      "syntax": "textReplace(arg1, arg2, arg3)",
+      "types": [
+        "text",
+        "text",
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-timeout",
+      "kind": "stdlib",
+      "name": "timeout",
+      "namespace": "time",
+      "purpose": "timeout is a built-in time standard-library function.",
+      "syntax": "timeout(arg1, arg2, arg3)",
+      "types": [
+        "capability<time>",
+        "task<T>",
+        "integer",
+        "task<result<T,text>>"
+      ],
+      "effects": [
+        "time"
+      ],
+      "capabilities": [
+        "time"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-today",
+      "kind": "stdlib",
+      "name": "today",
+      "namespace": "time",
+      "purpose": "today is a built-in time standard-library function.",
+      "syntax": "today(arg1)",
+      "types": [
+        "capability<time>",
+        "date"
+      ],
+      "effects": [
+        "time"
+      ],
+      "capabilities": [
+        "time"
+      ],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-trim",
+      "kind": "stdlib",
+      "name": "trim",
+      "namespace": "text",
+      "purpose": "trim is a built-in text standard-library function.",
+      "syntax": "trim(arg1)",
+      "types": [
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-uploadFilename",
+      "kind": "stdlib",
+      "name": "uploadFilename",
+      "namespace": "core",
+      "purpose": "uploadFilename is a built-in core standard-library function.",
+      "syntax": "uploadFilename(arg1)",
+      "types": [
+        "upload",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-uploadMediaType",
+      "kind": "stdlib",
+      "name": "uploadMediaType",
+      "namespace": "core",
+      "purpose": "uploadMediaType is a built-in core standard-library function.",
+      "syntax": "uploadMediaType(arg1)",
+      "types": [
+        "upload",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-uploadSize",
+      "kind": "stdlib",
+      "name": "uploadSize",
+      "namespace": "core",
+      "purpose": "uploadSize is a built-in core standard-library function.",
+      "syntax": "uploadSize(arg1)",
+      "types": [
+        "upload",
+        "integer"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-upper",
+      "kind": "stdlib",
+      "name": "upper",
+      "namespace": "text",
+      "purpose": "upper is a built-in text standard-library function.",
+      "syntax": "upper(arg1)",
+      "types": [
+        "text",
+        "text"
+      ],
+      "effects": [],
+      "capabilities": [],
+      "errors": [],
+      "related": []
+    },
+    {
+      "id": "STDLIB-writeStderr",
+      "kind": "stdlib",
+      "name": "writeStderr",
+      "namespace": "core",
+      "purpose": "writeStderr is a built-in core standard-library function.",
+      "syntax": "writeStderr(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-writeStdout",
+      "kind": "stdlib",
+      "name": "writeStdout",
+      "namespace": "core",
+      "purpose": "writeStdout is a built-in core standard-library function.",
+      "syntax": "writeStdout(arg1, arg2)",
+      "types": [
+        "capability<environment>",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "environment"
+      ],
+      "capabilities": [
+        "environment"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STDLIB-writeTextFile",
+      "kind": "stdlib",
+      "name": "writeTextFile",
+      "namespace": "file",
+      "purpose": "writeTextFile is a built-in file standard-library function.",
+      "syntax": "writeTextFile(arg1, arg2, arg3)",
+      "types": [
+        "capability<filesystem>",
+        "text",
+        "text",
+        "result<boolean,text>"
+      ],
+      "effects": [
+        "filesystem"
+      ],
+      "capabilities": [
+        "filesystem"
+      ],
+      "errors": [
+        "Returns a typed Result; inspect and handle its error value."
+      ],
+      "related": []
+    },
+    {
+      "id": "STYLE-TYPED-001",
+      "name": "typed style declaration",
+      "purpose": "Define composable typed visual rules with responsive values and interaction states.",
+      "syntax": "style named Name { typed style properties; on small screens { responsive properties } }",
+      "types": [
+        "layout",
+        "alignment",
+        "colors",
+        "dimensions",
+        "typography",
+        "responsive values",
+        "states"
+      ],
+      "constraints": [
+        "Style properties are selected from compiler-supported typed values.",
+        "Tokens compose into named styles and do not emit standalone selectors; attach the composed named style to a page or component.",
+        "For scalar conflicts, local values override bases and otherwise the first composed base supplies the value.",
+        "List properties accumulate in base composition order followed by local values.",
+        "Responsive rules and states are validated before lowering."
+      ],
+      "errors": [
+        "Unknown properties, values, states, and invalid dimensions are rejected.",
+        "Direct attachment of a token is rejected with PIPE-STYLE-034; compose it into a named style first."
+      ],
+      "example": "style named Card { layout is grid gap is 16 on small screens { columns is 1 } }",
+      "related": [
+        "style token",
+        "component declaration",
+        "responsive rule",
+        "accessibility state"
+      ],
+      "properties": [
+        "layout",
+        "alignment",
+        "gap",
+        "padding",
+        "margin",
+        "width",
+        "height",
+        "columns",
+        "color",
+        "theme",
+        "typography",
+        "focus",
+        "disabled",
+        "responsive"
+      ],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-COMPONENT-001",
+      "name": "component declaration",
+      "purpose": "Define a reusable typed UI component with children, optional typed props/state, named events, and an optional named style.",
+      "syntax": "component Name [uses style StyleName] [form] { UI children }",
+      "types": [
+        "component props and state use TypeRef",
+        "events have typed parameters"
+      ],
+      "constraints": [
+        "Component and page IDs are compiler-assigned canonical IDs.",
+        "References and bindings are validated against declared components and typed data.",
+        "Attach a named style in the component header with `uses style StyleName`; style tokens must first be composed into a named style."
+      ],
+      "errors": [
+        "Unknown components, invalid bindings, duplicate props/state/events, and invalid event references are rejected."
+      ],
+      "example": "style named MetricCard { surface is elevated padding is 16 corners is rounded } component Metric uses style MetricCard { text \"Open 6\" }",
+      "related": [
+        "input control",
+        "named event",
+        "page list",
+        "typed style"
+      ],
+      "properties": [
+        "form",
+        "style",
+        "props",
+        "state",
+        "children"
+      ],
+      "events": [
+        "named events and typed event parameters"
+      ],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-CRUD-001",
+      "name": "generated CRUD page section",
+      "purpose": "Generate a typed model form, searchable table, and sortable visible columns on a page, optionally excluding optional server-managed fields from the rendered controls and columns.",
+      "syntax": "crud Model [excluding field [, field...]]",
+      "types": [
+        "declared model",
+        "optional model fields to exclude from the generated UI"
+      ],
+      "constraints": [
+        "Search and sort operate on rows already returned by the route; they do not change the database query or provide server-side paging.",
+        "Excluded fields must exist on the model, must not be required, and cannot be repeated.",
+        "Excluded fields are omitted from create controls, edit prompts, table columns, search, and sort. Existing excluded values are preserved in edit requests.",
+        "This option controls generated UI only; source handlers still validate and authorize all submitted values."
+      ],
+      "errors": [
+        "Unknown, required, or duplicate exclusions produce a PIPE-UI diagnostic."
+      ],
+      "example": "model Task { title text required ownerAuthId text? } page Dashboard { crud Task excluding ownerAuthId }",
+      "related": [
+        "page declaration",
+        "model declaration",
+        "generated CRUD"
+      ],
+      "properties": [
+        "model",
+        "excludedFields"
+      ],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-DIALOG-001",
+      "name": "typed modal dialog",
+      "purpose": "Show a labeled native modal dialog with an explicit trigger and keyboard dismissal.",
+      "syntax": "dialog \"Open details\" title \"Details\" message \"More information\"",
+      "types": [
+        "trigger label",
+        "dialog title",
+        "dialog message"
+      ],
+      "constraints": [
+        "Dialogs may appear in page declarations or reusable components.",
+        "The trigger identifies the dialog with aria-haspopup and aria-controls.",
+        "The native modal dialog is named by its title.",
+        "Close control and Escape dismiss through native dialog behavior."
+      ],
+      "errors": [
+        "Dialog ID, trigger label, title, and message are required in typed UI IR."
+      ],
+      "example": "component ProductCard { dialog \"Open details\" title \"Product details\" message \"This item is ready.\" }",
+      "related": [
+        "page declaration",
+        "component declaration",
+        "overlay",
+        "accessibility"
+      ],
+      "properties": [
+        "label",
+        "title",
+        "message",
+        "close"
+      ],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-FEEDBACK-001",
+      "name": "typed page feedback",
+      "purpose": "Show a state-controlled loading status or error alert with browser assistive-technology semantics.",
+      "syntax": "loading \"Loading…\" error \"Could not load data\"",
+      "types": [
+        "loading state and message",
+        "error state and message"
+      ],
+      "constraints": [
+        "Loading feedback uses role=status and polite announcements.",
+        "Error feedback uses role=alert and assertive announcements.",
+        "Visibility follows the matching page state."
+      ],
+      "errors": [
+        "Feedback messages must be nonempty."
+      ],
+      "example": "page Home { state loading boolean = true loading \"Loading tasks\" error \"Unable to load tasks\" }",
+      "related": [
+        "page state",
+        "typed UI node",
+        "accessibility"
+      ],
+      "properties": [
+        "loading",
+        "error",
+        "message"
+      ],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-INPUT-001",
+      "name": "typed input",
+      "purpose": "Collect a validated typed value from a user.",
+      "syntax": "input name Type [label \"...\"] [placeholder \"...\"] [help \"...\"] [validate rule] [on Event]",
+      "types": [
+        "text",
+        "integer",
+        "number",
+        "boolean",
+        "date",
+        "datetime",
+        "enum",
+        "optional TypeRef"
+      ],
+      "constraints": [
+        "Labels provide accessible names.",
+        "Validation rules come from the canonical validation vocabulary.",
+        "Enum inputs render as selects; optional inputs represent absence explicitly.",
+        "Placeholder/help are display hints and do not change semantic values."
+      ],
+      "errors": [
+        "Invalid types, validation rules, and event references are compiler diagnostics."
+      ],
+      "example": "page EmailPage { input email text label \"Email\" help \"We will contact you here\" validate email }",
+      "related": [
+        "component declaration",
+        "validation rule",
+        "enum",
+        "optional type"
+      ],
+      "properties": [
+        "label",
+        "placeholder",
+        "help",
+        "disabled",
+        "readonly",
+        "password",
+        "validate",
+        "control"
+      ],
+      "events": [
+        "optional named event"
+      ],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-NAV-001",
+      "name": "typed internal page link",
+      "purpose": "Navigate to a declared page using its canonical UI component identity, optionally binding dynamic route parameters from a typed list item.",
+      "syntax": "link \"Tasks\" to Tasks [with slug item.slug [, other item.field...]]",
+      "types": [
+        "display label",
+        "declared page target",
+        "text item fields for dynamic route parameters"
+      ],
+      "constraints": [
+        "Target must name a declared page with a generated route.",
+        "Lowering resolves the target to the canonical page component ID.",
+        "Static routes use standard hash anchors; dynamic routes encode supplied path values and are checked against list item text fields.",
+        "Every dynamic target parameter must be supplied exactly once."
+      ],
+      "errors": [
+        "Unknown target pages use PIPE-UI-006; invalid route parameters and item bindings use PIPE-UI-017."
+      ],
+      "example": "model Post { slug text } component PostRow { link \"Read\" to Article with slug post.slug } page Articles { state posts list<Post> for each post in posts show PostRow } page Article at \"/articles/:slug\" { state posts list<Post> for each post in posts show post slug }",
+      "related": [
+        "page declaration",
+        "component declaration",
+        "route",
+        "typed page list"
+      ],
+      "properties": [
+        "label",
+        "target page",
+        "parameters"
+      ],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-PAGE-ACTION-001",
+      "name": "typed page action",
+      "purpose": "Submit typed form values, typed page state, or repeated-list item fields from a generated browser page to a declared server route.",
+      "syntax": "event Name(pathField Type, bodyField Type, ...) sends POST|PUT|PATCH|DELETE \"/items/:id\" [with idempotency key] [then clears stateName on success]; button \"Add\" on add with productId from product.id; button \"Checkout\" on checkout with items from cart",
+      "types": [
+        "typed event parameters",
+        "declared record/model request body",
+        "HTTP method and path",
+        "typed page-state and repeated-list item bindings"
+      ],
+      "constraints": [
+        "The action must resolve to exactly one declared route.",
+        "Event parameters that are not path placeholders must match every request-body field and type; path parameters match the declared route name and type.",
+        "An action may bind any event parameter from a page state using `with parameter from stateName`; the page-state TypeRef must match. Remaining parameters may come from matching typed inputs in the enclosing form. Repeated-list buttons may bind parameters from fields on their typed list item.",
+        "Page state is client-provided request data. Server handlers must still validate it and apply their normal authorization checks.",
+        "The action may use a form component with matching typed inputs, or a repeated-list button may bind every action parameter exactly once from a field on its list item with matching types.",
+        "Routes cannot require query or other header inputs; an explicit idempotency-key action may supply the typed idempotencyKey header. Every path placeholder must match a typed event parameter and a declared route parameter; path values are URL-encoded and excluded from the JSON body.",
+        "Submission, success, and failure messages use an accessible live status region.",
+        "Generated browser output includes only the public method, path, and field types; server handlers and database IR stay server-side.",
+        "An action may add `then clears stateName on success` to clear one page state that is a locally persisted list. Clearing and the storage write run only after success; typed application errors, HTTP failures, and network failures keep the list."
+      ],
+      "errors": [
+        "Unknown/ambiguous routes, path-parameter name/type mismatches, body mismatches, unsupported route inputs, missing form inputs, and invalid page-state or list-item bindings produce UI diagnostics.",
+        "A success clear without a typed HTTP action and a locally persisted list state produces a UI diagnostic."
+      ],
+      "example": "model CartLine { sku text required }\nmodel CheckoutRequest { customerName text required items list<CartLine> required }\napi /checkout from CheckoutRequest\ncomponent CheckoutForm form { input customerName text button \"Checkout\" on checkout with items from cart }\npage Store { event checkout(customerName text, items list<CartLine>) sends POST \"/checkout\" then clears cart on success use CheckoutForm state cart list<CartLine> = [] persisted in local storage }",
+      "related": [
+        "page declaration",
+        "component declaration",
+        "typed input",
+        "typed route declaration",
+        "page state",
+        "release boundary"
+      ],
+      "properties": [
+        "method",
+        "path",
+        "pathParameters",
+        "fields",
+        "arguments",
+        "successUpdate"
+      ],
+      "events": [
+        "form submit",
+        "page-state binding",
+        "repeated-row action",
+        "action-success state update"
+      ],
+      "effects": [
+        "http"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-PAGE-LIST-001",
+      "name": "typed page list",
+      "purpose": "Render a repeated UI body for each value in a typed page state list, with optional filtering, pagination, and an accessible empty message. A typed server-search source sends the filter term to its declared GET route and renders the complete server result set.",
+      "syntax": "for each item in items show ComponentName [filter by textField label \"Search items\"] [paginate 25] [empty \"No items\"]",
+      "types": [
+        "list<T> state",
+        "component item binding"
+      ],
+      "constraints": [
+        "The list source must resolve to typed list state.",
+        "Item bindings and displayed fields must belong to the declared element type.",
+        "A filter field must be a text field on a record or model list item.",
+        "Without a server-search source, filtering and pagination operate only on values already supplied to the page; they do not limit database reads. With a server-search source, each filter change requests the typed search route, whose server-side query remains authoritative. On a dynamic page, the search and search-cursor routes repeat every base route parameter; the generated client carries those values forward, while each server handler must keep the scope predicate in its database query.",
+        "A generated crud Model section is separate from page-state lists: CRUD rows do not populate a list source, and no automatic binding between the two is provided.",
+        "Page size must be an integer from 1 to 100.",
+        "An optional empty message is shown only when the list has no values and is announced as a polite status."
+      ],
+      "errors": [
+        "Unknown list sources, components, filter fields, or invalid page sizes are rejected."
+      ],
+      "example": "model Task { title text } component TaskRow { show task title } page Home { state tasks list<Task> for each task in tasks show TaskRow filter by title paginate 25 empty \"No tasks yet\" }",
+      "related": [
+        "page declaration",
+        "component declaration",
+        "list",
+        "typed binding"
+      ],
+      "properties": [
+        "source",
+        "item",
+        "body",
+        "filterBy",
+        "filterLabel",
+        "pageSize",
+        "empty"
+      ],
+      "events": [],
+      "effects": [],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-PAGE-ROUTE-001",
+      "name": "typed dynamic page route",
+      "purpose": "Declare a parameterized page route and bind route parameters to typed fields in a page list.",
+      "syntax": "page Article at \"/articles/:slug\" { state posts list<Post> from GET \"/posts\"; for each post in posts show ArticleDetail }",
+      "types": [
+        "declared page route",
+        "text route parameters or generated integer model IDs",
+        "typed list<Model|Record> page state"
+      ],
+      "constraints": [
+        "Route paths use non-empty slash-separated segments and unique :parameter placeholders.",
+        "Each parameter must match a text field in the page list element type or a model generated integer id.",
+        "A link supplies each parameter from its matching typed list-item field; model links may use the generated integer id.",
+        "A dynamic GET source may use a different static path prefix but must carry the page route parameters in the same order with matching handler types; a static source is also allowed when the page list items expose matching route fields.",
+        "Generated hash routing supports direct links, browser back/forward, and URL-encoded parameter values.",
+        "Page-state sources must be public GET routes; keep unpublished or private records filtered by the server before returning data."
+      ],
+      "errors": [
+        "Malformed routes, mismatched GET path parameters, missing/extra link parameters, and unknown fields or values that are not text or a generated model id produce PIPE-UI-011 or PIPE-UI-017."
+      ],
+      "example": "model Post { title text slug text required unique published boolean } async function publishedPosts(db capability<database>) -> task<list<Post>> { return wait for get posts from Post where published is true ordered by title ascending limited to 50 using db } http GET /published-posts requires database -> publishedPosts component PostRow { show post title link \"Read article\" to Article with slug post.slug } page Articles { state posts list<Post> from GET \"/published-posts\" for each post in posts show PostRow } page Article at \"/articles/:slug\" { state posts list<Post> from GET \"/published-posts\" for each post in posts show post title empty \"Article not found or unpublished.\" }",
+      "related": [
+        "typed internal page link",
+        "typed GET page-state source",
+        "typed page list",
+        "HTTP route"
+      ],
+      "properties": [
+        "path",
+        "parameters",
+        "componentId"
+      ],
+      "events": [],
+      "effects": [
+        "http"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-PAGE-STATE-SOURCE-001",
+      "name": "typed GET page-state source",
+      "purpose": "Hydrate typed page list state from a public GET route, with an optional typed keyset continuation, so a page list can render database-backed data without a host state adapter.",
+      "syntax": "state items list<Item> from GET \"/items\" [next GET \"/items/:after\" cursor by name] [search GET \"/items/search/:term\" [next GET \"/items/search/:term/:after\" cursor by name]]",
+      "types": [
+        "list<Model|Record> page state",
+        "static GET route",
+        "matching list<Model|Record> response",
+        "optional one-parameter GET continuation; optional one-parameter GET search with its own optional cursor continuation; all return the same list type"
+      ],
+      "constraints": [
+        "A static initial GET route has no path parameters or query string. A dynamic initial route carries each page route parameter in the same order with a matching text or integer handler type; the static path prefixes may differ.",
+        "The initial and continuation route responses must match the page state list type exactly.",
+        "The base continuation adds one text or integer cursor path parameter and carries every parameter from a dynamic initial source with matching handler types; its query must retain the same scope predicates. A search continuation is declared inside the search source and has distinct search-term and cursor path parameters. Search sources currently accept only the search-term parameter, not additional page-scope parameters. Server-injected Principal and capabilities are also allowed.",
+        "The cursor must be a unique text or integer field, or the generated integer id of a model, and must match the cursor route parameter; traversal uses the last row value to request the next page. A search source takes one text path parameter, returns the same list type, and requires a page-list filter field; the generated filter input debounces and URL-encodes search requests.",
+        "The generated browser fetches declared public routes; handlers, capabilities, database schema, and query plans remain server-side.",
+        "The generated list keeps only one server page in browser state and supports forward traversal. Loading, request failure, and end-of-list are announced accessibly.",
+        "The initial source does not add database filters or limits. Use bounded typed database queries for server-side filtering or pagination.",
+        "Requests do not share a snapshot, so concurrent writes may affect traversal.",
+        "When a page has a generated CRUD section for the same model and source route, that section uses the continuation for its next-page control while retaining create, edit, and delete. This page data is hydrated by the generated client and does not require PIPE_UI_STATE."
+      ],
+      "errors": [
+        "Unknown/non-GET routes, unmatched dynamic route parameters, query strings, mismatched list responses, invalid search/cursor parameters, and non-unique or unsupported cursor fields are rejected. The generated model id is an integer cursor."
+      ],
+      "example": "model Task { title text required unique } async function listTasks(db capability<database>) -> task<list<Task>> { return wait for get records from Task ordered by title ascending limited to 50 using db } async function nextTasks(db capability<database>, after text) -> task<list<Task>> { return wait for get records from Task where title is greater than after ordered by title ascending limited to 50 using db } http GET /tasks requires database -> listTasks http GET /tasks/:after requires database -> nextTasks component TaskRow { show task title } page Home { state tasks list<Task> from GET \"/tasks\" next GET \"/tasks/:after\" cursor by title for each task in tasks show TaskRow }",
+      "related": [
+        "typed page list",
+        "typed route declaration",
+        "database query",
+        "release boundary"
+      ],
+      "properties": [
+        "state",
+        "method",
+        "path",
+        "responseType",
+        "next",
+        "cursorField",
+        "search"
+      ],
+      "events": [],
+      "effects": [
+        "http"
+      ],
+      "kind": "construct"
+    },
+    {
+      "id": "UI-PAGE-STATE-UPDATE-001",
+      "name": "typed local page-state update",
+      "purpose": "Append a typed row or project its fields into a smaller record, remove a row, or change a numeric field, with optional browser-local persistence.",
+      "syntax": "event add(product Product) appends product as CartLine { productId: product.id, quantity: 1 } to cart; event remove(item Item) removes item from items; event more(item Item) increases quantity of item in items; event less(item Item) decreases quantity of item in items; show total of items by price times quantity; state items list<Item> = [] persisted in local storage",
+      "types": [
+        "list<Item> page state",
+        "event parameter matching the list item type",
+        "typed record projection fields and literals",
+        "numeric item fields",
+        "local browser storage"
+      ],
+      "constraints": [
+        "A local update event names a list state and one event parameter whose type exactly matches its list item when no projection is used. Append may use `as TypeName { field: value, ... }` to construct the item from source-row fields and typed literals.",
+        "A repeated-row button binds that parameter to the whole typed row item using `with item from item`, or to a checked field when its type matches.",
+        "An append projection may use only fields present in the row value. A model id is generated for database-persisted rows; manually constructed model values returned by an in-memory function may omit `id` in JSON. For non-database rows, project a stable field actually returned by the source, or include a stable key in the returned values.",
+        "Append adds one item. Remove deletes the first item with the same model id, or the first structurally equal value when no id is present. Increase/decrease changes only the matching row field by one and requires an integer or number field.",
+        "A total display sums one numeric field, or multiplies two numeric fields per row before summing; it recalculates when the page list changes.",
+        "`persisted in local storage` scopes data by app, page, and state name. The generated browser validates restored JSON against the state TypeRef and model fields; invalid or unreadable entries are discarded. A browser-storage write must succeed before the new state is committed.",
+        "Persistent page state cannot also be hydrated from a remote GET source."
+      ],
+      "errors": [
+        "Unknown/non-list state, mismatched event parameter or projection field types, incomplete record projections, nonnumeric fields, missing repeated-row binding, server-action combinations, remote-source persistence, and unsupported persisted types produce UI diagnostics."
+      ],
+      "example": "app Shop\nmodel Product { id integer name text price integer }\ntype CartLine { productId integer price integer quantity integer }\ncomponent ProductRow { button \"Add\" on add with product from product }\ncomponent CartRow { button \"More\" on more with line from line }\ncomponent CartSummary { show total of cart by price times quantity }\npage Cart { state products list<Product> = [] state cart list<CartLine> persisted in local storage event add(product Product) appends product as CartLine { productId: product.id, price: product.price, quantity: 1 } to cart event more(line CartLine) increases quantity of line in cart for each product in products show ProductRow for each line in cart show CartRow use CartSummary }",
+      "related": [
+        "page declaration",
+        "page state",
+        "typed page list",
+        "typed component button"
+      ],
+      "properties": [
+        "operation",
+        "state",
+        "parameter",
+        "field",
+        "total",
+        "persisted",
+        "storageKey"
+      ],
+      "events": [
+        "repeated-row button"
+      ],
+      "effects": [
+        "browser storage"
+      ],
+      "kind": "construct"
+    }
+  ],
+  "capabilities": [
+    {
+      "name": "http",
+      "stdlib": [
+        "httpRequest",
+        "httpRequestJson",
+        "httpRequestMultipart"
+      ]
+    },
+    {
+      "name": "database",
+      "stdlib": []
+    },
+    {
+      "name": "environment",
+      "stdlib": [
+        "environmentArguments",
+        "environmentBoolean",
+        "environmentInteger",
+        "environmentSecret",
+        "environmentText",
+        "readStdin",
+        "revealSecret",
+        "setExitCode",
+        "writeStderr",
+        "writeStdout"
+      ]
+    },
+    {
+      "name": "time",
+      "stdlib": [
+        "cancel",
+        "currentTime",
+        "delay",
+        "scheduleOnce",
+        "timeout",
+        "today"
+      ]
+    },
+    {
+      "name": "random",
+      "stdlib": [
+        "randomId",
+        "randomInteger",
+        "randomNumber"
+      ]
+    },
+    {
+      "name": "secureRandom",
+      "stdlib": [
+        "secureRandomId",
+        "secureRandomInteger"
+      ]
+    },
+    {
+      "name": "filesystem",
+      "stdlib": [
+        "appendTextFile",
+        "copyTextFile",
+        "createDirectory",
+        "fileExists",
+        "listDirectory",
+        "moveTextFile",
+        "readTextFile",
+        "removeTextFile",
+        "saveUpload",
+        "writeTextFile"
+      ]
+    },
+    {
+      "name": "email",
+      "stdlib": [
+        "sendEmail"
+      ]
+    }
+  ],
+  "diagnostics": {
+    "schemaVersion": "bmec.diagnostics.v1",
+    "languageVersion": "0.1",
+    "categories": {
+      "PIPE-SYN": "syntax",
+      "PIPE-TYPE": "type system",
+      "PIPE-REF": "references",
+      "PIPE-MODEL": "data models",
+      "PIPE-UI": "pages and UI",
+      "PIPE-AI": "AI/tooling contract",
+      "PIPE-RUNTIME": "runtime failures",
+      "PIPE-RESULT": "Result value semantics",
+      "PIPE-FUNC": "standard-library function calls",
+      "PIPE-INTERNAL": "compiler bugs"
+    },
+    "envelope": {
+      "required": [
+        "schemaVersion",
+        "languageVersion",
+        "ok",
+        "diagnostics"
+      ],
+      "shape": {
+        "schemaVersion": "bmec.diagnostics.v1",
+        "languageVersion": "0.1",
+        "ok": false,
+        "diagnostics": "Diagnostic[]"
+      }
+    },
+    "diagnostic": {
+      "required": [
+        "code",
+        "severity",
+        "message",
+        "file",
+        "line",
+        "column",
+        "span"
+      ],
+      "optional": [
+        "node",
+        "path",
+        "kind",
+        "received",
+        "expected",
+        "actual",
+        "suggestions",
+        "repair",
+        "related"
+      ],
+      "shape": {
+        "code": "stable string",
+        "severity": "error|warning",
+        "message": "string",
+        "file": "string",
+        "line": "number",
+        "column": "number",
+        "span": {
+          "start": {
+            "file": "string",
+            "line": "number",
+            "column": "number",
+            "offset": "number"
+          },
+          "end": {
+            "file": "string",
+            "line": "number",
+            "column": "number",
+            "offset": "number"
+          }
+        },
+        "node": "string?",
+        "path": "string?",
+        "kind": "string?",
+        "received": "string?",
+        "expected": "string?",
+        "actual": "string?",
+        "suggestions": "string[]?",
+        "repair": {
+          "type": "string",
+          "value": "string"
+        },
+        "related": [
+          {
+            "message": "string",
+            "span": "Span"
+          }
+        ]
+      }
+    },
+    "repairPolicy": "Use repair only for compiler-known deterministic actions. Suggestions are advisory and must not be treated as certain intent."
+  },
+  "examples": [
+    {
+      "id": "EXAMPLE-HELLO-001",
+      "name": "hello-world",
+      "title": "Hello World",
+      "purpose": "Define a small typed function and return text.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "app",
+        "function",
+        "text"
+      ],
+      "source": "app HelloWorld\nfunction greeting() -> text { return \"Hello, world!\" }\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-RECORD-001",
+      "name": "typed-record-and-json",
+      "title": "Typed Record, JSON, and Result",
+      "purpose": "Declare a record type, encode it as JSON text, and decode JSON into a typed Result.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "record",
+        "json",
+        "result"
+      ],
+      "source": "app JsonRecords\ntype Preferences { name text active boolean }\nfunction stringify(preferences Preferences) -> text { return encodeJson(preferences) }\nfunction parsePreferences(source text) -> result<Preferences,text> { return decodeJson(source) }\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-TODO-001",
+      "name": "todo-model-and-page",
+      "title": "Todo Model and Page",
+      "purpose": "Start a small database-backed UI with a model, CRUD page, and named style.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "model",
+        "page",
+        "crud",
+        "style"
+      ],
+      "source": "app Todo\nmodel Task { title text required done boolean default false }\npage Home { crud Task }\nstyle clean dark\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-DASHBOARD-001",
+      "name": "controlled-english-dashboard",
+      "title": "Controlled-English Dashboard",
+      "purpose": "Show typed models, reusable form and row components, page lists, responsive styles, async database functions, and authenticated routes.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "model",
+        "component",
+        "form",
+        "validation",
+        "page-list",
+        "responsive-style",
+        "database-capability",
+        "route-authorization"
+      ],
+      "source": "app Workspace\napi / tasks from Task requiring authenticated\nmodel User {\n  name text required active boolean required\n}\nmodel Task {\n  title text required done boolean required\n}\ncomponent TaskRow {\n  show task title\n}\ncomponent TaskForm form {\n  text \"Create task\"\n  input title text validate nonempty button \"Save\" on Save\n}\npage Dashboard {\n  state tasks list < Task >\n  state loading boolean = false\n  for each task in tasks show TaskRow\n  use TaskForm when Save is clicked\n  crud Task\n}\nstyle named DashboardStyle {\n  layout is grid columns is 2 gap is 16 on small screens {\n    columns is 1\n  }\n}\nfunction canAccess(age integer) -> boolean {\n  return age is at least 18\n}\nasync function listTasks(db capability < database >) -> task < list < Task > > {\n  return wait for get tasks from Task using db\n}\nasync function createTask(db capability < database >,body Task) -> task < integer > {\n  return wait for add body to Task using db\n}\nserve GET / tasks requiring authenticated and database with listTasks\nserve POST / tasks requiring authenticated and database with createTask\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-LOG-001",
+      "name": "log-analyzer",
+      "title": "Large-File Log Analyzer",
+      "purpose": "Read a file through an explicit filesystem capability, filter and count matching lines, sort results, and write a summary.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "filesystem-capability",
+        "result",
+        "list-filter",
+        "fold",
+        "sort",
+        "file-io"
+      ],
+      "source": "app LogAnalyzer\nfunction summarize(fs capability<filesystem>, input text, output text) -> result<boolean,text> { let contents = readTextFile(fs, input)? let lines = split(contents, \"\\n\") let errors = filter(lines, lambda(line text) -> boolean { return textContains(line, \"ERROR\") }) let errorCount = fold(errors, 0, lambda(count integer, line text) -> integer { return count + 1 }) let sortedErrors = sort(errors) let summary = join(sortedErrors, \"\\n\") let written = writeTextFile(fs, output, summary)? return ok(errorCount > 0 and written) }\n",
+      "check": "bmec check main.bmec",
+      "run": "bmec exec main.bmec summarize --args '[\"input.log\",\"errors.log\"]' --filesystem-root ./data"
+    },
+    {
+      "id": "EXAMPLE-READING-QUEUE-001",
+      "name": "reading-queue",
+      "title": "Personal Reading Queue",
+      "purpose": "Build a developer-owned full-stack app with authenticated routes and server-enforced per-user database scope.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "model",
+        "record",
+        "database-capability",
+        "route-authorization",
+        "form",
+        "page-list",
+        "responsive-style"
+      ],
+      "source": "app ReadingQueue {\n  description \"A personal reading queue with server-checked ownership.\"\n}\ntype Principal {\n  id text role text\n}\nmodel Book {\n  title text required ownerId text required finished boolean required default false\n}\ntype NewBook {\n  title text required\n}\nasync function listMyBooks(principal Principal, db capability<database>) -> task<list<Book>> {\n  let userId = principal.id\n  return wait for get books from Book where ownerId is userId ordered by id ascending limited to 100 using db\n}\nasync function addMyBook(principal Principal, db capability<database>, body NewBook) -> task<integer> {\n  let book = Book {\n    title :body.title, ownerId :principal.id, finished :false\n  }\n  return wait for add book to Book using db\n}\nserve GET / books requiring authenticated and database with listMyBooks\nserve POST / books requiring authenticated and database with addMyBook\ncomponent NewBookForm form {\n  text \"Add a book to your queue\"\n  input title text label \"Book title\" validate nonempty button \"Add book\" on AddBook\n}\ncomponent BookRow {\n  show book title\n  show book finished\n}\ncomponent PrivacyNote {\n  text \"Books saved here are visible only to your account.\"\n}\ncomponent SignInForm form {\n  text \"Sign in to see your reading queue\"\n  input id text label \"User ID\" validate nonempty\n  input password text label \"Password\" validate nonempty button \"Sign in\" on Login\n}\ncomponent SignOutButton {\n  button \"Sign out\" on Logout\n}\npage SignIn {\n  use SignInForm link \"Open my reading queue\" to ReadingQueue\n}\npage ReadingQueue {\n  use SignOutButton\n  use style ReadingQueueLayout\n  event AddBook(title text) sends POST \"/books\" use NewBookForm\n  state books list<Book> from GET \"/books\"\n  use PrivacyNote link \"Sign in\" to SignIn\n  for each book in books show BookRow empty \"Your queue is empty. Add a book to begin.\"\n}\nstyle named ReadingQueueLayout {\n  layout is column alignment is stretch gap is 16 padding is 24 on small screens {\n    padding is 12\n  }\n}\n",
+      "check": "bmec check main.bmec"
+    }
+  ]
+}

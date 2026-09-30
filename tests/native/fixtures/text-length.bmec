@@ -1,0 +1,9 @@
+app NativeTextLength
+
+function units(value text) -> integer {
+  return textLength(value)
+}
+
+function main() -> boolean {
+  return units("") == 0 and units("ASCII") == 5 and units("éα") == 2 and units("é") == 2 and units("🌍") == 1 and units("a🌍b") == 3
+}

@@ -1,0 +1,43 @@
+{
+  "schemaVersion": "bmec.diagnostics.v1",
+  "languageVersion": "0.1",
+  "categories": {
+    "PIPE-SYN": "syntax",
+    "PIPE-TYPE": "type system",
+    "PIPE-REF": "references",
+    "PIPE-MODEL": "data models",
+    "PIPE-UI": "pages and UI",
+    "PIPE-AI": "AI/tooling contract",
+    "PIPE-RUNTIME": "runtime failures",
+    "PIPE-RESULT": "Result value semantics",
+    "PIPE-FUNC": "standard-library function calls",
+    "PIPE-INTERNAL": "compiler bugs"
+  },
+  "envelope": {
+    "required": ["schemaVersion", "languageVersion", "ok", "diagnostics"],
+    "shape": {"schemaVersion": "bmec.diagnostics.v1", "languageVersion": "0.1", "ok": false, "diagnostics": "Diagnostic[]"}
+  },
+  "diagnostic": {
+    "required": ["code", "severity", "message", "file", "line", "column", "span"],
+    "optional": ["node", "path", "kind", "received", "expected", "actual", "suggestions", "repair", "related"],
+    "shape": {
+      "code": "stable string",
+      "severity": "error|warning",
+      "message": "string",
+      "file": "string",
+      "line": "number",
+      "column": "number",
+      "span": {"start": {"file": "string", "line": "number", "column": "number", "offset": "number"}, "end": {"file": "string", "line": "number", "column": "number", "offset": "number"}},
+      "node": "string?",
+      "path": "string?",
+      "kind": "string?",
+      "received": "string?",
+      "expected": "string?",
+      "actual": "string?",
+      "suggestions": "string[]?",
+      "repair": {"type": "string", "value": "string"},
+      "related": [{"message": "string", "span": "Span"}]
+    }
+  },
+  "repairPolicy": "Use repair only for compiler-known deterministic actions. Suggestions are advisory and must not be treated as certain intent."
+}

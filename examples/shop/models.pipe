@@ -1,0 +1,4 @@
+public model Product {
+    name text required
+    price money required
+}

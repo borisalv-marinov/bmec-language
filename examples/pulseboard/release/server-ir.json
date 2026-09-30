@@ -1,0 +1,1521 @@
+{
+  "irVersion": 2,
+  "version": "0.1-alpha",
+  "app": {
+    "id": "APP-001",
+    "name": "PulseBoard"
+  },
+  "models": [
+    {
+      "id": "DB-001",
+      "name": "Task",
+      "typeRef": {
+        "kind": "model",
+        "name": "Task",
+        "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+      },
+      "visibility": "private",
+      "fields": [
+        {
+          "id": "FIELD-001",
+          "name": "title",
+          "type": "text",
+          "typeRef": {
+            "kind": "primitive",
+            "name": "text"
+          },
+          "required": true,
+          "unique": false
+        },
+        {
+          "id": "FIELD-002",
+          "name": "status",
+          "type": "TaskStatus",
+          "typeRef": {
+            "kind": "enum",
+            "name": "TaskStatus",
+            "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+            "variants": [
+              {
+                "name": "Inbox"
+              },
+              {
+                "name": "Active"
+              },
+              {
+                "name": "Done"
+              }
+            ]
+          },
+          "required": true,
+          "unique": false
+        },
+        {
+          "id": "FIELD-003",
+          "name": "priority",
+          "type": "TaskPriority",
+          "typeRef": {
+            "kind": "enum",
+            "name": "TaskPriority",
+            "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:2",
+            "variants": [
+              {
+                "name": "Low"
+              },
+              {
+                "name": "Medium"
+              },
+              {
+                "name": "High"
+              }
+            ]
+          },
+          "required": true,
+          "unique": false
+        }
+      ]
+    }
+  ],
+  "records": [
+    {
+      "id": "TYPE-001",
+      "name": "DashboardMetric",
+      "visibility": "private",
+      "fields": [
+        {
+          "id": "FIELD-T001",
+          "name": "name",
+          "type": "text",
+          "typeRef": {
+            "kind": "primitive",
+            "name": "text"
+          },
+          "required": false,
+          "unique": false
+        },
+        {
+          "id": "FIELD-T002",
+          "name": "value",
+          "type": "integer",
+          "typeRef": {
+            "kind": "primitive",
+            "name": "integer"
+          },
+          "required": false,
+          "unique": false
+        }
+      ]
+    }
+  ],
+  "db": {
+    "version": 1,
+    "models": [
+      {
+        "id": "DB-001",
+        "name": "Task",
+        "typeSymbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4",
+        "fields": [
+          {
+            "id": "DB-001:id",
+            "name": "id",
+            "type": {
+              "kind": "primitive",
+              "name": "integer"
+            },
+            "required": true,
+            "unique": false,
+            "primaryKey": true
+          },
+          {
+            "id": "FIELD-001",
+            "name": "title",
+            "type": {
+              "kind": "primitive",
+              "name": "text"
+            },
+            "required": true,
+            "unique": false,
+            "primaryKey": false
+          },
+          {
+            "id": "FIELD-002",
+            "name": "status",
+            "type": {
+              "kind": "enum",
+              "name": "TaskStatus",
+              "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+              "variants": [
+                {
+                  "name": "Inbox"
+                },
+                {
+                  "name": "Active"
+                },
+                {
+                  "name": "Done"
+                }
+              ]
+            },
+            "required": true,
+            "unique": false,
+            "primaryKey": false
+          },
+          {
+            "id": "FIELD-003",
+            "name": "priority",
+            "type": {
+              "kind": "enum",
+              "name": "TaskPriority",
+              "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:2",
+              "variants": [
+                {
+                  "name": "Low"
+                },
+                {
+                  "name": "Medium"
+                },
+                {
+                  "name": "High"
+                }
+              ]
+            },
+            "required": true,
+            "unique": false,
+            "primaryKey": false
+          }
+        ]
+      }
+    ]
+  },
+  "enums": [
+    {
+      "id": "ENUM-001",
+      "name": "TaskStatus",
+      "visibility": "private",
+      "variants": [
+        {
+          "name": "Inbox"
+        },
+        {
+          "name": "Active"
+        },
+        {
+          "name": "Done"
+        }
+      ]
+    },
+    {
+      "id": "ENUM-002",
+      "name": "TaskPriority",
+      "visibility": "private",
+      "variants": [
+        {
+          "name": "Low"
+        },
+        {
+          "name": "Medium"
+        },
+        {
+          "name": "High"
+        }
+      ]
+    }
+  ],
+  "interfaces": [],
+  "implementations": [],
+  "pages": [
+    {
+      "id": "UI-001",
+      "name": "Dashboard",
+      "crud": [
+        "Task"
+      ],
+      "state": [
+        {
+          "name": "metrics",
+          "type": "list<DashboardMetric>",
+          "source": {
+            "method": "GET",
+            "path": "/dashboard/metrics"
+          }
+        }
+      ],
+      "events": []
+    }
+  ],
+  "ui": {
+    "components": [
+      {
+        "id": "UI-001",
+        "name": "Dashboard",
+        "style": "Shell",
+        "props": [],
+        "state": [
+          {
+            "name": "metrics",
+            "type": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "DashboardMetric",
+                "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+              }
+            },
+            "source": {
+              "method": "GET",
+              "path": "/dashboard/metrics"
+            }
+          }
+        ],
+        "events": [],
+        "children": [
+          {
+            "kind": "component",
+            "componentId": "COMP-001",
+            "props": {}
+          },
+          {
+            "kind": "component",
+            "componentId": "COMP-002",
+            "props": {}
+          },
+          {
+            "kind": "component",
+            "componentId": "COMP-003",
+            "props": {}
+          },
+          {
+            "kind": "component",
+            "componentId": "COMP-005",
+            "props": {}
+          },
+          {
+            "kind": "list",
+            "source": "metrics",
+            "item": "metric",
+            "empty": "No metrics available.",
+            "body": [
+              {
+                "kind": "component",
+                "componentId": "COMP-004",
+                "props": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "COMP-001",
+        "name": "Eyebrow",
+        "style": "Badge",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "PERSONAL WORKSPACE"
+          }
+        ]
+      },
+      {
+        "id": "COMP-002",
+        "name": "HeroBanner",
+        "style": "Hero",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "PulseBoard"
+          },
+          {
+            "kind": "text",
+            "value": "Your command center for focused work."
+          },
+          {
+            "kind": "text",
+            "value": "Plan clearly. Move quickly. Finish well."
+          }
+        ]
+      },
+      {
+        "id": "COMP-003",
+        "name": "QuickNote",
+        "style": "Note",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "LIVE WORKSPACE / LOCAL SQLITE"
+          }
+        ]
+      },
+      {
+        "id": "COMP-004",
+        "name": "MetricCard",
+        "style": "MetricBlue",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "binding",
+            "path": "metric.name"
+          },
+          {
+            "kind": "binding",
+            "path": "metric.value"
+          }
+        ]
+      },
+      {
+        "id": "COMP-005",
+        "name": "CommandPanel",
+        "style": "CommandPanel",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "Your next move"
+          },
+          {
+            "kind": "text",
+            "value": "Add a task below, then keep the list lean and actionable."
+          }
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "path": "/dashboard",
+        "componentId": "UI-001"
+      }
+    ]
+  },
+  "apis": [],
+  "functions": [
+    {
+      "id": "pulseboard@0.2.0:main.bmec:FUNC-001",
+      "name": "dashboardMetrics",
+      "async": true,
+      "visibility": "private",
+      "typeParameters": [],
+      "parameters": [
+        {
+          "name": "db",
+          "typeRef": {
+            "kind": "capability",
+            "name": "database"
+          },
+          "type": "capability<database>"
+        }
+      ],
+      "returnTypeRef": {
+        "kind": "task",
+        "result": {
+          "kind": "list",
+          "element": {
+            "kind": "record",
+            "name": "DashboardMetric",
+            "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+          }
+        }
+      },
+      "returnType": "task<list<DashboardMetric>>",
+      "body": [
+        {
+          "kind": "let",
+          "name": "tasks",
+          "mutable": false,
+          "value": {
+            "kind": "await",
+            "typeRef": {
+              "kind": "list",
+              "element": {
+                "kind": "model",
+                "name": "Task",
+                "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+              }
+            },
+            "type": "list<Task>",
+            "operand": {
+              "kind": "call",
+              "typeRef": {
+                "kind": "task",
+                "result": {
+                  "kind": "list",
+                  "element": {
+                    "kind": "model",
+                    "name": "Task",
+                    "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                  }
+                }
+              },
+              "type": "task<list<Task>>",
+              "callee": "databaseSelect",
+              "args": [
+                {
+                  "kind": "identifier",
+                  "typeRef": {
+                    "kind": "capability",
+                    "name": "database"
+                  },
+                  "type": "capability<database>",
+                  "name": "db",
+                  "symbolId": "pulseboard@0.2.0:main.bmec:FUNC-001:parameter:0"
+                },
+                {
+                  "kind": "literal",
+                  "typeRef": {
+                    "kind": "primitive",
+                    "name": "text"
+                  },
+                  "type": "text",
+                  "value": "Task"
+                },
+                {
+                  "kind": "literal",
+                  "typeRef": {
+                    "kind": "primitive",
+                    "name": "text"
+                  },
+                  "type": "text",
+                  "value": "title"
+                },
+                {
+                  "kind": "literal",
+                  "typeRef": {
+                    "kind": "primitive",
+                    "name": "text"
+                  },
+                  "type": "text",
+                  "value": "ascending"
+                }
+              ]
+            }
+          }
+        },
+        {
+          "kind": "let",
+          "name": "activeTasks",
+          "mutable": false,
+          "value": {
+            "kind": "call",
+            "typeRef": {
+              "kind": "list",
+              "element": {
+                "kind": "model",
+                "name": "Task",
+                "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+              }
+            },
+            "type": "list<Task>",
+            "callee": "filter",
+            "args": [
+              {
+                "kind": "identifier",
+                "typeRef": {
+                  "kind": "list",
+                  "element": {
+                    "kind": "model",
+                    "name": "Task",
+                    "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                  }
+                },
+                "type": "list<Task>",
+                "name": "tasks",
+                "symbolId": "pulseboard@0.2.0:main.bmec:FUNC-001:local:1"
+              },
+              {
+                "kind": "lambda",
+                "typeRef": {
+                  "kind": "function",
+                  "parameters": [
+                    {
+                      "kind": "model",
+                      "name": "Task",
+                      "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                    }
+                  ],
+                  "returns": {
+                    "kind": "primitive",
+                    "name": "boolean"
+                  }
+                },
+                "type": "(Task) -> boolean",
+                "lambda": {
+                  "id": "pulseboard@0.2.0:main.bmec:LAMBDA-001",
+                  "name": "<lambda>",
+                  "parameters": [
+                    {
+                      "name": "task",
+                      "typeRef": {
+                        "kind": "model",
+                        "name": "Task",
+                        "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                      },
+                      "type": "Task"
+                    }
+                  ],
+                  "returnTypeRef": {
+                    "kind": "primitive",
+                    "name": "boolean"
+                  },
+                  "returnType": "boolean",
+                  "body": [
+                    {
+                      "kind": "return",
+                      "value": {
+                        "kind": "match",
+                        "typeRef": {
+                          "kind": "primitive",
+                          "name": "boolean"
+                        },
+                        "type": "boolean",
+                        "scrutinee": {
+                          "kind": "field",
+                          "typeRef": {
+                            "kind": "enum",
+                            "name": "TaskStatus",
+                            "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+                            "variants": [
+                              {
+                                "name": "Inbox"
+                              },
+                              {
+                                "name": "Active"
+                              },
+                              {
+                                "name": "Done"
+                              }
+                            ]
+                          },
+                          "type": "TaskStatus",
+                          "object": {
+                            "kind": "identifier",
+                            "typeRef": {
+                              "kind": "model",
+                              "name": "Task",
+                              "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                            },
+                            "type": "Task",
+                            "name": "task",
+                            "symbolId": "pulseboard@0.2.0:main.bmec:LAMBDA-001:parameter:0"
+                          },
+                          "field": "status"
+                        },
+                        "arms": [
+                          {
+                            "variant": "Inbox",
+                            "value": {
+                              "kind": "literal",
+                              "typeRef": {
+                                "kind": "primitive",
+                                "name": "boolean"
+                              },
+                              "type": "boolean",
+                              "value": false
+                            }
+                          },
+                          {
+                            "variant": "Active",
+                            "value": {
+                              "kind": "literal",
+                              "typeRef": {
+                                "kind": "primitive",
+                                "name": "boolean"
+                              },
+                              "type": "boolean",
+                              "value": true
+                            }
+                          },
+                          {
+                            "variant": "Done",
+                            "value": {
+                              "kind": "literal",
+                              "typeRef": {
+                                "kind": "primitive",
+                                "name": "boolean"
+                              },
+                              "type": "boolean",
+                              "value": false
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "captures": [],
+                  "recordSchemas": {
+                    "Task": {
+                      "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4",
+                      "kind": "model",
+                      "fields": {
+                        "title": {
+                          "kind": "primitive",
+                          "name": "text"
+                        },
+                        "status": {
+                          "kind": "enum",
+                          "name": "TaskStatus",
+                          "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+                          "variants": [
+                            {
+                              "name": "Inbox"
+                            },
+                            {
+                              "name": "Active"
+                            },
+                            {
+                              "name": "Done"
+                            }
+                          ]
+                        },
+                        "priority": {
+                          "kind": "enum",
+                          "name": "TaskPriority",
+                          "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:2",
+                          "variants": [
+                            {
+                              "name": "Low"
+                            },
+                            {
+                              "name": "Medium"
+                            },
+                            {
+                              "name": "High"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "DashboardMetric": {
+                      "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3",
+                      "kind": "record",
+                      "fields": {
+                        "name": {
+                          "kind": "primitive",
+                          "name": "text"
+                        },
+                        "value": {
+                          "kind": "primitive",
+                          "name": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "captures": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "let",
+          "name": "doneTasks",
+          "mutable": false,
+          "value": {
+            "kind": "call",
+            "typeRef": {
+              "kind": "list",
+              "element": {
+                "kind": "model",
+                "name": "Task",
+                "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+              }
+            },
+            "type": "list<Task>",
+            "callee": "filter",
+            "args": [
+              {
+                "kind": "identifier",
+                "typeRef": {
+                  "kind": "list",
+                  "element": {
+                    "kind": "model",
+                    "name": "Task",
+                    "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                  }
+                },
+                "type": "list<Task>",
+                "name": "tasks",
+                "symbolId": "pulseboard@0.2.0:main.bmec:FUNC-001:local:1"
+              },
+              {
+                "kind": "lambda",
+                "typeRef": {
+                  "kind": "function",
+                  "parameters": [
+                    {
+                      "kind": "model",
+                      "name": "Task",
+                      "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                    }
+                  ],
+                  "returns": {
+                    "kind": "primitive",
+                    "name": "boolean"
+                  }
+                },
+                "type": "(Task) -> boolean",
+                "lambda": {
+                  "id": "pulseboard@0.2.0:main.bmec:LAMBDA-002",
+                  "name": "<lambda>",
+                  "parameters": [
+                    {
+                      "name": "task",
+                      "typeRef": {
+                        "kind": "model",
+                        "name": "Task",
+                        "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                      },
+                      "type": "Task"
+                    }
+                  ],
+                  "returnTypeRef": {
+                    "kind": "primitive",
+                    "name": "boolean"
+                  },
+                  "returnType": "boolean",
+                  "body": [
+                    {
+                      "kind": "return",
+                      "value": {
+                        "kind": "match",
+                        "typeRef": {
+                          "kind": "primitive",
+                          "name": "boolean"
+                        },
+                        "type": "boolean",
+                        "scrutinee": {
+                          "kind": "field",
+                          "typeRef": {
+                            "kind": "enum",
+                            "name": "TaskStatus",
+                            "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+                            "variants": [
+                              {
+                                "name": "Inbox"
+                              },
+                              {
+                                "name": "Active"
+                              },
+                              {
+                                "name": "Done"
+                              }
+                            ]
+                          },
+                          "type": "TaskStatus",
+                          "object": {
+                            "kind": "identifier",
+                            "typeRef": {
+                              "kind": "model",
+                              "name": "Task",
+                              "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                            },
+                            "type": "Task",
+                            "name": "task",
+                            "symbolId": "pulseboard@0.2.0:main.bmec:LAMBDA-002:parameter:0"
+                          },
+                          "field": "status"
+                        },
+                        "arms": [
+                          {
+                            "variant": "Inbox",
+                            "value": {
+                              "kind": "literal",
+                              "typeRef": {
+                                "kind": "primitive",
+                                "name": "boolean"
+                              },
+                              "type": "boolean",
+                              "value": false
+                            }
+                          },
+                          {
+                            "variant": "Active",
+                            "value": {
+                              "kind": "literal",
+                              "typeRef": {
+                                "kind": "primitive",
+                                "name": "boolean"
+                              },
+                              "type": "boolean",
+                              "value": false
+                            }
+                          },
+                          {
+                            "variant": "Done",
+                            "value": {
+                              "kind": "literal",
+                              "typeRef": {
+                                "kind": "primitive",
+                                "name": "boolean"
+                              },
+                              "type": "boolean",
+                              "value": true
+                            }
+                          }
+                        ]
+                      }
+                    }
+                  ],
+                  "captures": [],
+                  "recordSchemas": {
+                    "Task": {
+                      "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4",
+                      "kind": "model",
+                      "fields": {
+                        "title": {
+                          "kind": "primitive",
+                          "name": "text"
+                        },
+                        "status": {
+                          "kind": "enum",
+                          "name": "TaskStatus",
+                          "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+                          "variants": [
+                            {
+                              "name": "Inbox"
+                            },
+                            {
+                              "name": "Active"
+                            },
+                            {
+                              "name": "Done"
+                            }
+                          ]
+                        },
+                        "priority": {
+                          "kind": "enum",
+                          "name": "TaskPriority",
+                          "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:2",
+                          "variants": [
+                            {
+                              "name": "Low"
+                            },
+                            {
+                              "name": "Medium"
+                            },
+                            {
+                              "name": "High"
+                            }
+                          ]
+                        }
+                      }
+                    },
+                    "DashboardMetric": {
+                      "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3",
+                      "kind": "record",
+                      "fields": {
+                        "name": {
+                          "kind": "primitive",
+                          "name": "text"
+                        },
+                        "value": {
+                          "kind": "primitive",
+                          "name": "integer"
+                        }
+                      }
+                    }
+                  }
+                },
+                "captures": []
+              }
+            ]
+          }
+        },
+        {
+          "kind": "return",
+          "value": {
+            "kind": "list",
+            "typeRef": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "DashboardMetric",
+                "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+              }
+            },
+            "type": "list<DashboardMetric>",
+            "elements": [
+              {
+                "kind": "record",
+                "typeRef": {
+                  "kind": "record",
+                  "name": "DashboardMetric",
+                  "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+                },
+                "type": "DashboardMetric",
+                "fields": [
+                  {
+                    "name": "name",
+                    "value": {
+                      "kind": "literal",
+                      "typeRef": {
+                        "kind": "primitive",
+                        "name": "text"
+                      },
+                      "type": "text",
+                      "value": "Tasks tracked"
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "value": {
+                      "kind": "call",
+                      "typeRef": {
+                        "kind": "primitive",
+                        "name": "integer"
+                      },
+                      "type": "integer",
+                      "callee": "length",
+                      "args": [
+                        {
+                          "kind": "identifier",
+                          "typeRef": {
+                            "kind": "list",
+                            "element": {
+                              "kind": "model",
+                              "name": "Task",
+                              "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                            }
+                          },
+                          "type": "list<Task>",
+                          "name": "tasks",
+                          "symbolId": "pulseboard@0.2.0:main.bmec:FUNC-001:local:1"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "kind": "record",
+                "typeRef": {
+                  "kind": "record",
+                  "name": "DashboardMetric",
+                  "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+                },
+                "type": "DashboardMetric",
+                "fields": [
+                  {
+                    "name": "name",
+                    "value": {
+                      "kind": "literal",
+                      "typeRef": {
+                        "kind": "primitive",
+                        "name": "text"
+                      },
+                      "type": "text",
+                      "value": "In progress"
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "value": {
+                      "kind": "call",
+                      "typeRef": {
+                        "kind": "primitive",
+                        "name": "integer"
+                      },
+                      "type": "integer",
+                      "callee": "length",
+                      "args": [
+                        {
+                          "kind": "identifier",
+                          "typeRef": {
+                            "kind": "list",
+                            "element": {
+                              "kind": "model",
+                              "name": "Task",
+                              "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                            }
+                          },
+                          "type": "list<Task>",
+                          "name": "activeTasks",
+                          "symbolId": "pulseboard@0.2.0:main.bmec:FUNC-001:local:2"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              },
+              {
+                "kind": "record",
+                "typeRef": {
+                  "kind": "record",
+                  "name": "DashboardMetric",
+                  "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+                },
+                "type": "DashboardMetric",
+                "fields": [
+                  {
+                    "name": "name",
+                    "value": {
+                      "kind": "literal",
+                      "typeRef": {
+                        "kind": "primitive",
+                        "name": "text"
+                      },
+                      "type": "text",
+                      "value": "Completed"
+                    }
+                  },
+                  {
+                    "name": "value",
+                    "value": {
+                      "kind": "call",
+                      "typeRef": {
+                        "kind": "primitive",
+                        "name": "integer"
+                      },
+                      "type": "integer",
+                      "callee": "length",
+                      "args": [
+                        {
+                          "kind": "identifier",
+                          "typeRef": {
+                            "kind": "list",
+                            "element": {
+                              "kind": "model",
+                              "name": "Task",
+                              "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+                            }
+                          },
+                          "type": "list<Task>",
+                          "name": "doneTasks",
+                          "symbolId": "pulseboard@0.2.0:main.bmec:FUNC-001:local:3"
+                        }
+                      ]
+                    }
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "recordTypes": {
+        "Task": {
+          "title": "text",
+          "status": "TaskStatus",
+          "priority": "TaskPriority"
+        },
+        "DashboardMetric": {
+          "name": "text",
+          "value": "integer"
+        }
+      },
+      "recordSchemas": {
+        "Task": {
+          "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4",
+          "kind": "model",
+          "fields": {
+            "title": {
+              "kind": "primitive",
+              "name": "text"
+            },
+            "status": {
+              "kind": "enum",
+              "name": "TaskStatus",
+              "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+              "variants": [
+                {
+                  "name": "Inbox"
+                },
+                {
+                  "name": "Active"
+                },
+                {
+                  "name": "Done"
+                }
+              ]
+            },
+            "priority": {
+              "kind": "enum",
+              "name": "TaskPriority",
+              "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:2",
+              "variants": [
+                {
+                  "name": "Low"
+                },
+                {
+                  "name": "Medium"
+                },
+                {
+                  "name": "High"
+                }
+              ]
+            }
+          }
+        },
+        "DashboardMetric": {
+          "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3",
+          "kind": "record",
+          "fields": {
+            "name": {
+              "kind": "primitive",
+              "name": "text"
+            },
+            "value": {
+              "kind": "primitive",
+              "name": "integer"
+            }
+          }
+        }
+      }
+    }
+  ],
+  "styles": [
+    {
+      "id": "STYLE-001",
+      "token": true,
+      "name": "SurfaceBase",
+      "values": [],
+      "spacing": "comfortable",
+      "corners": "rounded",
+      "disabled": "guarded",
+      "focus": "ringed",
+      "transitionDuration": 150,
+      "transitionProperty": "background",
+      "transitionEasing": "ease",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-002",
+      "token": true,
+      "name": "Accent",
+      "values": [
+        "accent"
+      ],
+      "typedValues": [
+        {
+          "name": "accent",
+          "category": "surface"
+        }
+      ]
+    },
+    {
+      "id": "STYLE-003",
+      "token": false,
+      "name": "Shell",
+      "values": [],
+      "composes": [
+        "SurfaceBase",
+        "Accent"
+      ],
+      "padding": 40,
+      "gap": 18,
+      "margin": 24,
+      "responsiveGap": 12,
+      "responsivePadding": 20,
+      "responsiveMargin": 12,
+      "states": [
+        {
+          "kind": "StyleState",
+          "state": "hovered",
+          "properties": [
+            {
+              "kind": "StyleProperty",
+              "name": "background",
+              "value": "dark-blue",
+              "span": {
+                "start": {
+                  "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+                  "line": 57,
+                  "column": 8,
+                  "offset": 1523
+                },
+                "end": {
+                  "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+                  "line": 57,
+                  "column": 43,
+                  "offset": 1558
+                }
+              }
+            }
+          ],
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 57,
+              "column": 3,
+              "offset": 1518
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 57,
+              "column": 43,
+              "offset": 1558
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "stretch",
+      "theme": "dark",
+      "border": "strong",
+      "shadow": "strong",
+      "corners": "rounded",
+      "disabled": "guarded",
+      "focus": "ringed",
+      "surface": "elevated",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-004",
+      "token": false,
+      "name": "Badge",
+      "values": [],
+      "padding": 8,
+      "margin": 8,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "blue",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 68,
+              "column": 3,
+              "offset": 1757
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 68,
+              "column": 21,
+              "offset": 1775
+            }
+          }
+        }
+      ],
+      "layout": "row",
+      "alignment": "center",
+      "typography": "compact",
+      "corners": "pill",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-005",
+      "token": false,
+      "name": "Hero",
+      "values": [],
+      "padding": 34,
+      "margin": 8,
+      "responsivePadding": 22,
+      "responsiveFontSize": 20,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "dark-blue",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 79,
+              "column": 3,
+              "offset": 1934
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 79,
+              "column": 26,
+              "offset": 1957
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "start",
+      "typography": "readable",
+      "fontWeight": "bold",
+      "fontSize": 24,
+      "lineHeight": 1.4,
+      "border": "strong",
+      "shadow": "strong",
+      "corners": "rounded",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-006",
+      "token": false,
+      "name": "Note",
+      "values": [],
+      "padding": 12,
+      "margin": 8,
+      "layout": "column",
+      "alignment": "start",
+      "typography": "compact",
+      "color": "muted",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-007",
+      "token": false,
+      "name": "MetricBlue",
+      "values": [],
+      "padding": 18,
+      "margin": 4,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "blue",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 106,
+              "column": 3,
+              "offset": 2434
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 106,
+              "column": 21,
+              "offset": 2452
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "start",
+      "border": "subtle",
+      "shadow": "strong",
+      "corners": "rounded",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-008",
+      "token": false,
+      "name": "CommandPanel",
+      "values": [],
+      "padding": 22,
+      "margin": 8,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "neutral",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 118,
+              "column": 3,
+              "offset": 2636
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 118,
+              "column": 24,
+              "offset": 2657
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "start",
+      "typography": "readable",
+      "color": "blue",
+      "border": "subtle",
+      "shadow": "soft",
+      "corners": "rounded",
+      "typedValues": []
+    }
+  ],
+  "http": {
+    "routes": [
+      {
+        "id": "SOURCE-HTTP-001",
+        "method": "GET",
+        "path": "/dashboard/metrics",
+        "pathParams": [],
+        "query": [],
+        "headers": [],
+        "responseBody": {
+          "kind": "list",
+          "element": {
+            "kind": "record",
+            "name": "DashboardMetric",
+            "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+          }
+        },
+        "status": 200,
+        "handlerId": "pulseboard@0.2.0:main.bmec:FUNC-001",
+        "capabilities": [
+          "database"
+        ]
+      }
+    ]
+  },
+  "modules": [
+    {
+      "id": "pulseboard@0.2.0:main.bmec",
+      "file": "pulseboard@0.2.0:main.bmec",
+      "imports": [],
+      "importIds": [],
+      "symbols": [
+        "PulseBoard",
+        "TaskStatus",
+        "TaskPriority",
+        "DashboardMetric",
+        "Task",
+        "dashboardMetrics",
+        "HttpDeclaration",
+        "SurfaceBase",
+        "Accent",
+        "Shell",
+        "Badge",
+        "Hero",
+        "Note",
+        "MetricBlue",
+        "CommandPanel",
+        "Eyebrow",
+        "HeroBanner",
+        "QuickNote",
+        "MetricCard",
+        "CommandPanel",
+        "Dashboard"
+      ],
+      "symbolIds": [
+        "pulseboard@0.2.0:main.bmec:0:PulseBoard",
+        "pulseboard@0.2.0:main.bmec:1:TaskStatus",
+        "pulseboard@0.2.0:main.bmec:2:TaskPriority",
+        "pulseboard@0.2.0:main.bmec:3:DashboardMetric",
+        "pulseboard@0.2.0:main.bmec:4:Task",
+        "pulseboard@0.2.0:main.bmec:5:dashboardMetrics",
+        "pulseboard@0.2.0:main.bmec:6:HttpDeclaration",
+        "pulseboard@0.2.0:main.bmec:7:SurfaceBase",
+        "pulseboard@0.2.0:main.bmec:8:Accent",
+        "pulseboard@0.2.0:main.bmec:9:Shell",
+        "pulseboard@0.2.0:main.bmec:10:Badge",
+        "pulseboard@0.2.0:main.bmec:11:Hero",
+        "pulseboard@0.2.0:main.bmec:12:Note",
+        "pulseboard@0.2.0:main.bmec:13:MetricBlue",
+        "pulseboard@0.2.0:main.bmec:14:CommandPanel",
+        "pulseboard@0.2.0:main.bmec:15:Eyebrow",
+        "pulseboard@0.2.0:main.bmec:16:HeroBanner",
+        "pulseboard@0.2.0:main.bmec:17:QuickNote",
+        "pulseboard@0.2.0:main.bmec:18:MetricCard",
+        "pulseboard@0.2.0:main.bmec:19:CommandPanel",
+        "pulseboard@0.2.0:main.bmec:20:Dashboard"
+      ]
+    }
+  ]
+}

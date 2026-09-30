@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "package": "pulseboard",
+  "packageVersion": "0.2.0",
+  "languageVersion": "0.1",
+  "irVersion": 2,
+  "entry": "APP-001",
+  "artifacts": {
+    "browser": "index.html",
+    "manifest": "pipe-release.json",
+    "server": "server-ir.json"
+  },
+  "runtime": {
+    "kind": "pipe-reference",
+    "capabilities": []
+  }
+}

@@ -1,0 +1,21 @@
+function sampleWire() -> text {
+  return encodeJson(["alpha", "beta", "β", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon"])
+}
+
+function decodeTextList(source text) -> result<list<text>,text> { return decodeJson(source) }
+
+function countMatches(source text) -> boolean {
+  let decoded = decodeTextList(source)
+  if isOk(decoded) {
+    let values = decoded.value
+    var count integer = 0
+    var found boolean = false
+    for value in values {
+      count = count + 1
+      if value == "β" { found = true }
+    }
+    return count == 20 and found
+  } else { return false }
+}
+
+function main() -> boolean { return countMatches(sampleWire()) }

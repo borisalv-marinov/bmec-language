@@ -1,0 +1,14 @@
+function main() -> boolean {
+  return encodeJson(1.0) == "{\"version\":1,\"kind\":\"number\",\"value\":1}" and
+    encodeJson(0.25) == "{\"version\":1,\"kind\":\"number\",\"value\":0.25}" and
+    encodeJson(-0.25) == "{\"version\":1,\"kind\":\"number\",\"value\":-0.25}" and
+    encodeJson(1.75) == "{\"version\":1,\"kind\":\"number\",\"value\":1.75}" and
+    encodeJson(-1.75) == "{\"version\":1,\"kind\":\"number\",\"value\":-1.75}" and
+    encodeJson(0.1) == "{\"version\":1,\"kind\":\"number\",\"value\":0.1}" and
+    encodeJson(0.000001) == "{\"version\":1,\"kind\":\"number\",\"value\":0.000001}" and
+    encodeJson(0.0000001) == "{\"version\":1,\"kind\":\"number\",\"value\":1e-7}" and
+    encodeJson(100000000000000000000.0) == "{\"version\":1,\"kind\":\"number\",\"value\":100000000000000000000}" and
+    encodeJson(1000000000000000000000.0) == "{\"version\":1,\"kind\":\"number\",\"value\":1e+21}" and
+    encodeJson(1.2345678901234567) == "{\"version\":1,\"kind\":\"number\",\"value\":1.2345678901234567}" and
+    encodeJson(1.0000000000000002) == "{\"version\":1,\"kind\":\"number\",\"value\":1.0000000000000002}"
+}

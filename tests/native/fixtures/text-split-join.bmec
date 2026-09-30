@@ -1,0 +1,5 @@
+function main() -> integer {
+  let pieces = split("α|β||", "|")
+  let rebuilt = join(pieces, ",")
+  if rebuilt == "α,β,," { return 1 } else { return 0 }
+}

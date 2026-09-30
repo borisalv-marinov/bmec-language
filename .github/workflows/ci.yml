@@ -1,0 +1,98 @@
+name: BMEC CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  linux-gate:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18
+        env:
+          POSTGRES_USER: bmec_ci
+          POSTGRES_PASSWORD: bmec_ci
+          POSTGRES_DB: bmec_ci_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U bmec_ci -d bmec_ci_db"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:docs
+      - run: npm test -- --reporter=dot --testTimeout=20000
+        env:
+          BMEC_POSTGRES_URL: postgresql://bmec_ci:bmec_ci@127.0.0.1:5432/bmec_ci_db
+      - name: performance regression gate
+        run: |
+          mkdir -p .tmp
+          node scripts/benchmark.mjs
+          node scripts/performance-gate.mjs .tmp/performance.json
+        env:
+          BMEC_POSTGRES_URL: postgresql://bmec_ci:bmec_ci@127.0.0.1:5432/bmec_ci_db
+          PIPE_BENCH_OUTPUT: .tmp/performance.json
+          PIPE_BENCH_ITERATIONS: 100
+      - run: npm run test:native
+      - run: npm run test:soak
+        env:
+          BMEC_POSTGRES_URL: postgresql://bmec_ci:bmec_ci@127.0.0.1:5432/bmec_ci_db
+      - run: npm run test:native:filesystem-sanitizer
+      - run: npm run test:native:json-record-text-sanitizer
+      - run: npm run test:native:json-text-list-sanitizer
+      - run: npm run test:native:text-sanitizer
+      - run: npm run test:native:enum-sanitizer
+      - run: npm run test:native:money-sanitizer
+      - run: npm run test:fuzz
+      - run: npm run test:package
+      - run: npm run test:examples
+      - run: npm run test:ai-benchmark
+      - run: npm run test:style-browser
+      - run: npm run test:accessibility
+      - run: npm run test:website
+      - run: npm run test:pulseboard-visual
+      - run: npm run test:job-booking-postgres
+        env:
+          BMEC_POSTGRES_URL: postgresql://bmec_ci:bmec_ci@127.0.0.1:5432/bmec_ci_db
+      - run: npm run test:pulseboard-postgres
+        env:
+          BMEC_POSTGRES_URL: postgresql://bmec_ci:bmec_ci@127.0.0.1:5432/bmec_ci_db
+      - run: npm run test:consumer-ui
+      - run: npm run test:data-explorer-large
+      - run: npm run test:data-explorer-ui
+      - run: npm run test:security
+
+  windows-package:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run test:docs
+      - run: npm test -- --reporter=dot --testTimeout=20000
+      - run: npm run test:native
+      - run: npm run test:native:filesystem
+      - run: npm run test:package
+      - run: npm run test:examples
+      - run: npm run test:ai-benchmark
+      - run: npm run test:security

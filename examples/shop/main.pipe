@@ -1,0 +1,6 @@
+import { Product } from "./models.pipe"
+import { discount } from "./pricing.pipe"
+
+app Shop
+page Catalog { crud Product }
+api /products from Product requiring role admin

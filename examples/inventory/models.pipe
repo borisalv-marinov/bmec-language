@@ -1,0 +1,13 @@
+public model Product {
+    name text required
+    price money required
+    category text?
+    available boolean default true
+}
+
+public model StockEntry {
+    product Product required
+    quantity integer required
+    received datetime required
+    note text?
+}

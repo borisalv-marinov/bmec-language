@@ -1,0 +1,38 @@
+app Workspace
+api / tasks from Task requiring authenticated
+model User {
+  name text required active boolean required
+}
+model Task {
+  title text required done boolean required
+}
+component TaskRow {
+  show task title
+}
+component TaskForm form {
+  text "Create task"
+  input title text validate nonempty button "Save" on Save
+}
+page Dashboard {
+  state tasks list < Task >
+  state loading boolean = false
+  for each task in tasks show TaskRow
+  use TaskForm when Save is clicked
+  crud Task
+}
+style named DashboardStyle {
+  layout is grid columns is 2 gap is 16 on small screens {
+    columns is 1
+  }
+}
+function canAccess(age integer) -> boolean {
+  return age is at least 18
+}
+async function listTasks(db capability < database >) -> task < list < Task > > {
+  return wait for get tasks from Task using db
+}
+async function createTask(db capability < database >,body Task) -> task < integer > {
+  return wait for add body to Task using db
+}
+serve GET / tasks requiring authenticated and database with listTasks
+serve POST / tasks requiring authenticated and database with createTask

@@ -1,0 +1,8 @@
+app NativeTextFold
+
+function main() -> integer {
+  let lines list<text> = []
+  return fold(lines, 42, lambda(count integer, line text) -> integer {
+    return count + 1
+  })
+}

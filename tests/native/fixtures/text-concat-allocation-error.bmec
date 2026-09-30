@@ -1,0 +1,6 @@
+app NativeTextConcatAllocationError
+
+function main() -> boolean {
+  let joined = "12345678901234567890" + "abcdefghijklmnopqrstu"
+  return joined == "12345678901234567890abcdefghijklmnopqrstu"
+}

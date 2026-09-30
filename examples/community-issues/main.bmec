@@ -1,0 +1,332 @@
+app CommunityIssues
+
+type Principal {
+  id text
+  role text
+}
+
+enum IssueState { Open InProgress Closed }
+
+model Repository {
+  name text required
+  slug text required unique
+}
+
+model Issue {
+  repository Repository required
+  title text required
+  description text required
+  state IssueState required
+  createdBy text required
+  createdAt integer required
+}
+
+model IssueComment {
+  issue Issue required
+  body text required
+  createdBy text required
+}
+
+type NewRepository {
+  name text required
+  slug text required
+}
+
+type NewIssue {
+  repository Repository required
+  title text required
+  description text required
+  state IssueState required
+}
+type IssueUpdate {
+  title text required
+  description text required
+  state IssueState required
+}
+
+type NewComment {
+  issue Issue required
+  body text required
+}
+type CommentMessage {
+  body text required
+}
+type IssueStatusUpdate {
+  state IssueState required
+}
+
+async function listIssues(principal Principal, db capability<database>) -> task<list<Issue>> {
+  return wait for get issues from Issue ordered by id ascending limited to 50 using db
+}
+
+async function listIssuesAfter(principal Principal, db capability<database>, after integer) -> task<list<Issue>> {
+  return wait for get issues from Issue where id is greater than after ordered by id ascending limited to 50 using db
+}
+
+async function getIssue(principal Principal, db capability<database>, id integer) -> task<list<Issue>> {
+  return wait for get issues from Issue where id is id ordered by id ascending limited to 1 using db
+}
+
+async function searchIssues(principal Principal, db capability<database>, term text) -> task<list<Issue>> {
+  return wait for get issues from Issue where title contains term or description contains term ordered by title ascending limited to 100 using db
+}
+
+async function searchIssuePage(principal Principal, db capability<database>, term text) -> task<list<Issue>> {
+  return wait for get issues from Issue where title contains term or description contains term ordered by id ascending limited to 50 using db
+}
+
+async function searchIssuesAfter(principal Principal, db capability<database>, term text, after integer) -> task<list<Issue>> {
+  return wait for get issues from Issue where (title contains term or description contains term) and id is greater than after ordered by id ascending limited to 50 using db
+}
+
+async function listRepositoryIssues(principal Principal, db capability<database>, repositoryId Repository) -> task<list<Issue>> {
+  return wait for get issues from Issue where repository is repositoryId ordered by id ascending limited to 50 using db
+}
+
+async function listRepositoryIssuesAfter(principal Principal, db capability<database>, repositoryId Repository, after integer) -> task<list<Issue>> {
+  return wait for get issues from Issue where repository is repositoryId and id is greater than after ordered by id ascending limited to 50 using db
+}
+
+async function listRepositories(principal Principal, db capability<database>) -> task<list<Repository>> {
+  return wait for get repositories from Repository ordered by name ascending limited to 100 using db
+}
+
+async function listRepositoryIssuesBySlug(principal Principal, db capability<database>, slug text) -> task<list<Issue>> {
+  let repositories = wait for get matches from Repository where slug is slug ordered by id ascending limited to 1 using db
+  if length(repositories) == 0 { return [] }
+  let repository = match first(repositories) {
+    some(found) => found,
+    none => Repository { name: "", slug: "" }
+  }
+  return wait for get issues from Issue where repository is repository ordered by id ascending limited to 50 using db
+}
+
+async function listRepositoryIssuesBySlugAfter(principal Principal, db capability<database>, slug text, after integer) -> task<list<Issue>> {
+  let repositories = wait for get matches from Repository where slug is slug ordered by id ascending limited to 1 using db
+  if length(repositories) == 0 { return [] }
+  let repository = match first(repositories) {
+    some(found) => found,
+    none => Repository { name: "", slug: "" }
+  }
+  return wait for get issues from Issue where repository is repository and id is greater than after ordered by id ascending limited to 50 using db
+}
+
+async function searchRepositoryIssuesBySlug(principal Principal, db capability<database>, slug text, term text) -> task<list<Issue>> {
+  let repositories = wait for get matches from Repository where slug is slug ordered by id ascending limited to 1 using db
+  if length(repositories) == 0 { return [] }
+  let repository = match first(repositories) {
+    some(found) => found,
+    none => Repository { name: "", slug: "" }
+  }
+  return wait for get issues from Issue where repository is repository and (title contains term or description contains term) ordered by id ascending limited to 50 using db
+}
+
+async function searchRepositoryIssuesBySlugAfter(principal Principal, db capability<database>, slug text, term text, after integer) -> task<list<Issue>> {
+  let repositories = wait for get matches from Repository where slug is slug ordered by id ascending limited to 1 using db
+  if length(repositories) == 0 { return [] }
+  let repository = match first(repositories) {
+    some(found) => found,
+    none => Repository { name: "", slug: "" }
+  }
+  return wait for get issues from Issue where repository is repository and (title contains term or description contains term) and id is greater than after ordered by id ascending limited to 50 using db
+}
+
+async function listComments(principal Principal, db capability<database>, issueId Issue) -> task<list<IssueComment>> {
+  return wait for listCommentsForIssue(db,issueId)
+}
+
+async function listCommentsForIssue(db capability<database>, issueId Issue) -> task<list<IssueComment>> {
+  return wait for get comments from IssueComment where issue is issueId ordered by body ascending limited to 100 using db
+}
+
+async function emptyIssueComments() -> task<list<IssueComment>> {
+  return []
+}
+
+async function listCommentsById(principal Principal, db capability<database>, id integer) -> task<list<IssueComment>> {
+  let issues = wait for get issues from Issue where id is id using db
+  let comments = match first(issues) {
+    some(issue) => listCommentsForIssue(db,issue),
+    none => emptyIssueComments()
+  }
+  return wait for comments
+}
+
+async function createRepository(principal Principal, db capability<database>, body NewRepository) -> task<integer> {
+  let repository = Repository { name: body.name, slug: body.slug }
+  return wait for add repository to Repository using db
+}
+
+async function createIssue(principal Principal, db capability<database>, clock capability<time>, body NewIssue) -> task<integer> {
+  let issue = Issue {
+    repository: body.repository,
+    title: body.title,
+    description: body.description,
+    state: body.state,
+    createdBy: principal.id,
+    createdAt: currentTime(clock)
+  }
+  return wait for add issue to Issue using db
+}
+
+async function updateCurrentIssue(db capability<database>, id integer, body IssueUpdate, current Issue) -> task<integer> {
+  let updated = Issue {
+    repository: current.repository,
+    title: body.title,
+    description: body.description,
+    state: body.state,
+    createdBy: current.createdBy,
+    createdAt: current.createdAt
+  }
+  return wait for update updated in Issue with id using db
+}
+
+async function zeroIssueChanges() -> task<integer> {
+  return 0
+}
+
+async function updateIssue(principal Principal, db capability<database>, id integer, body IssueUpdate) -> task<integer> {
+  let issues = wait for get issues from Issue where id is id using db
+  let updateTask = match first(issues) {
+    some(current) => updateCurrentIssue(db,id,body,current),
+    none => zeroIssueChanges()
+  }
+  return wait for updateTask
+}
+
+async function createComment(principal Principal, db capability<database>, body NewComment) -> task<integer> {
+  let comment = IssueComment {
+    issue: body.issue,
+    body: body.body,
+    createdBy: principal.id
+  }
+  return wait for add comment to IssueComment using db
+}
+
+async function saveIssueComment(principal Principal, db capability<database>, issue Issue, body CommentMessage) -> task<integer> {
+  let comment = IssueComment { issue: issue, body: body.body, createdBy: principal.id }
+  return wait for add comment to IssueComment using db
+}
+
+async function createIssueComment(principal Principal, db capability<database>, id integer, body CommentMessage) -> task<integer> {
+  let issues = wait for get issues from Issue where id is id using db
+  let write = match first(issues) {
+    some(issue) => saveIssueComment(principal,db,issue,body),
+    none => zeroIssueChanges()
+  }
+  return wait for write
+}
+
+async function updateCurrentIssueState(db capability<database>, id integer, state IssueState, current Issue) -> task<integer> {
+  let updated = Issue { repository: current.repository, title: current.title, description: current.description, state: state, createdBy: current.createdBy, createdAt: current.createdAt }
+  return wait for update updated in Issue with id using db
+}
+
+async function updateIssueState(principal Principal, db capability<database>, id integer, body IssueStatusUpdate) -> task<integer> {
+  let issues = wait for get issues from Issue where id is id using db
+  let updateTask = match first(issues) {
+    some(current) => updateCurrentIssueState(db,id,body.state,current),
+    none => zeroIssueChanges()
+  }
+  return wait for updateTask
+}
+
+http GET /issues requires authenticated, database -> listIssues
+http GET /issues/pages/:after requires authenticated, database -> listIssuesAfter
+http GET /issues/search requires authenticated, database -> searchIssues
+http GET /issues/search/:term requires authenticated, database -> searchIssuePage
+http GET /issues/search/:term/pages/:after requires authenticated, database -> searchIssuesAfter
+http GET /issues/:id requires authenticated, database -> getIssue
+http GET /issues/:id/comments requires authenticated, database -> listCommentsById
+http POST /issues/:id/comments requires authenticated, database -> createIssueComment
+http PATCH /issues/:id/status requires role maintainer, database -> updateIssueState
+http GET /repositories/:repositoryId/issues requires authenticated, database -> listRepositoryIssues
+http GET /repositories/:repositoryId/issues/pages/:after requires authenticated, database -> listRepositoryIssuesAfter
+http GET /repositories/by-slug/:slug/issues requires authenticated, database -> listRepositoryIssuesBySlug
+http GET /repositories/by-slug/:slug/issues/pages/:after requires authenticated, database -> listRepositoryIssuesBySlugAfter
+http GET /repositories/by-slug/:slug/issues/search/:term requires authenticated, database -> searchRepositoryIssuesBySlug
+http GET /repositories/by-slug/:slug/issues/search/:term/pages/:after requires authenticated, database -> searchRepositoryIssuesBySlugAfter
+http GET /repositories requires authenticated, database -> listRepositories
+http GET /issues/:issueId/comments requires authenticated, database -> listComments
+http POST /repositories requires role maintainer, database -> createRepository
+http POST /issues requires authenticated, database, time -> createIssue
+http PATCH /issues/:id requires role maintainer, database -> updateIssue
+http POST /comments requires authenticated, database -> createComment
+
+component SignInForm form {
+  text "Community Issues"
+  text "Sign in to browse community reports"
+  input id text label "User ID" validate nonempty
+  input password text label "Password" validate nonempty button "Sign in" on Login
+}
+
+component IssueRow {
+  show issue title
+  show issue description
+  show issue state
+  show issue createdBy
+  link "View details" to IssueDetail with id issue.id
+}
+
+component IssueDetailRow {
+  show issue title
+  show issue description
+  show issue state
+  show issue createdBy
+}
+
+component IssueCommentRow {
+  show comment body
+  show comment createdBy
+}
+
+component RepositoryRow {
+  show repository name
+  link "Browse repository" to RepositoryIssues with slug repository.slug
+}
+
+component CommentForm form {
+  text "Add a comment"
+  input id integer label "Issue ID" readonly validate number
+  input body text label "Comment" validate nonempty button "Post comment" on AddComment
+}
+
+component IssueStatusForm form {
+  text "Maintainer status"
+  input id integer label "Issue ID" readonly validate number
+  input state IssueState label "New status" button "Update status" on UpdateStatus
+}
+
+page SignIn {
+  use SignInForm
+  link "Browse issues" to Issues
+}
+
+page Issues {
+  state issues list<Issue> from GET "/issues" next GET "/issues/pages/:after" cursor by id search GET "/issues/search/:term" next GET "/issues/search/:term/pages/:after" cursor by id
+  link "Sign in" to SignIn
+  link "Browse repositories" to Repositories
+  for each issue in issues show IssueRow filter by title label "Search issues by title or description" paginate 50 empty "No issues yet."
+}
+
+page Repositories {
+  state repositories list<Repository> from GET "/repositories"
+  link "Back to issues" to Issues
+  for each repository in repositories show RepositoryRow empty "No repositories yet."
+}
+
+page RepositoryIssues at "/repositories/:slug/issues" {
+  state issues list<Issue> from GET "/repositories/by-slug/:slug/issues" next GET "/repositories/by-slug/:slug/issues/pages/:after" cursor by id search GET "/repositories/by-slug/:slug/issues/search/:term" next GET "/repositories/by-slug/:slug/issues/search/:term/pages/:after" cursor by id
+  link "Back to repositories" to Repositories
+  for each issue in issues show IssueRow filter by title label "Search issues in this repository by title or description" paginate 50 empty "No issues in this repository."
+}
+
+page IssueDetail at "/issues/:id" {
+  event AddComment(id integer, body text) sends POST "/issues/:id/comments"
+  event UpdateStatus(id integer, state IssueState) sends PATCH "/issues/:id/status"
+  state issue list<Issue> from GET "/issues/:id" for each issue in issue show IssueDetailRow empty "Issue not found."
+  state comments list<IssueComment> from GET "/issues/:id/comments" for each comment in comments show IssueCommentRow empty "No comments yet."
+  use CommentForm
+  use IssueStatusForm
+  link "Back to issues" to Issues
+}

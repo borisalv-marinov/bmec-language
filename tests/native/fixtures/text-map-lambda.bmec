@@ -1,0 +1,27 @@
+app NativeTextMap
+
+function main() -> boolean {
+  let lines = split("α\nβ\n", "\n")
+  let mapped = map(lines, lambda(line text) -> text { return line + "!" })
+  let integers list<integer> = [1, 2, 3]
+  let mappedIntegers = map(integers, lambda(value integer) -> integer { return value + 1 })
+  let numbers list<number> = [1.0, 2.0]
+  let mappedNumbers = map(numbers, lambda(value number) -> number { return value * 2.0 })
+  let largeIntegers = map(integers, lambda(value integer) -> boolean { return value > 1 })
+  let greekLines = map(lines, lambda(line text) -> boolean { return textContains(line, "α") })
+  let flags list<boolean> = [true, false]
+  let mappedFlags = map(flags, lambda(value boolean) -> boolean { return not value })
+  let empty list<text> = []
+  let mappedEmpty = map(empty, lambda(line text) -> text { return line + "!" })
+  var integerTotal integer = 0
+  for value in mappedIntegers { integerTotal = integerTotal + value }
+  var numberTotal number = 0.0
+  for value in mappedNumbers { numberTotal = numberTotal + value }
+  var greekLineCount integer = 0
+  for value in greekLines { if value { greekLineCount = greekLineCount + 1 } }
+  var largeIntegerCount integer = 0
+  for value in largeIntegers { if value { largeIntegerCount = largeIntegerCount + 1 } }
+  var trueFlags integer = 0
+  for value in mappedFlags { if value { trueFlags = trueFlags + 1 } }
+  return join(mapped, ",") == "α!,β!,!" and length(mappedEmpty) == 0 and integerTotal == 9 and numberTotal == 6.0 and greekLineCount == 1 and largeIntegerCount == 2 and trueFlags == 1
+}

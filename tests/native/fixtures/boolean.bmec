@@ -1,0 +1,9 @@
+app NativeBoolean
+
+function positive(value integer) -> boolean {
+  return value > 0
+}
+
+function main() -> boolean {
+  return positive(1) and not false
+}

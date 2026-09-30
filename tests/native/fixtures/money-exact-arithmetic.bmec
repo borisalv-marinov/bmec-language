@@ -1,0 +1,26 @@
+app MoneyExact
+
+function add(left money, right money) -> money { return left + right }
+function subtract(left money, right money) -> money { return left - right }
+function multiply(value money, factor integer) -> money { return value * factor }
+function divide(value money, divisor integer) -> money { return value / divisor }
+function greater(left money, right money) -> boolean { return left > right }
+function same(left money, right money) -> boolean { return left == right }
+function differs(left money, right money) -> boolean { return left != right }
+function atMost(left money, right money) -> boolean { return left <= right }
+
+function main() -> integer {
+  let maximum = add(999999999999999999999999999999999999999999999999.99, 0.01)
+  if atMost(maximum, 999999999999999999999999999999999999999999999999.99) { return 1 }
+  if differs(subtract(maximum, 0.01), 999999999999999999999999999999999999999999999999.99) { return 2 }
+  if atMost(maximum, subtract(0.00, maximum)) { return 3 }
+  if differs(multiply(12.34, -2), -24.68) { return 4 }
+  if differs(divide(0.05, 2), 0.03) { return 5 }
+  if differs(divide(-0.05, 2), -0.03) { return 6 }
+  if differs(divide(0.04, 2), 0.02) { return 7 }
+  if differs(divide(0.05, -2), -0.03) { return 8 }
+  let wideProduct = multiply(maximum, -9223372036854775808)
+  if greater(wideProduct, 0.00) { return 9 }
+  if differs(divide(wideProduct, -9223372036854775808), maximum) { return 10 }
+  return 42
+}

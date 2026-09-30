@@ -1,0 +1,5 @@
+function divide(value money, divisor integer) -> money { return value / divisor }
+function main() -> integer {
+  let invalid = divide(1.00, 0)
+  return 0
+}

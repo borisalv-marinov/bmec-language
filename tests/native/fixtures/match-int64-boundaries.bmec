@@ -1,0 +1,19 @@
+app NativeMatchInt64Boundaries
+
+function optionalValue(value integer?) -> integer {
+  return match value { some(number) => number, none => 0 }
+}
+
+function resultValue(value result<integer,integer>) -> integer {
+  return match value { ok(number) => number, err(problem) => problem }
+}
+
+function main() -> integer {
+  let minimum integer = -9223372036854775808
+  let maximum integer = 9223372036854775807
+  let optionalMinimum = optionalValue(some(minimum))
+  let optionalNone = optionalValue(none)
+  let resultMaximum = resultValue(ok(maximum))
+  let resultMinimum = resultValue(err(minimum))
+  if optionalMinimum == minimum and optionalNone == 0 and resultMaximum == maximum and resultMinimum == minimum { return 1 } else { return 0 }
+}

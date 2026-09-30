@@ -1,0 +1,12 @@
+app NativeOptionalRecord
+
+type Point { x integer enabled boolean }
+
+function maybePoint(value integer) -> Point? {
+  if value > 0 { return some(Point { x: value, enabled: true }) } else { return none }
+}
+
+function main() -> integer {
+  let maybe = maybePoint(12)
+  if maybe != none { return maybe.x } else { return 0 }
+}

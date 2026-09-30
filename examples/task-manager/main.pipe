@@ -1,0 +1,34 @@
+import { User, Task } from "./models.pipe"
+import { titleLength, configuredName, configuredSecretExists } from "./logic.pipe"
+
+component TaskForm {
+    text "Create task"
+    input title text validate nonempty
+}
+
+app TaskManager
+
+api /users from User requiring role admin
+api /tasks from Task requiring authenticated
+page Tasks {
+    state loading boolean = false
+    state error text
+    event refresh()
+    event create(title text)
+    input title text on create
+    use TaskForm
+    crud Task
+}
+
+async function listTasks(db capability<database>) -> task<list<Task>> {
+    return wait for get tasks from Task using db
+}
+
+async function createTask(db capability<database>, body Task) -> task<integer> {
+    return wait for add body to Task using db
+}
+
+serve GET /task-feed requiring authenticated and database with listTasks
+serve POST /tasks requiring database with createTask
+
+style clean dark

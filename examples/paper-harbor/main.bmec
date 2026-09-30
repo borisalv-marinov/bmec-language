@@ -1,0 +1,267 @@
+app PaperHarbor
+
+model Product {
+  sku text required unique
+  name text required
+  category text required
+  price money required
+  description text required
+  searchable text required
+  stock integer required
+}
+
+model Order {
+  idempotencyKey text required unique
+  requestFingerprint text required
+  customerName text required
+  email text required
+  address text required
+  status text required
+  total money required
+}
+
+model OrderLine {
+  orderId integer required
+  productId integer required
+  productName text required
+  quantity integer required
+  unitPrice money required
+  lineTotal money required
+}
+
+type CartLine {
+  productId integer
+  name text?
+  unitPrice money?
+  quantity integer
+}
+
+type CheckoutRequest {
+  name text
+  email text
+  address text
+  items list<CartLine>
+}
+
+type OrderReceipt {
+  orderId integer
+  status text
+}
+
+async function listProducts(db capability<database>) -> task<list<Product>> {
+  return wait for get products from Product ordered by id ascending limited to 100 using db
+}
+
+function hasValidEmailAddress(email text) -> boolean {
+  let value = lower(trim(email))
+  let atPosition = textIndexOf(value, "@")
+  if textLength(value) < 6 or textContains(value, " ") or textLength(textReplace(value, "@", "")) != textLength(value) - 1 {
+    return false
+  } else {
+    if atPosition == none {
+      return false
+    } else {
+      let domain = substring(value, atPosition + 1, textLength(value))
+      let dotPosition = textIndexOf(domain, ".")
+      if dotPosition == none {
+        return false
+      } else {
+        return atPosition > 0 and dotPosition > 0 and dotPosition < textLength(domain) - 1
+      }
+    }
+  }
+}
+
+async function checkout(db capability<database>, body CheckoutRequest, idempotencyKey text) -> task<result<OrderReceipt,text>> {
+  let customerName = trim(body.name)
+  let email = lower(trim(body.email))
+  let address = trim(body.address)
+  if textLength(customerName) < 2 { return err("Enter your name.") }
+  if hasValidEmailAddress(email) == false { return err("Enter a valid email address.") }
+  if textLength(address) < 8 { return err("Enter a complete delivery address.") }
+  if textLength(idempotencyKey) == 0 or textLength(idempotencyKey) > 128 { return err("Checkout requires a valid idempotency key.") }
+  if length(body.items) == 0 { return err("Add an item to your cart before checkout.") }
+
+  let fingerprint = encodeJson(body)
+  let existingOrders = wait for get existing from Order where idempotencyKey is idempotencyKey ordered by idempotencyKey ascending limited to 1 using db
+  let prior = first(existingOrders)
+  if prior != none {
+    if prior.requestFingerprint != fingerprint { return err("This checkout key was already used for a different order.") }
+    return ok(OrderReceipt { orderId: prior.id, status: prior.status })
+  }
+
+  var orderId integer = 0
+  var total money = 0.00
+  transaction using db {
+    let order = Order {
+      idempotencyKey: idempotencyKey,
+      requestFingerprint: fingerprint,
+      customerName: customerName,
+      email: email,
+      address: address,
+      status: "pending_payment",
+      total: 0.00
+    }
+    let insertedOrderId = await databaseInsertIdIfAbsent(db, "Order", order, "idempotencyKey")
+    if insertedOrderId == none {
+      let concurrentOrders = wait for get existing from Order where idempotencyKey is idempotencyKey ordered by idempotencyKey ascending limited to 1 using db
+      let concurrentOrder = first(concurrentOrders)
+      if concurrentOrder == none {
+        return err("The previous checkout is still being saved. Retry with the same key.")
+      } else {
+        if concurrentOrder.requestFingerprint != fingerprint { return err("This checkout key was already used for a different order.") }
+        return ok(OrderReceipt { orderId: concurrentOrder.id, status: concurrentOrder.status })
+      }
+    } else {
+      orderId = insertedOrderId
+    }
+
+    for each line in body.items {
+      if line.quantity < 1 { return err("Item quantities must be positive whole numbers.") }
+      let matchingProducts = wait for get matches from Product where id is line.productId ordered by id ascending limited to 1 using db
+      let product = first(matchingProducts)
+      if product == none { return err("Your cart contains an unavailable product.") } else {
+        let reserved = await databaseDecrementWhere(db, "Product", "stock", line.quantity, "id", line.productId)
+        if reserved == 0 { return err("There is not enough stock for one or more items.") }
+        let orderLine = OrderLine {
+          orderId: orderId,
+          productId: product.id,
+          productName: product.name,
+          quantity: line.quantity,
+          unitPrice: product.price,
+          lineTotal: product.price * line.quantity
+        }
+        let lineId = await add orderLine to OrderLine using db
+        total = total + product.price * line.quantity
+      }
+    }
+    let updatedOrder = Order {
+      idempotencyKey: idempotencyKey,
+      requestFingerprint: fingerprint,
+      customerName: customerName,
+      email: email,
+      address: address,
+      status: "pending_payment",
+      total: total
+    }
+    let savedOrder = wait for update updatedOrder in Order with orderId using db
+  }
+  return ok(OrderReceipt { orderId: orderId, status: "pending_payment" })
+}
+
+http GET /products requires database -> listProducts
+http POST /orders headers idempotencyKey returns 201 errors 400, 404, 409 requires database -> checkout
+
+style named StoreShell {
+  layout is column
+  alignment is stretch
+  padding is 24
+  gap is 20
+  margin is 12
+  typography is readable
+  on small screens { padding is 12 }
+  on small screens { margin is 4 }
+  on small screens { gap is 12 }
+}
+
+style named ProductGrid {
+  layout is grid
+  columns is 3
+  gap is 16
+  on small screens { columns is 1 }
+}
+
+style named IntroPanel {
+  layout is column
+  alignment is start
+  gap is 8
+  padding is 12
+  background is blue
+  text color is white
+  corners is rounded
+}
+
+style named ProductCard {
+  layout is column
+  alignment is start
+  padding is 20
+  gap is 10
+  border is subtle
+  corners is rounded
+  background is neutral
+  typography is readable
+  on small screens { padding is 16 }
+}
+
+style named CartPanel {
+  layout is column
+  alignment is stretch
+  padding is 16
+  gap is 12
+  border is subtle
+  corners is rounded
+  background is neutral
+}
+
+style named CartSubtotal {
+  typography is readable
+  font weight is bold
+}
+
+component StoreIntro uses style IntroPanel {
+  text "PAPER HARBOR"
+  text "Good paper. Clear thoughts."
+  text "Useful notebooks and desk goods for the ideas you want to keep."
+}
+
+component ProductCard uses style ProductCard {
+  show product sku
+  show product name
+  show product category
+  show product description
+  show product price
+  show product stock
+  button "Add to cart" on add with product from product
+}
+
+component CartLineRow {
+  show cartLine name
+  show cartLine unitPrice
+  show cartLine quantity
+  button "Add one" on increase with line from cartLine
+  button "Remove one" on decrease with line from cartLine
+  button "Remove item" on remove with line from cartLine
+}
+
+component CheckoutForm form {
+  input name text label "Your name" validate nonempty
+  input email text label "Email address" validate email
+  input address text label "Delivery address" validate nonempty
+  button "Place demo order" on checkout with items from cart
+}
+
+component CartShell uses style CartPanel {
+  text "Your cart"
+}
+
+component CartSummary uses style CartSubtotal {
+  text "Subtotal: $"
+  show total of cart by unitPrice times quantity
+}
+
+page Store {
+  use style StoreShell
+  use StoreIntro
+  state products list<Product> from GET "/products"
+  state cart list<CartLine> = [] persisted in local storage
+  event add(product Product) appends product as CartLine { productId: product.id, name: product.name, unitPrice: product.price, quantity: 1 } to cart
+  event increase(line CartLine) increases quantity of line in cart
+  event decrease(line CartLine) decreases quantity of line in cart
+  event remove(line CartLine) removes line from cart
+  for each product in products show ProductCard filter by searchable label "Search products by name or description" empty "No products match your search."
+  use CartShell
+  for each cartLine in cart show CartLineRow empty "Your cart is empty. Add a product to begin."
+  use CartSummary
+  event checkout(name text, email text, address text, items list<CartLine>) sends POST "/orders" with idempotency key then clears cart on success
+  use CheckoutForm
+}

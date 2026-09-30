@@ -1,0 +1,65 @@
+{
+  "schemaVersion": "bmec.showcase.v1",
+  "projects": [
+    {
+      "id": "paper-harbor",
+      "name": "Paper Harbor",
+      "tagline": "Good paper. Clear thoughts.",
+      "description": "A small storefront with typed product search, a persistent cart, and transactional demo checkout.",
+      "category": "Commerce demo",
+      "status": "Demo",
+      "builtWith": ["BMEC pages", "SQLite", "Typed routes", "Browser storage"],
+      "source": "/examples/paper-harbor/main.bmec",
+      "preview": {
+        "src": "/assets/paper-harbor.png",
+        "alt": "Paper Harbor storefront with product search, notebook and pen listings, cart, and demo checkout form"
+      },
+      "disclosure": "Checkout stores a pending demo order. No payment is collected or sent to a provider."
+    },
+    {
+      "id": "job-booking",
+      "name": "Job Booking",
+      "tagline": "A clear view of the day’s work.",
+      "description": "An operations workspace for customers, jobs, schedules, workers, and role-aware actions.",
+      "category": "Operations workspace",
+      "status": "Demo",
+      "builtWith": ["BMEC models", "PostgreSQL", "Role policies", "Audit events"],
+      "source": "/examples/job-booking/main.bmec",
+      "preview": {
+        "src": "/assets/job-booking.png",
+        "alt": "Job Booking Manager jobs workspace with schedule form, search, and job table"
+      },
+      "disclosure": "This is a reference application. It does not provide hosted scheduling, messaging, or payment services."
+    },
+    {
+      "id": "pulseboard",
+      "name": "PulseBoard",
+      "tagline": "Plan clearly. Move quickly. Finish well.",
+      "description": "A workspace task dashboard with persisted tasks, memberships, owner and manager roles, settings, and bounded pages.",
+      "category": "Workspace dashboard",
+      "status": "Demo",
+      "builtWith": ["BMEC page state", "SQLite and PostgreSQL", "Workspace roles", "Cursor paging"],
+      "source": "/examples/pulseboard/main.bmec",
+      "preview": {
+        "src": "/assets/pulseboard.png",
+        "alt": "PulseBoard workspace task dashboard with summary, task form, and bounded task table"
+      },
+      "disclosure": "Membership invitations and removal are not implemented. Search and sort operate on the visible server page."
+    },
+    {
+      "id": "community-issues",
+      "name": "Community Issues",
+      "tagline": "Keep the work in view.",
+      "description": "A repository-scoped issue tracker with authenticated browsing, literal search, cursor pages, comments, and role-checked status changes.",
+      "category": "Community issue tracking",
+      "status": "Demo",
+      "builtWith": ["BMEC routes", "SQLite and PostgreSQL", "Session auth", "Scoped search"],
+      "source": "/examples/community-issues/main.bmec",
+      "preview": {
+        "src": "/assets/community-issues.png",
+        "alt": "Community Issues app listing three repository issues with state, reporter, and detail links"
+      },
+      "disclosure": "This is not a GitHub replacement. It has no Git integration, pull requests, or audit history."
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+<section class="route-section">
+  <h2>Make trust boundaries explicit.</h2>
+  <p>BMEC provides server-side authentication and role checks, origin validation for unsafe production requests, bounded request sizes, rate limiting, and explicit host capabilities. Application code still needs correct policies and careful secret handling.</p>
+  <ul class="route-list"><li>Keep secrets on the server and out of browser bundles.</li><li>Use exact trusted origins behind a configured TLS proxy.</li><li>Give database and filesystem capabilities only where needed.</li><li>Review migrations and backups before changing production data.</li></ul>
+  <p>BMEC remains a developer preview. A passing repository scan or local deployment smoke is not an independent security audit.</p>
+  <p><a href="/docs/SECURITY_MODEL.md">Read the security model</a> · <a href="/docs/THREAT_MODEL.md">Read the threat model</a> · <a href="/docs/DEPLOYMENT.md">Deployment guidance</a></p>
+</section>

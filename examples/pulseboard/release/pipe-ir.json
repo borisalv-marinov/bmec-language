@@ -1,0 +1,589 @@
+{
+  "irVersion": 2,
+  "version": "0.1-alpha",
+  "app": {
+    "id": "APP-001",
+    "name": "PulseBoard"
+  },
+  "models": [
+    {
+      "id": "DB-001",
+      "name": "Task",
+      "typeRef": {
+        "kind": "model",
+        "name": "Task",
+        "symbol": "pulseboard@0.2.0:main.bmec:ModelDeclaration:4"
+      },
+      "visibility": "private",
+      "fields": [
+        {
+          "id": "FIELD-001",
+          "name": "title",
+          "type": "text",
+          "typeRef": {
+            "kind": "primitive",
+            "name": "text"
+          },
+          "required": true,
+          "unique": false
+        },
+        {
+          "id": "FIELD-002",
+          "name": "status",
+          "type": "TaskStatus",
+          "typeRef": {
+            "kind": "enum",
+            "name": "TaskStatus",
+            "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:1",
+            "variants": [
+              {
+                "name": "Inbox"
+              },
+              {
+                "name": "Active"
+              },
+              {
+                "name": "Done"
+              }
+            ]
+          },
+          "required": true,
+          "unique": false
+        },
+        {
+          "id": "FIELD-003",
+          "name": "priority",
+          "type": "TaskPriority",
+          "typeRef": {
+            "kind": "enum",
+            "name": "TaskPriority",
+            "symbol": "pulseboard@0.2.0:main.bmec:EnumDeclaration:2",
+            "variants": [
+              {
+                "name": "Low"
+              },
+              {
+                "name": "Medium"
+              },
+              {
+                "name": "High"
+              }
+            ]
+          },
+          "required": true,
+          "unique": false
+        }
+      ]
+    }
+  ],
+  "records": [
+    {
+      "id": "TYPE-001",
+      "name": "DashboardMetric",
+      "visibility": "private",
+      "fields": [
+        {
+          "id": "FIELD-T001",
+          "name": "name",
+          "type": "text",
+          "typeRef": {
+            "kind": "primitive",
+            "name": "text"
+          },
+          "required": false,
+          "unique": false
+        },
+        {
+          "id": "FIELD-T002",
+          "name": "value",
+          "type": "integer",
+          "typeRef": {
+            "kind": "primitive",
+            "name": "integer"
+          },
+          "required": false,
+          "unique": false
+        }
+      ]
+    }
+  ],
+  "enums": [
+    {
+      "id": "ENUM-001",
+      "name": "TaskStatus",
+      "visibility": "private",
+      "variants": [
+        {
+          "name": "Inbox"
+        },
+        {
+          "name": "Active"
+        },
+        {
+          "name": "Done"
+        }
+      ]
+    },
+    {
+      "id": "ENUM-002",
+      "name": "TaskPriority",
+      "visibility": "private",
+      "variants": [
+        {
+          "name": "Low"
+        },
+        {
+          "name": "Medium"
+        },
+        {
+          "name": "High"
+        }
+      ]
+    }
+  ],
+  "interfaces": [],
+  "implementations": [],
+  "pages": [
+    {
+      "id": "UI-001",
+      "name": "Dashboard",
+      "crud": [
+        "Task"
+      ],
+      "state": [
+        {
+          "name": "metrics",
+          "type": "list<DashboardMetric>",
+          "source": {
+            "method": "GET",
+            "path": "/dashboard/metrics"
+          }
+        }
+      ],
+      "events": []
+    }
+  ],
+  "ui": {
+    "components": [
+      {
+        "id": "UI-001",
+        "name": "Dashboard",
+        "style": "Shell",
+        "props": [],
+        "state": [
+          {
+            "name": "metrics",
+            "type": {
+              "kind": "list",
+              "element": {
+                "kind": "record",
+                "name": "DashboardMetric",
+                "symbol": "pulseboard@0.2.0:main.bmec:RecordDeclaration:3"
+              }
+            },
+            "source": {
+              "method": "GET",
+              "path": "/dashboard/metrics"
+            }
+          }
+        ],
+        "events": [],
+        "children": [
+          {
+            "kind": "component",
+            "componentId": "COMP-001",
+            "props": {}
+          },
+          {
+            "kind": "component",
+            "componentId": "COMP-002",
+            "props": {}
+          },
+          {
+            "kind": "component",
+            "componentId": "COMP-003",
+            "props": {}
+          },
+          {
+            "kind": "component",
+            "componentId": "COMP-005",
+            "props": {}
+          },
+          {
+            "kind": "list",
+            "source": "metrics",
+            "item": "metric",
+            "empty": "No metrics available.",
+            "body": [
+              {
+                "kind": "component",
+                "componentId": "COMP-004",
+                "props": {}
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "COMP-001",
+        "name": "Eyebrow",
+        "style": "Badge",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "PERSONAL WORKSPACE"
+          }
+        ]
+      },
+      {
+        "id": "COMP-002",
+        "name": "HeroBanner",
+        "style": "Hero",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "PulseBoard"
+          },
+          {
+            "kind": "text",
+            "value": "Your command center for focused work."
+          },
+          {
+            "kind": "text",
+            "value": "Plan clearly. Move quickly. Finish well."
+          }
+        ]
+      },
+      {
+        "id": "COMP-003",
+        "name": "QuickNote",
+        "style": "Note",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "LIVE WORKSPACE / LOCAL SQLITE"
+          }
+        ]
+      },
+      {
+        "id": "COMP-004",
+        "name": "MetricCard",
+        "style": "MetricBlue",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "binding",
+            "path": "metric.name"
+          },
+          {
+            "kind": "binding",
+            "path": "metric.value"
+          }
+        ]
+      },
+      {
+        "id": "COMP-005",
+        "name": "CommandPanel",
+        "style": "CommandPanel",
+        "form": false,
+        "props": [],
+        "state": [],
+        "events": [],
+        "children": [
+          {
+            "kind": "text",
+            "value": "Your next move"
+          },
+          {
+            "kind": "text",
+            "value": "Add a task below, then keep the list lean and actionable."
+          }
+        ]
+      }
+    ],
+    "routes": [
+      {
+        "path": "/dashboard",
+        "componentId": "UI-001"
+      }
+    ]
+  },
+  "apis": [],
+  "functions": [],
+  "styles": [
+    {
+      "id": "STYLE-001",
+      "token": true,
+      "name": "SurfaceBase",
+      "values": [],
+      "spacing": "comfortable",
+      "corners": "rounded",
+      "disabled": "guarded",
+      "focus": "ringed",
+      "transitionDuration": 150,
+      "transitionProperty": "background",
+      "transitionEasing": "ease",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-002",
+      "token": true,
+      "name": "Accent",
+      "values": [
+        "accent"
+      ],
+      "typedValues": [
+        {
+          "name": "accent",
+          "category": "surface"
+        }
+      ]
+    },
+    {
+      "id": "STYLE-003",
+      "token": false,
+      "name": "Shell",
+      "values": [],
+      "composes": [
+        "SurfaceBase",
+        "Accent"
+      ],
+      "padding": 40,
+      "gap": 18,
+      "margin": 24,
+      "responsiveGap": 12,
+      "responsivePadding": 20,
+      "responsiveMargin": 12,
+      "states": [
+        {
+          "kind": "StyleState",
+          "state": "hovered",
+          "properties": [
+            {
+              "kind": "StyleProperty",
+              "name": "background",
+              "value": "dark-blue",
+              "span": {
+                "start": {
+                  "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+                  "line": 57,
+                  "column": 8,
+                  "offset": 1523
+                },
+                "end": {
+                  "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+                  "line": 57,
+                  "column": 43,
+                  "offset": 1558
+                }
+              }
+            }
+          ],
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 57,
+              "column": 3,
+              "offset": 1518
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 57,
+              "column": 43,
+              "offset": 1558
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "stretch",
+      "theme": "dark",
+      "border": "strong",
+      "shadow": "strong",
+      "corners": "rounded",
+      "disabled": "guarded",
+      "focus": "ringed",
+      "surface": "elevated",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-004",
+      "token": false,
+      "name": "Badge",
+      "values": [],
+      "padding": 8,
+      "margin": 8,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "blue",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 68,
+              "column": 3,
+              "offset": 1757
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 68,
+              "column": 21,
+              "offset": 1775
+            }
+          }
+        }
+      ],
+      "layout": "row",
+      "alignment": "center",
+      "typography": "compact",
+      "corners": "pill",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-005",
+      "token": false,
+      "name": "Hero",
+      "values": [],
+      "padding": 34,
+      "margin": 8,
+      "responsivePadding": 22,
+      "responsiveFontSize": 20,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "dark-blue",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 79,
+              "column": 3,
+              "offset": 1934
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 79,
+              "column": 26,
+              "offset": 1957
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "start",
+      "typography": "readable",
+      "fontWeight": "bold",
+      "fontSize": 24,
+      "lineHeight": 1.4,
+      "border": "strong",
+      "shadow": "strong",
+      "corners": "rounded",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-006",
+      "token": false,
+      "name": "Note",
+      "values": [],
+      "padding": 12,
+      "margin": 8,
+      "layout": "column",
+      "alignment": "start",
+      "typography": "compact",
+      "color": "muted",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-007",
+      "token": false,
+      "name": "MetricBlue",
+      "values": [],
+      "padding": 18,
+      "margin": 4,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "blue",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 106,
+              "column": 3,
+              "offset": 2434
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 106,
+              "column": 21,
+              "offset": 2452
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "start",
+      "border": "subtle",
+      "shadow": "strong",
+      "corners": "rounded",
+      "textColor": "white",
+      "typedValues": []
+    },
+    {
+      "id": "STYLE-008",
+      "token": false,
+      "name": "CommandPanel",
+      "values": [],
+      "padding": 22,
+      "margin": 8,
+      "properties": [
+        {
+          "kind": "StyleProperty",
+          "name": "background",
+          "value": "neutral",
+          "span": {
+            "start": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 118,
+              "column": 3,
+              "offset": 2636
+            },
+            "end": {
+              "file": "<BMEC_WORKSPACE>\\examples\\pulseboard\\main.bmec",
+              "line": 118,
+              "column": 24,
+              "offset": 2657
+            }
+          }
+        }
+      ],
+      "layout": "column",
+      "alignment": "start",
+      "typography": "readable",
+      "color": "blue",
+      "border": "subtle",
+      "shadow": "soft",
+      "corners": "rounded",
+      "typedValues": []
+    }
+  ]
+}

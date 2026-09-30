@@ -1,0 +1,5 @@
+function main() -> integer {
+  let lines = split("INFO ready\nERROR disk\nWARN low\nERROR timeout", "\n")
+  let errors = filter(lines, lambda(line text) -> boolean { return textContains(line, "ERROR") })
+  return length(errors)
+}

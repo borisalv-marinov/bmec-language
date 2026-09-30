@@ -1,0 +1,8 @@
+app NativeOptionalNumber
+
+function identity(value number?) -> number? { return value }
+
+function main() -> number {
+  let value = identity(some(1.5))
+  if value != none { return value } else { return 0.0 }
+}

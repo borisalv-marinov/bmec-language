@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bmec.dev/schemas/website-index.schema.json",
+  "title": "BMEC website machine-readable index",
+  "type": "object",
+  "required": ["schemaVersion", "version", "languageVersion", "status", "catalogs"],
+  "properties": {
+    "schemaVersion": { "const": "bmec.website-index.v1" },
+    "version": { "type": "string" },
+    "languageVersion": { "type": "string" },
+    "status": { "type": "string", "pattern": "^/" },
+    "catalogs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "title", "href", "schemaVersion"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "href": { "type": "string", "pattern": "^/" },
+          "schemaVersion": { "type": "string" },
+          "jsonPointers": { "type": "array", "items": { "type": "string", "pattern": "^/" } }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

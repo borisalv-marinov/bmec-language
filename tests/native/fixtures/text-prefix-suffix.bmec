@@ -1,0 +1,9 @@
+app NativeTextPrefixSuffix
+
+function check(value text, prefix text, suffix text) -> boolean {
+  return startsWith(value, prefix) and endsWith(value, suffix)
+}
+
+function main() -> boolean {
+  return check("αβγ", "αβ", "βγ") and startsWith("🌍!", "🌍") and endsWith("🌍!", "!") and startsWith("", "") and endsWith("", "") and startsWith("short", "long") == false and endsWith("short", "long") == false
+}

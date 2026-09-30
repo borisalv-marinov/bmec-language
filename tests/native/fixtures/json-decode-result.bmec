@@ -1,0 +1,21 @@
+function decode(source text) -> result<result<integer,text>,text> { return decodeJson(source) }
+
+function hasOk(value result<result<integer,text>,text>) -> boolean {
+  if isOk(value) {
+    let inner = value.value
+    if isOk(inner) { return inner.value == 42 } else { return false }
+  } else { return false }
+}
+
+function hasErr(value result<result<integer,text>,text>) -> boolean {
+  if isOk(value) {
+    let inner = value.value
+    if isErr(inner) { return inner.error == "inner failure" } else { return false }
+  } else { return false }
+}
+
+function main() -> boolean {
+  let ok = decode("{\"version\":1,\"kind\":\"result\",\"state\":\"ok\",\"value\":{\"version\":1,\"kind\":\"integer\",\"value\":\"42\"}}")
+  let err = decode("{\"version\":1,\"kind\":\"result\",\"state\":\"err\",\"error\":{\"version\":1,\"kind\":\"text\",\"value\":\"inner failure\"}}")
+  return hasOk(ok) and hasErr(err)
+}

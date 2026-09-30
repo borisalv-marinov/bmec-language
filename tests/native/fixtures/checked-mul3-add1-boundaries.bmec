@@ -1,0 +1,9 @@
+function transform(value integer) -> integer { return value * 3 + 1 }
+
+function main() -> boolean {
+  let high integer = 3074457345618258602
+  let low integer = -3074457345618258602
+  return transform(high) == 9223372036854775807 and
+    transform(low) == -9223372036854775805 and
+    transform(-2) == -5 and transform(0) == 1
+}

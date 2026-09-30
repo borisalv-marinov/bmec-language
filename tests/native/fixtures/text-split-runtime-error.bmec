@@ -1,0 +1,6 @@
+function main() -> integer {
+  let pieces = split("α|β||", "|")
+  var count integer = 0
+  for piece in pieces { if piece == "" { count = count + 1 } }
+  return count / 0
+}

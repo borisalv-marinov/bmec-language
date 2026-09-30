@@ -1,0 +1,6 @@
+app NativeTextSubstringReversed
+
+function main() -> integer {
+  let value = substring("text", 3, 2)
+  return 0
+}

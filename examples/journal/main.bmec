@@ -1,0 +1,68 @@
+app Journal
+
+model Post {
+  title text required
+  slug text required unique
+  summary text required
+  body text required
+  published boolean default false
+}
+
+api /posts from Post requiring role admin
+
+async function listPublishedPosts(db capability<database>) -> task<list<Post>> {
+  return wait for get posts from Post where published is true ordered by slug ascending limited to 50 using db
+}
+
+async function listNextPublishedPosts(db capability<database>, after text) -> task<list<Post>> {
+  return wait for get posts from Post where published is true and slug is greater than after ordered by slug ascending limited to 50 using db
+}
+
+async function searchPublishedPosts(db capability<database>, term text) -> task<list<Post>> {
+  return wait for get posts from Post where published is true and title contains term ordered by slug ascending limited to 50 using db
+}
+
+async function searchNextPublishedPosts(db capability<database>, term text, after text) -> task<list<Post>> {
+  return wait for get posts from Post where published is true and title contains term and slug is greater than after ordered by slug ascending limited to 50 using db
+}
+
+async function findPublishedPost(db capability<database>, slug text) -> task<list<Post>> {
+  return wait for get posts from Post where published is true and slug is slug ordered by title ascending limited to 1 using db
+}
+
+http GET /published-posts requires database -> listPublishedPosts
+http GET /published-posts/pages/:after requires database -> listNextPublishedPosts
+http GET /published-posts/search/:term requires database -> searchPublishedPosts
+http GET /published-posts/search/:term/pages/:after requires database -> searchNextPublishedPosts
+http GET /published-posts/:slug requires database -> findPublishedPost
+
+component JournalIntro {
+  text "Journal editor"
+  text "Create and maintain persisted posts. Required fields and unique slugs are validated."
+}
+
+component ArticleRow {
+  show post title
+  show post summary
+  link "Read article" to Article with slug post.slug
+}
+
+component ArticleDetail {
+  show post title
+  show post body
+}
+
+page Posts {
+  use JournalIntro
+  crud Post
+}
+
+page Articles {
+  state posts list<Post> from GET "/published-posts" next GET "/published-posts/pages/:after" cursor by slug search GET "/published-posts/search/:term" next GET "/published-posts/search/:term/pages/:after" cursor by slug
+  for each post in posts show ArticleRow empty "No published posts." filter by title
+}
+
+page Article at "/articles/:slug" {
+  state posts list<Post> from GET "/published-posts/:slug"
+  for each post in posts show ArticleDetail empty "Article not found or unpublished."
+}

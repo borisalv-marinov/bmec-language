@@ -1,0 +1,5 @@
+app NativeNumberConstantFold
+
+function main() -> number {
+  return 7919.0 * 0.25 - 126.0
+}

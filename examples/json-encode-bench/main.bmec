@@ -1,0 +1,7 @@
+function main() -> boolean {
+  var success boolean = true
+  repeat 1000 {
+    success = success and encodeJson("A \"quoted\" path \\ sample\nUnicode Привет") == "{\"version\":1,\"kind\":\"text\",\"value\":\"A \\\"quoted\\\" path \\\\ sample\\nUnicode Привет\"}"
+  }
+  return success
+}

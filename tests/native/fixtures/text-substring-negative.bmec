@@ -1,0 +1,6 @@
+app NativeTextSubstringNegative
+
+function main() -> integer {
+  let value = substring("text", -1, 2)
+  return 0
+}

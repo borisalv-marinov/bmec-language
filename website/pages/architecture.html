@@ -1,0 +1,15 @@
+<section class="route-section">
+  <h2>One checked path from source to running app.</h2>
+  <p>BMEC keeps its language rules in the compiler. Database adapters, HTTP transport, generated browser output, and the native backend connect through typed intermediate forms.</p>
+  <pre class="route-diagram" aria-label="BMEC compiler architecture"><code>BMEC source
+    ↓
+lexer → parser → AST
+    ↓
+semantic analysis → typed IR
+    ↓
+reference runtime · browser output · generated C
+    ↓
+SQLite / PostgreSQL · HTTP / UI · native executable</code></pre>
+  <p>Type references and stable identifiers remain part of the checked contract. Host behavior enters through explicit capabilities and narrow runtime adapters.</p>
+  <p><a href="/ai/ai-spec.json">Read the compiler contract</a> · <a href="/ai/">Explore AI knowledge</a> · <a href="/docs/CAPABILITIES.md">See platform boundaries</a></p>
+</section>

@@ -1,0 +1,5 @@
+[package]
+name = "paper-harbor"
+version = "0.7.0"
+language = "0.1"
+entry = "main.bmec"

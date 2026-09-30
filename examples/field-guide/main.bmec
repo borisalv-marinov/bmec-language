@@ -1,0 +1,37 @@
+app FieldGuide {
+  description "A \"small\" field guide to BMEC & tooling."
+  canonical "https://bmec.example/field-guide"
+}
+
+component WelcomeCopy {
+  text "A small field guide to building with BMEC"
+  text "BMEC keeps the surface readable and the runtime behavior explicit."
+}
+
+component LanguageCopy {
+  text "Learn the language"
+  text "Start with values, records, functions, and explicit Result handling."
+}
+
+component PrinciplesCopy {
+  text "Project principles"
+  text "Easy on the outside. Strict on the inside."
+  text "Typed intermediate representations keep compiler, runtime, and tools aligned."
+}
+
+page Welcome {
+  use WelcomeCopy
+  link "How the language works" to Language
+  link "Project principles" to Principles
+}
+
+page Language {
+  use LanguageCopy
+  link "Back to welcome" to Welcome
+  link "Project principles" to Principles
+}
+
+page Principles {
+  use PrinciplesCopy
+  link "Back to welcome" to Welcome
+}

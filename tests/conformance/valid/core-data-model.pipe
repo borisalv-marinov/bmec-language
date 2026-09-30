@@ -1,0 +1,11 @@
+type User { name text nickname text? }
+
+function main() -> text {
+    let users list<User> = [User { name: "Ada" nickname: none }]
+    let first = users[0]
+    if first != none {
+        return first.name
+    } else {
+        return "empty"
+    }
+}

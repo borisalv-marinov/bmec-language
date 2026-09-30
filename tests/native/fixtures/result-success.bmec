@@ -1,0 +1,12 @@
+app NativeResultSuccess
+
+function increment(value integer) -> result<integer,integer> { return ok(value + 1) }
+function pass(value result<integer,integer>) -> result<integer,integer> {
+  let number = value?
+  return ok(number)
+}
+
+function main() -> integer {
+  let answer = pass(increment(3))
+  if isOk(answer) { return answer.value } else { return -1 }
+}

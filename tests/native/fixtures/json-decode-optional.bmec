@@ -1,0 +1,35 @@
+function decodeOptional(source text) -> result<integer?,text> { return decodeJson(source) }
+
+function hasPresent(value result<integer?,text>) -> boolean {
+  if isOk(value) {
+    let inner = value.value
+    return isSome(inner)
+  } else { return false }
+}
+
+function hasAbsent(value result<integer?,text>) -> boolean {
+  if isOk(value) {
+    let inner = value.value
+    return isNone(inner)
+  } else { return false }
+}
+
+function hasError(value result<integer?,text>, expected text) -> boolean {
+  if isErr(value) { return value.error == expected } else { return false }
+}
+
+function main() -> boolean {
+  let absent = decodeOptional("{\"version\":1,\"kind\":\"optional\",\"present\":false}")
+  let decodedNone = decodeOptional("{\"version\":1,\"kind\":\"none\"}")
+  let present = decodeOptional("{\"version\":1,\"kind\":\"optional\",\"present\":true,\"value\":{\"version\":1,\"kind\":\"integer\",\"value\":\"3\"}}")
+  let mismatch = decodeOptional("{\"version\":1,\"kind\":\"optional\",\"present\":true,\"value\":{\"version\":1,\"kind\":\"boolean\",\"value\":true}}")
+  let missingValue = decodeOptional("{\"version\":1,\"kind\":\"optional\",\"present\":true}")
+  let unexpectedValue = decodeOptional("{\"version\":1,\"kind\":\"optional\",\"present\":false,\"value\":null}")
+  let invalidNone = decodeOptional("{\"version\":1,\"kind\":\"none\",\"extra\":true}")
+  return hasAbsent(decodedNone) and hasPresent(present) and
+    hasError(absent, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(mismatch, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(missingValue, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(unexpectedValue, "PIPE-JSON-002: decoded value does not match integer") and
+    hasError(invalidNone, "PIPE-JSON-002: decoded value does not match integer")
+}

@@ -1,0 +1,19 @@
+type Leaf { value integer }
+type Branch { leaf Leaf enabled boolean }
+type Tree { branch Branch label text }
+
+function buildTree() -> Tree {
+  return Tree { branch: Branch { leaf: Leaf { value: 40 }, enabled: true }, label: "native" }
+}
+
+function readTree(tree Tree) -> integer {
+  if tree.branch.enabled and tree.label == "native" {
+    return tree.branch.leaf.value + 2
+  }
+  return 0
+}
+
+function main() -> boolean {
+  let tree = buildTree()
+  return readTree(tree) == 42
+}

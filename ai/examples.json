@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "bmec.examples.v1",
+  "languageVersion": "0.1",
+  "examples": [
+    {
+      "id": "EXAMPLE-HELLO-001",
+      "name": "hello-world",
+      "title": "Hello World",
+      "purpose": "Define a small typed function and return text.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "app",
+        "function",
+        "text"
+      ],
+      "source": "app HelloWorld\nfunction greeting() -> text { return \"Hello, world!\" }\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-RECORD-001",
+      "name": "typed-record-and-json",
+      "title": "Typed Record, JSON, and Result",
+      "purpose": "Declare a record type, encode it as JSON text, and decode JSON into a typed Result.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "record",
+        "json",
+        "result"
+      ],
+      "source": "app JsonRecords\ntype Preferences { name text active boolean }\nfunction stringify(preferences Preferences) -> text { return encodeJson(preferences) }\nfunction parsePreferences(source text) -> result<Preferences,text> { return decodeJson(source) }\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-TODO-001",
+      "name": "todo-model-and-page",
+      "title": "Todo Model and Page",
+      "purpose": "Start a small database-backed UI with a model, CRUD page, and named style.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "model",
+        "page",
+        "crud",
+        "style"
+      ],
+      "source": "app Todo\nmodel Task { title text required done boolean default false }\npage Home { crud Task }\nstyle clean dark\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-DASHBOARD-001",
+      "name": "controlled-english-dashboard",
+      "title": "Controlled-English Dashboard",
+      "purpose": "Show typed models, reusable form and row components, page lists, responsive styles, async database functions, and authenticated routes.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "model",
+        "component",
+        "form",
+        "validation",
+        "page-list",
+        "responsive-style",
+        "database-capability",
+        "route-authorization"
+      ],
+      "source": "app Workspace\napi / tasks from Task requiring authenticated\nmodel User {\n  name text required active boolean required\n}\nmodel Task {\n  title text required done boolean required\n}\ncomponent TaskRow {\n  show task title\n}\ncomponent TaskForm form {\n  text \"Create task\"\n  input title text validate nonempty button \"Save\" on Save\n}\npage Dashboard {\n  state tasks list < Task >\n  state loading boolean = false\n  for each task in tasks show TaskRow\n  use TaskForm when Save is clicked\n  crud Task\n}\nstyle named DashboardStyle {\n  layout is grid columns is 2 gap is 16 on small screens {\n    columns is 1\n  }\n}\nfunction canAccess(age integer) -> boolean {\n  return age is at least 18\n}\nasync function listTasks(db capability < database >) -> task < list < Task > > {\n  return wait for get tasks from Task using db\n}\nasync function createTask(db capability < database >,body Task) -> task < integer > {\n  return wait for add body to Task using db\n}\nserve GET / tasks requiring authenticated and database with listTasks\nserve POST / tasks requiring authenticated and database with createTask\n",
+      "check": "bmec check main.bmec"
+    },
+    {
+      "id": "EXAMPLE-LOG-001",
+      "name": "log-analyzer",
+      "title": "Large-File Log Analyzer",
+      "purpose": "Read a file through an explicit filesystem capability, filter and count matching lines, sort results, and write a summary.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "filesystem-capability",
+        "result",
+        "list-filter",
+        "fold",
+        "sort",
+        "file-io"
+      ],
+      "source": "app LogAnalyzer\nfunction summarize(fs capability<filesystem>, input text, output text) -> result<boolean,text> { let contents = readTextFile(fs, input)? let lines = split(contents, \"\\n\") let errors = filter(lines, lambda(line text) -> boolean { return textContains(line, \"ERROR\") }) let errorCount = fold(errors, 0, lambda(count integer, line text) -> integer { return count + 1 }) let sortedErrors = sort(errors) let summary = join(sortedErrors, \"\\n\") let written = writeTextFile(fs, output, summary)? return ok(errorCount > 0 and written) }\n",
+      "check": "bmec check main.bmec",
+      "run": "bmec exec main.bmec summarize --args '[\"input.log\",\"errors.log\"]' --filesystem-root ./data"
+    },
+    {
+      "id": "EXAMPLE-READING-QUEUE-001",
+      "name": "reading-queue",
+      "title": "Personal Reading Queue",
+      "purpose": "Build a developer-owned full-stack app with authenticated routes and server-enforced per-user database scope.",
+      "fileName": "main.bmec",
+      "constructs": [
+        "model",
+        "record",
+        "database-capability",
+        "route-authorization",
+        "form",
+        "page-list",
+        "responsive-style"
+      ],
+      "source": "app ReadingQueue {\n  description \"A personal reading queue with server-checked ownership.\"\n}\ntype Principal {\n  id text role text\n}\nmodel Book {\n  title text required ownerId text required finished boolean required default false\n}\ntype NewBook {\n  title text required\n}\nasync function listMyBooks(principal Principal, db capability<database>) -> task<list<Book>> {\n  let userId = principal.id\n  return wait for get books from Book where ownerId is userId ordered by id ascending limited to 100 using db\n}\nasync function addMyBook(principal Principal, db capability<database>, body NewBook) -> task<integer> {\n  let book = Book {\n    title :body.title, ownerId :principal.id, finished :false\n  }\n  return wait for add book to Book using db\n}\nserve GET / books requiring authenticated and database with listMyBooks\nserve POST / books requiring authenticated and database with addMyBook\ncomponent NewBookForm form {\n  text \"Add a book to your queue\"\n  input title text label \"Book title\" validate nonempty button \"Add book\" on AddBook\n}\ncomponent BookRow {\n  show book title\n  show book finished\n}\ncomponent PrivacyNote {\n  text \"Books saved here are visible only to your account.\"\n}\ncomponent SignInForm form {\n  text \"Sign in to see your reading queue\"\n  input id text label \"User ID\" validate nonempty\n  input password text label \"Password\" validate nonempty button \"Sign in\" on Login\n}\ncomponent SignOutButton {\n  button \"Sign out\" on Logout\n}\npage SignIn {\n  use SignInForm link \"Open my reading queue\" to ReadingQueue\n}\npage ReadingQueue {\n  use SignOutButton\n  use style ReadingQueueLayout\n  event AddBook(title text) sends POST \"/books\" use NewBookForm\n  state books list<Book> from GET \"/books\"\n  use PrivacyNote link \"Sign in\" to SignIn\n  for each book in books show BookRow empty \"Your queue is empty. Add a book to begin.\"\n}\nstyle named ReadingQueueLayout {\n  layout is column alignment is stretch gap is 16 padding is 24 on small screens {\n    padding is 12\n  }\n}\n",
+      "check": "bmec check main.bmec"
+    }
+  ]
+}

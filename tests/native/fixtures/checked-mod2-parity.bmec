@@ -1,0 +1,7 @@
+function isEven(value integer) -> boolean { return value % 2 == 0 }
+function isOdd(value integer) -> boolean { return value % 2 != 0 }
+
+function main() -> boolean {
+  return isEven(-9223372036854775807 - 1) and isEven(-2) and isEven(0) and isEven(2) and
+    isOdd(-9223372036854775807) and isOdd(-3) and isOdd(-1) and isOdd(1) and isOdd(9223372036854775807)
+}

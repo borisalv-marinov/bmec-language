@@ -1,0 +1,97 @@
+
+app DataExplorer
+
+model Region {
+    name text required unique
+}
+
+model ExplorerRecord {
+    name text required unique
+    category text required
+    region Region required
+    value integer required
+    active boolean required
+}
+
+component ExplorerHome {
+    text "BMEC Data Explorer"
+    text "Bounded, sorted reads over a large SQLite dataset."
+}
+
+index ExplorerRecord_region_name on ExplorerRecord by region, name
+index ExplorerRecord_category_name on ExplorerRecord by category, name
+
+type ExplorerCounts {
+    total integer
+    active integer
+}
+
+component ExplorerRecordRow {
+    show record name
+    show record category
+    link "Browse this category" to CategoryExplorer with category record.category
+}
+
+component ExplorerSummary {
+    text "Matching records"
+    show summary total
+    show summary active
+}
+
+page Explorer {
+    use ExplorerHome
+    state summaries list<ExplorerCounts> from GET "/records/summary"
+    for each summary in summaries show ExplorerSummary
+    state records list<ExplorerRecord> from GET "/records/page" next GET "/records/page/:after" cursor by name
+    for each record in records show ExplorerRecordRow empty "No records yet."
+}
+
+page CategoryExplorer at "/records/category/:category" {
+    state records list<ExplorerRecord> from GET "/records/category/:category" next GET "/records/category/:category/pages/:after" cursor by name
+    for each record in records show ExplorerRecordRow empty "No records in this category."
+}
+
+async function listRecords(db capability<database>) -> task<list<ExplorerRecord>> {
+    return wait for get records from ExplorerRecord ordered by name ascending limited to 50 using db
+}
+
+async function listRecordsAfter(db capability<database>, after text) -> task<list<ExplorerRecord>> {
+    return wait for get records from ExplorerRecord where name is greater than after ordered by name ascending limited to 50 using db
+}
+
+async function listByRegion(db capability<database>, region Region) -> task<list<ExplorerRecord>> {
+    return wait for get records from ExplorerRecord where region is region ordered by name ascending limited to 50 using db
+}
+
+async function listByRegionAfter(db capability<database>, region Region, after text) -> task<list<ExplorerRecord>> {
+    return wait for get records from ExplorerRecord where region is region and name is greater than after ordered by name ascending limited to 50 using db
+}
+
+async function listByCategory(db capability<database>, category text) -> task<list<ExplorerRecord>> {
+    return wait for get records from ExplorerRecord where category is category ordered by name ascending limited to 50 using db
+}
+
+async function listByCategoryAfter(db capability<database>, category text, after text) -> task<list<ExplorerRecord>> {
+    return wait for get records from ExplorerRecord where category is category and name is greater than after ordered by name ascending limited to 50 using db
+}
+
+async function createRecord(db capability<database>, body ExplorerRecord) -> task<integer> {
+    return wait for add body to ExplorerRecord using db
+}
+
+async function recordCounts(db capability<database>) -> task<list<ExplorerCounts>> {
+    let total = await databaseCount(db, "ExplorerRecord")
+    let active = await databaseCountWhere(db, "ExplorerRecord", "active", "=", true)
+    let summary = ExplorerCounts { total: total, active: active }
+    return [summary]
+}
+
+serve GET /records requiring database with listRecords
+serve POST /records requiring role admin and database with createRecord
+http GET /records/region/:region requires database -> listByRegion
+http GET /records/region/:region/pages/:after requires database -> listByRegionAfter
+http GET /records/category/:category requires database -> listByCategory
+http GET /records/category/:category/pages/:after requires database -> listByCategoryAfter
+http GET /records/page requires database -> listRecords
+http GET /records/page/:after requires database -> listRecordsAfter
+http GET /records/summary requires database -> recordCounts

@@ -1,0 +1,5 @@
+app NativeOverflow
+
+function main() -> integer {
+  return 9223372036854775807 + 1
+}

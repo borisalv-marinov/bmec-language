@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+  "name": "BMEC",
+  "scopeName": "source.bmec",
+  "patterns": [
+    {"include": "#comments"},
+    {"include": "#strings"},
+    {"include": "#declarations"},
+    {"include": "#keywords"},
+    {"include": "#types"},
+    {"include": "#constants"},
+    {"include": "#numbers"},
+    {"include": "#operators"}
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {"name": "comment.line.number-sign.bmec", "match": "#.*$"},
+        {"name": "comment.line.double-slash.bmec", "match": "//.*$"}
+      ]
+    },
+    "strings": {
+      "patterns": [
+        {"name": "string.quoted.double.bmec", "begin": "\"", "end": "\"", "patterns": [{"name": "constant.character.escape.bmec", "match": "\\\\."}]},
+        {"name": "string.quoted.single.bmec", "begin": "'", "end": "'", "patterns": [{"name": "constant.character.escape.bmec", "match": "\\\\."}]}
+      ]
+    },
+    "declarations": {
+      "patterns": [
+        {"name": "meta.declaration.bmec", "match": "\\b(app|model|type|enum|interface|function|page|component|style|api)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": {"1": {"name": "keyword.declaration.bmec"}, "2": {"name": "entity.name.type.bmec"}}},
+        {"name": "meta.declaration.bmec", "match": "\\b(public|private)\\s+(function|model|type|enum|interface|page|component|style)\\s+([A-Za-z_][A-Za-z0-9_]*)", "captures": {"1": {"name": "storage.modifier.bmec"}, "2": {"name": "keyword.declaration.bmec"}, "3": {"name": "entity.name.type.bmec"}}}
+      ]
+    },
+    "keywords": {
+      "name": "keyword.control.bmec",
+      "match": "\\b(if|else|otherwise|for|each|in|while|repeat|break|continue|return|let|var|match|case|test|async|await|wait|from|where|ordered|by|ascending|descending|limited|to|using|requires|requiring|with|on|when|show|use|state|event|input|button|text|validate|crud|route|as|and|or|not|is|at|least|most|greater|less|than|equal|otherwise)\\b"
+    },
+    "types": {
+      "name": "storage.type.bmec",
+      "match": "\\b(text|number|integer|boolean|money|date|datetime|id|result|list|task|upload|capability)\\b"
+    },
+    "constants": {
+      "name": "constant.language.bmec",
+      "match": "\\b(true|false|none|null)\\b"
+    },
+    "numbers": {
+      "name": "constant.numeric.bmec",
+      "match": "\\b\\d+(?:\\.\\d+)?\\b"
+    },
+    "operators": {
+      "name": "keyword.operator.bmec",
+      "match": "->|=>|==|!=|<=|>=|[=+*/%<>-]"
+    }
+  }
+}

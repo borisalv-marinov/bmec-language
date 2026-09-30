@@ -1,0 +1,62 @@
+{
+  "name": "bmec-language-support",
+  "displayName": "BMEC Language Support",
+  "description": "BMEC language tooling backed by the BMEC compiler and stdio language server.",
+  "version": "0.9.1-beta.1",
+  "publisher": "bmec",
+  "license": "SEE LICENSE IN LICENSE",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/borisalv-marinov/bmec-language.git"
+  },
+  "homepage": "https://bmec-language-bm-s.vercel.app",
+  "bugs": {
+    "url": "https://github.com/borisalv-marinov/bmec-language/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "main": "./dist/extension.js",
+  "scripts": {
+    "vscode:prepublish": "node ../scripts/build-vscode-extension.mjs"
+  },
+  "activationEvents": [
+    "onLanguage:bmec"
+  ],
+  "contributes": {
+    "languages": [
+      {
+        "id": "bmec",
+        "aliases": [
+          "BMEC",
+          "Pipe"
+        ],
+        "extensions": [
+          ".bmec",
+          ".pipe"
+        ],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "bmec",
+        "scopeName": "source.bmec",
+        "path": "./syntaxes/bmec.tmLanguage.json"
+      }
+    ],
+    "configuration": {
+      "title": "BMEC",
+      "properties": {
+        "bmec.executable": {
+          "type": "string",
+          "default": "bmec",
+          "description": "BMEC CLI executable used to start the language server."
+        }
+      }
+    }
+  },
+  "devDependencies": {
+    "vscode-languageclient": "10.1.1"
+  }
+}

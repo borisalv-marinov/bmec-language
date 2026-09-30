@@ -1,0 +1,17 @@
+app Tasks
+
+model User {
+    name text required
+    email text required unique
+}
+
+model Task {
+    title text required
+    done boolean default false
+    owner User
+}
+
+api /users from User requiring role admin
+api /tasks from Task requiring role admin
+page Home { crud Task }
+style clean dark

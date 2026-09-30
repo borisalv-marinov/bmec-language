@@ -1,0 +1,19 @@
+type Sample { count integer values list<integer> }
+
+function sampleWire() -> text { return encodeJson(Sample { count: 17, values: [1, 2, 3, 4, 5, 6, 7, 8] }) }
+
+function decodeSample(source text) -> result<Sample,text> { return decodeJson(source) }
+
+function main() -> boolean {
+  repeat 100 {
+    let decoded = decodeSample(__BMEC_RECORD_PAYLOAD__)
+    if isOk(decoded) {
+      let sample = decoded.value
+      let values = sample.values
+      var total integer = sample.count
+      for value in values { total = total + value }
+      if total != 53 { return false }
+    } else { return false }
+  }
+  return true
+}

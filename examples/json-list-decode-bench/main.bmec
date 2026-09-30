@@ -1,0 +1,19 @@
+function decodeIntegers(source text) -> result<list<integer>,text> { return decodeJson(source) }
+
+function matchesExpected(source text, expected integer) -> boolean {
+  let decoded = decodeIntegers(source)
+  if isOk(decoded) {
+    let values = decoded.value
+    var total integer = 0
+    for value in values { total = total + value }
+    return total == expected
+  } else { return false }
+}
+
+function main() -> boolean {
+  repeat 100 {
+    let matched = matchesExpected("{\"version\":1,\"kind\":\"list\",\"elementType\":{\"kind\":\"primitive\",\"name\":\"integer\"},\"items\":[{\"version\":1,\"kind\":\"integer\",\"value\":\"1\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"2\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"3\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"4\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"5\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"6\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"7\"},{\"version\":1,\"kind\":\"integer\",\"value\":\"8\"}]}", 36)
+    if matched == false { return false }
+  }
+  return true
+}

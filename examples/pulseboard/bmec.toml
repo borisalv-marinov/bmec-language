@@ -1,0 +1,5 @@
+[package]
+name = "pulseboard"
+version = "0.2.0"
+language = "0.1"
+entry = "main.bmec"

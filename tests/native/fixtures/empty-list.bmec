@@ -1,0 +1,10 @@
+app NativeEmptyList
+
+function main() -> integer {
+  var total integer = 42
+  let values list<integer> = []
+  for value in values {
+    total = value
+  }
+  return total
+}

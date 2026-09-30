@@ -1,0 +1,12 @@
+type Sample { high money low money zero money }
+
+function main() -> boolean {
+  let high money = 92233720368547758.07
+  let low money = -92233720368547758.08
+  let zero money = 0.00
+  let sample = Sample { high: high, low: low, zero: zero }
+  let wire = encodeJson(sample)
+  return textContains(wire, "\"high\":{\"version\":1,\"kind\":\"money\",\"minor\":\"9223372036854775807\",\"scale\":2}") and
+    textContains(wire, "\"low\":{\"version\":1,\"kind\":\"money\",\"minor\":\"-9223372036854775808\",\"scale\":2}") and
+    textContains(wire, "\"zero\":{\"version\":1,\"kind\":\"money\",\"minor\":\"0\",\"scale\":2}")
+}

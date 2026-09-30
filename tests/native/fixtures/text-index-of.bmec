@@ -1,0 +1,20 @@
+app NativeTextIndexOf
+
+function findIndex(value text, needle text) -> integer? {
+  return textIndexOf(value, needle)
+}
+
+function isIndex(value text, needle text, expected integer) -> boolean {
+  let result = findIndex(value, needle)
+  return match result {
+    some(index) => index == expected,
+    none => false
+  }
+}
+
+function main() -> boolean {
+  let missing = findIndex("A🌍α", "missing")
+  let longNeedle = " ERROR "
+  let longSplit = join(split("left ERROR right ERROR end", longNeedle), "|")
+  return isIndex("A🌍α", "α", 2) and isNone(missing) and isIndex("A🌍α", "", 0) and isIndex("a🌍a", "🌍a", 1) and isIndex("INFO service\nERROR disk\nINFO ready\n ERROR detail\nERROR end", longNeedle, 35) and textContains("ERROR only", longNeedle) == false and longSplit == "left|right|end"
+}
