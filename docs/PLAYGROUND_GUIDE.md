@@ -76,9 +76,11 @@ and integer helpers. It refuses functions that use files, databases, network,
 processes, secrets, host capabilities, asynchronous calls, or unsupported
 operations.
 
-Each run occurs in a short-lived browser Worker with limits on source size,
-steps, loop iterations, call depth, integer size, and elapsed time. A run is
-stopped when it exceeds those bounds. The source is not uploaded to a server.
+Each run occurs in a short-lived browser Worker with limits on source size
+(50,000 characters), steps (20,000), loop iterations (1,000), call depth
+(32), integer range (signed 64-bit), text length (50,000 characters), list
+length (1,000 items), and elapsed time (2 seconds). A run stops when it
+exceeds those bounds. The source is not uploaded to a server.
 
 This page is not an app host. To try pages, routes, databases, or host-backed
 functions, install BMEC locally and follow the [getting started guide](GETTING_STARTED.md).

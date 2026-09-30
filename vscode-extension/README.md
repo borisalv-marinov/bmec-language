@@ -12,9 +12,13 @@ npm.
 The language server runs locally and uses the BMEC compiler. The extension
 does not bundle the compiler or include a debugger.
 
+If VS Code opens an untrusted workspace in Restricted Mode, the extension
+stays disabled until you explicitly trust that workspace. Review the folder
+before granting trust.
 
-Install the CLI with
-pm install -g bmec@0.9.1-beta.1. This extension's version tracks the matching BMEC beta; its language contract remains version 0.1. Local VSIX packaging and Marketplace publication are separate steps.
+Install the CLI with `npm install -g bmec@0.9.1-beta.1`. This extension's
+version tracks the matching BMEC beta; its language contract remains version
+0.1. Local VSIX packaging and Marketplace publication are separate steps.
 
 Licensed under the MIT License. See [LICENSE](LICENSE).
 

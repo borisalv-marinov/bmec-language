@@ -24,7 +24,7 @@ supported by every backend.
 - Preserve the existing compiler, reference runtime, typed IR, and explicit
   capability model. This beta is not a language feature programme.
 - Check the exact target and runtime before describing support. The browser
-  playground checks source only; it does not execute submitted BMEC programs.
+  playground checks source with the full compiler and can run a bounded pure-function subset in a short-lived browser Worker. Keep its limits and host-capability exclusions accurate.
 - Authentication does not provide row ownership automatically. Applications
   must put owner or workspace predicates in authorized data operations.
 

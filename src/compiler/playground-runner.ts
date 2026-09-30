@@ -1,4 +1,5 @@
 import type { CoreExpr, CoreFunction, CoreStatement } from "../core/analysis.js";
+import type { TypeRef } from "../types/type-ref.js";
 
 interface SafeArray extends Array<SafeValue> {}
 interface SafeObject { [key: string]: SafeValue }
@@ -8,12 +9,22 @@ type Budget = { steps: number; depth: number };
 
 const MAX_STEPS = 20_000;
 const MAX_DEPTH = 32;
-const MAX_INTEGER_BITS = 4_096;
+const MAX_LIST_ITEMS = 1_000;
+const MAX_STRING_LENGTH = 50_000;
+const MAX_ARGUMENT_NODES = 5_000;
+const INT_MIN = -(2n ** 63n);
+const INT_MAX = 2n ** 63n - 1n;
 const fail = (message: string): never => { throw new Error(message); };
 
 function integer(value: bigint): bigint {
-  if (value.toString(2).replace("-", "").length > MAX_INTEGER_BITS) fail("Integer result exceeded the playground size limit.");
+  if (value < INT_MIN || value > INT_MAX) fail("Integer overflow (BMEC integers are signed 64-bit values).");
   return value;
+}
+
+function equal(left: SafeValue, right: SafeValue): boolean {
+  if (left === right) return true;
+  if (Array.isArray(left) && Array.isArray(right)) return left.length === right.length && left.every((item, index) => equal(item, right[index]!));
+  return false;
 }
 
 function step(budget: Budget): void {
@@ -40,7 +51,11 @@ function valueOf(expression: CoreExpr, env: Environment, functions: Map<string, 
       if (!env.has(name)) return fail(`Unknown value "${name}" in the selected function.`);
       return env.get(name)!;
     }
-    case "list": return (expression.elements ?? []).map(item => valueOf(item, env, functions, budget));
+    case "list": {
+      const elements = expression.elements ?? [];
+      if (elements.length > MAX_LIST_ITEMS) fail("The playground limits lists to 1,000 items.");
+      return elements.map(item => valueOf(item, env, functions, budget));
+    }
     case "unary": {
       const value = valueOf(expression.operand!, env, functions, budget);
       if (expression.operator === "not" && typeof value === "boolean") return !value;
@@ -57,10 +72,13 @@ function valueOf(expression: CoreExpr, env: Environment, functions: Map<string, 
       const right = valueOf(expression.right!, env, functions, budget);
       if (operator === "and" && typeof left === "boolean" && typeof right === "boolean") return left && right;
       if (operator === "or" && typeof left === "boolean" && typeof right === "boolean") return left || right;
-      if (operator === "==") return left === right;
-      if (operator === "!=") return left !== right;
+      if (operator === "==") return equal(left, right);
+      if (operator === "!=") return !equal(left, right);
       if (typeof left === "string" && typeof right === "string") {
-        if (operator === "+") return left + right;
+        if (operator === "+") {
+          if (left.length + right.length > MAX_STRING_LENGTH) fail("The playground limits text values to 50,000 characters.");
+          return left + right;
+        }
         if (operator === "<") return left < right;
         if (operator === "<=") return left <= right;
         if (operator === ">") return left > right;
@@ -92,7 +110,10 @@ function valueOf(expression: CoreExpr, env: Environment, functions: Map<string, 
         if (operator === ">") return left > right;
         if (operator === ">=") return left >= right;
       }
-      if (Array.isArray(left) && Array.isArray(right) && operator === "+") return [...left, ...right];
+      if (Array.isArray(left) && Array.isArray(right) && operator === "+") {
+        if (left.length + right.length > MAX_LIST_ITEMS) fail("The playground limits lists to 1,000 items.");
+        return [...left, ...right];
+      }
       return fail(`Operator "${operator ?? "?"}" is not supported for these values.`);
     }
     case "index": {
@@ -117,9 +138,9 @@ function valueOf(expression: CoreExpr, env: Environment, functions: Map<string, 
 
 function pureBuiltin(name: string, args: SafeValue[]): SafeValue {
   if (name === "length" && args.length === 1 && (typeof args[0] === "string" || Array.isArray(args[0]))) return BigInt(args[0].length);
-  if (name === "uppercase" && args.length === 1 && typeof args[0] === "string") return args[0].toUpperCase();
-  if (name === "lowercase" && args.length === 1 && typeof args[0] === "string") return args[0].toLowerCase();
-  if (name === "trim" && args.length === 1 && typeof args[0] === "string") return args[0].trim();
+  if (name === "uppercase" && args.length === 1 && typeof args[0] === "string") return checkedText(args[0].toUpperCase());
+  if (name === "lowercase" && args.length === 1 && typeof args[0] === "string") return checkedText(args[0].toLowerCase());
+  if (name === "trim" && args.length === 1 && typeof args[0] === "string") return checkedText(args[0].trim());
   if (name === "absInt" && args.length === 1 && typeof args[0] === "bigint") return integer(args[0] < 0n ? -args[0] : args[0]);
   if ((name === "minInt" || name === "maxInt") && args.length === 2 && typeof args[0] === "bigint" && typeof args[1] === "bigint") return name === "minInt" ? (args[0] < args[1] ? args[0] : args[1]) : (args[0] > args[1] ? args[0] : args[1]);
   if (name === "range" && args.length === 2 && typeof args[0] === "bigint" && typeof args[1] === "bigint") {
@@ -129,6 +150,28 @@ function pureBuiltin(name: string, args: SafeValue[]): SafeValue {
     return Array.from({ length: Number(size) }, (_, index) => integer(start + BigInt(index)));
   }
   return fail(`The playground does not run "${name}" here. Only listed pure functions are available; host and capability functions stay off.`);
+}
+
+function checkedText(value: string): string {
+  if (value.length > MAX_STRING_LENGTH) fail("The playground limits text values to 50,000 characters.");
+  return value;
+}
+
+function checkedArgument(value: unknown, state: { nodes: number }, depth = 0): SafeValue {
+  if (depth > MAX_DEPTH) fail("The playground limits argument nesting to 32 levels.");
+  if (++state.nodes > MAX_ARGUMENT_NODES) fail("The playground limits JSON arguments to 5,000 values.");
+  if (value === null || typeof value === "boolean") return value;
+  if (typeof value === "string") return checkedText(value);
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) fail("Number arguments must be finite numbers.");
+    return value;
+  }
+  if (typeof value === "bigint") return integer(value);
+  if (Array.isArray(value)) {
+    if (value.length > MAX_LIST_ITEMS) fail("The playground limits lists to 1,000 items.");
+    return value.map(item => checkedArgument(item, state, depth + 1));
+  }
+  return fail("The playground accepts JSON values only; object arguments are not available here.");
 }
 
 function runStatements(body: CoreStatement[], env: Environment, functions: Map<string, CoreFunction>, budget: Budget): { returned: boolean; value?: SafeValue; control?: "break" | "continue" } {
@@ -197,34 +240,39 @@ function invoke(fn: CoreFunction, args: SafeValue[], functions: Map<string, Core
   if (++budget.depth > MAX_DEPTH) fail("The program reached the 32-call depth limit.");
   try {
     const env = new Map<string, SafeValue>();
-    fn.parameters.forEach((parameter, index) => env.set(parameter.name, coerceArgument(args[index], parameter.typeRef.kind === "primitive" ? parameter.typeRef.name : parameter.typeRef.kind)));
+    fn.parameters.forEach((parameter, index) => env.set(parameter.name, coerceArgument(args[index], parameter.typeRef)));
     const result = runStatements(fn.body, env, functions, budget);
     if (!result.returned) fail(`Function ${fn.name} did not return a value.`);
     return result.value ?? null;
   } finally { budget.depth -= 1; }
 }
 
-function coerceArgument(value: SafeValue, type: string): SafeValue {
-  if (type === "integer") {
-    if (typeof value === "bigint") return value;
-    if (typeof value === "number" && Number.isSafeInteger(value)) return BigInt(value);
+function coerceArgument(value: SafeValue, type: TypeRef): SafeValue {
+  if (type.kind === "primitive" && type.name === "integer") {
+    if (typeof value === "bigint") return integer(value);
+    if (typeof value === "number" && Number.isSafeInteger(value)) return integer(BigInt(value));
     return fail("Integer arguments must be safe whole numbers.");
   }
-  if (type === "number") {
+  if (type.kind === "primitive" && type.name === "number") {
     if (typeof value === "number" && Number.isFinite(value)) return value;
     return fail("Number arguments must be finite numbers.");
   }
-  if (type === "text" && typeof value === "string" || type === "boolean" && typeof value === "boolean") return value;
-  if (type === "list" && Array.isArray(value)) return value;
-  return fail(`The playground runner does not accept ${type} arguments yet.`);
+  if (type.kind === "primitive" && type.name === "text" && typeof value === "string") return checkedText(value);
+  if (type.kind === "primitive" && type.name === "boolean" && typeof value === "boolean") return value;
+  if (type.kind === "list" && Array.isArray(value)) {
+    if (value.length > MAX_LIST_ITEMS) fail("The playground limits lists to 1,000 items.");
+    return value.map(item => coerceArgument(item, type.element));
+  }
+  return fail(`The playground runner does not accept ${type.kind === "primitive" ? type.name : type.kind} arguments yet.`);
 }
 
 export function runPureFunction(functions: CoreFunction[], functionName: string, rawArguments: unknown[]): SafeValue {
   if (!Array.isArray(rawArguments) || rawArguments.length > 16) fail("Supply a JSON array with no more than 16 arguments.");
+  const argumentState = { nodes: 0 };
+  const args = rawArguments.map(value => checkedArgument(value, argumentState));
   const indexed = new Map<string, CoreFunction>();
   for (const fn of functions) { indexed.set(fn.id, fn); indexed.set(fn.name, fn); }
   const target = indexed.get(functionName);
   if (!target) fail(`Function "${functionName}" is not declared in this source.`);
-  const args = rawArguments as SafeValue[];
   return invoke(target!, args, indexed, { steps: 0, depth: 0 });
 }
