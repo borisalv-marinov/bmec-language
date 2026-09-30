@@ -3,5 +3,5 @@
   <p>The reference deployment uses Linux containers and PostgreSQL. It keeps credentials in mounted secret files, binds the app to a chosen host interface, and exposes liveness and database readiness checks.</p>
   <ul class="route-list"><li>Use a trusted TLS reverse proxy for browser traffic.</li><li>Keep the database port private.</li><li>Back up PostgreSQL before schema upgrades.</li><li>Verify the restored schema and application data before switching traffic.</li></ul>
   <p><strong>Verified:</strong> a local WSL/Linux container deployment with PostgreSQL, persistence, health/readiness and recovery checks. The static website and playground pass local browser checks. <strong>Not deployed:</strong> no Vercel Preview remains available; the Preview-only account flow was blocked because available deployment routes resolved to Production. No external production deployment or production certification is claimed.</p>
-  <p><a href="/docs/DEPLOYMENT.md">Read the deployment and recovery guide</a> · <a href="/security/">Read the security model</a></p>
+  <p><a href="/docs/deployment/">Read the deployment and recovery guide</a> · <a href="/security/">Read the security model</a></p>
 </section>

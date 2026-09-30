@@ -22,21 +22,27 @@ await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
 const address=server.address(),url=`http://127.0.0.1:${address.port}`;
 const browser=await chromium.launch({headless:true});
 try{
-  for(const [name,width,height] of [['mobile',360,800],['tablet',768,900],['desktop',1440,1000]]){
+  for(const [name,width,height] of [['mobile',360,800],['tablet',768,900],['compact',850,900],['desktop',1440,1000]]){
     const page=await browser.newPage({viewport:{width,height},reducedMotion:'reduce'});
     const browserErrors=[];
     page.on('pageerror',error=>browserErrors.push(`page: ${error.message}`));
     page.on('console',message=>{if(message.type()==='error'&&!message.location().url.endsWith('/definitely-not-a-bmec-page'))browserErrors.push(`console at ${message.location().url}: ${message.text()}`);});
     page.on('response',response=>{if(response.status()>=400&&response.url()!==`${url}/definitely-not-a-bmec-page`)browserErrors.push(`http ${response.status()}: ${response.url()}`);});
     await page.goto(url,{waitUntil:'networkidle'});
-    const siteChecks=await page.evaluate(async()=>{const failures=[];for(const [selector,label] of [['link[rel="canonical"]','canonical'],['meta[property="og:title"]','OpenGraph title'],['meta[property="og:description"]','OpenGraph description'],['meta[property="og:image"]','OpenGraph image'],['meta[name="twitter:card"]','Twitter card'],['link[rel="icon"]','favicon']])if(!document.querySelector(selector)?.getAttribute('content')&&!document.querySelector(selector)?.getAttribute('href'))failures.push(`${label} metadata missing`);const canonical=document.querySelector('link[rel="canonical"]')?.href;if(!canonical?.startsWith('https://'))failures.push('canonical URL must be absolute HTTPS');const robots=await fetch('/robots.txt'),robotsText=await robots.text(),sitemap=await fetch('/sitemap.xml'),sitemapText=await sitemap.text(),icon=await fetch('/favicon.svg');if(!robots.ok||!robotsText.includes('Disallow: /'))failures.push('robots.txt does not keep preview out of search');if(!sitemap.ok||!sitemapText.includes('<urlset')||!sitemapText.includes('https://'))failures.push('sitemap.xml missing or invalid');if(!icon.ok||!icon.headers.get('content-type')?.includes('image/svg+xml'))failures.push('favicon missing or wrong content type');const missing=await fetch('/definitely-not-a-bmec-page');if(missing.status!==404||!(await missing.text()).includes('Page not found'))failures.push('404 route is missing or has the wrong status');return failures;});
+    const siteChecks=await page.evaluate(async()=>{const failures=[];for(const [selector,label] of [['link[rel="canonical"]','canonical'],['meta[property="og:title"]','OpenGraph title'],['meta[property="og:description"]','OpenGraph description'],['meta[property="og:image"]','OpenGraph image'],['meta[name="twitter:card"]','Twitter card'],['link[rel="icon"]','favicon']])if(!document.querySelector(selector)?.getAttribute('content')&&!document.querySelector(selector)?.getAttribute('href'))failures.push(`${label} metadata missing`);const canonical=document.querySelector('link[rel="canonical"]')?.href;if(!canonical?.startsWith('https://'))failures.push('canonical URL must be absolute HTTPS');const robots=await fetch('/robots.txt'),robotsText=await robots.text(),sitemap=await fetch('/sitemap.xml'),sitemapText=await sitemap.text(),icon=await fetch('/assets/bmec-mark.png');if(!robots.ok||!robotsText.includes('Disallow: /'))failures.push('robots.txt does not keep preview out of search');if(!sitemap.ok||!sitemapText.includes('<urlset')||!sitemapText.includes('https://'))failures.push('sitemap.xml missing or invalid');if(!icon.ok||!icon.headers.get('content-type')?.includes('image/png'))failures.push('transparent brand mark missing or wrong content type');const missing=await fetch('/definitely-not-a-bmec-page');if(missing.status!==404||!(await missing.text()).includes('Page not found'))failures.push('404 route is missing or has the wrong status');return failures;});
     if(siteChecks.length)throw new Error(`${name}: site metadata and discovery checks failed: ${siteChecks.join(', ')}`);
-    await page.getByRole('heading',{name:'A typed language for your full-stack app.'}).waitFor();
-    for(const section of ['Start with a generated project. Shape it into your app.','The compiler connects your application layers.','Ask for language facts that fit the task.','Start with the CLI. Keep the compiler close.','Check source in your browser.','Follow a clear path into the language.','Study real BMEC source.','Different apps. The same language tools.','Know what BMEC checks—and what your host owns.','Read the source and its contracts.'])await page.getByRole('heading',{name:section}).waitFor();
-    if(await page.locator('.showcase-card').count()!==4)throw new Error(`${name}: four-project showcase catalog was not rendered`);
-    if(await page.locator('.showcase-image img').evaluateAll(images=>images.some(image=>!(Number(image.getAttribute('width'))>0&&Number(image.getAttribute('height'))>0))))throw new Error(`${name}: homepage showcase images are missing intrinsic dimensions`);
-    if(await page.locator('.showcase-disclosure').evaluateAll(nodes=>nodes.filter(node=>!node.textContent?.trim()).length))throw new Error(`${name}: a showcase disclosure is missing`);
-    if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error(`${name}: horizontal overflow`);
+    await page.getByRole('heading',{name:'One language. Real applications.'}).waitFor();
+    for(const section of ['Your data, server, database, and interface share one contract.','Start small. Connect the pieces when you’re ready.','The compiler connects your application layers.','Ask for language facts that fit the task.','Start with the CLI. Keep the compiler close.','Write, check, and run a function.','Follow a clear path into the language.','Readable source. Checked behavior.','Know what BMEC checks—and what your host owns.','Read the source and its contracts.'])await page.getByRole('heading',{name:section}).waitFor();
+    if(await page.locator('#showcase, .showcase-card').count())throw new Error(`${name}: removed example showcase is still visible on the homepage`);
+    const initialOverflow=await page.evaluate(()=>{const nodes=[...document.body.querySelectorAll('*')].map(el=>({el,rect:el.getBoundingClientRect(),text:(el.textContent??'').trim().replace(/\s+/g,' ').slice(0,70)})).filter(item=>item.rect.right>innerWidth+1||item.rect.left< -1).sort((a,b)=>Math.max(b.rect.right-innerWidth,-b.rect.left)-Math.max(a.rect.right-innerWidth,-a.rect.left)).slice(0,8);return `document=${document.documentElement.scrollWidth} body=${document.body.scrollWidth} client=${innerWidth}; ${nodes.map(item=>`${item.el.tagName.toLowerCase()}${item.el.className&&typeof item.el.className==='string'?'.'+item.el.className.split(' ').filter(Boolean).join('.'):''} left=${Math.round(item.rect.left)} right=${Math.round(item.rect.right)} text="${item.text}"`).join(' | ')}`;});
+    if(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error(`${name}: horizontal overflow (${initialOverflow})`);
+    const compactThemeMenu=name==='desktop'?undefined:page.getByRole('button',{name:'Toggle navigation'});
+    if(compactThemeMenu)await compactThemeMenu.click();
+    await page.getByRole('button',{name:'Switch to light theme'}).click();
+    const lightContrast=await page.evaluate(()=>{const parse=value=>{const m=value.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);return m?[+m[1],+m[2],+m[3]]:null;},luminance=rgb=>{const c=rgb.map(v=>v/255).map(v=>v<=.04045?v/12.92:((v+.055)/1.055)**2.4);return .2126*c[0]+.7152*c[1]+.0722*c[2];},failures=[];for(const selector of ['.hero h1','.hero-lede','.download-section h2','.download-grid>div>p','.source-section h2','.source-section>div>div>p','.site-footer p','.site-header nav .nav-download','.learn-code pre','.route-terminal']){const el=document.querySelector(selector);if(!el)continue;let node=el,bg;while(node&&!bg){const color=getComputedStyle(node).backgroundColor,rgba=color.match(/rgba\([^,]+,[^,]+,[^,]+,\s*([\d.]+)\)/);if(color!=='transparent'&&(!rgba||Number(rgba[1])>=.98))bg=parse(color);node=node.parentElement;}const fg=parse(getComputedStyle(el).color);if(!fg||!bg)continue;const a=luminance(fg),b=luminance(bg),ratio=(Math.max(a,b)+.05)/(Math.min(a,b)+.05);if(ratio<4.5)failures.push(`${selector}: ${ratio.toFixed(2)}:1`);}return failures;});
+    if(lightContrast.length)throw new Error(`${name}: light theme text contrast below 4.5:1: ${lightContrast.join(', ')}`);
+    await page.getByRole('button',{name:'Switch to dark theme'}).click();
+    if(compactThemeMenu)await compactThemeMenu.click();
     const broken=await page.locator('a[href^="/"]').evaluateAll(async links=>{const failures=[];for(const link of links){const href=link.getAttribute('href');if(!href||href.startsWith('#'))continue;const path=href.split('#',1)[0];if(!path)continue;try{const response=await fetch(path,{method:'HEAD'});if(!response.ok)failures.push(`${href} (${response.status})`);}catch{failures.push(`${href} (network)`);}}return failures;});
     if(broken.length)throw new Error(`${name}: broken internal links: ${broken.join(', ')}`);
     const contract=await page.evaluate(async()=>{const index=await(await fetch('/ai/index.json')).json(),schema=await(await fetch('/ai/index.schema.json')).json(),version=await(await fetch('/version.json')).json(),data=await(await fetch('/site-data.json')).json(),aiPage=await fetch('/ai/'),llmsResponse=await fetch('/llms.txt'),failures=[];if(index.schemaVersion!=='bmec.website-index.v1'||schema.properties.schemaVersion.const!==index.schemaVersion||index.version!==version.packageVersion||index.version!==data.version||index.languageVersion!==version.languageVersion)failures.push('index/version metadata mismatch');if(!aiPage.ok||(await aiPage.text()).indexOf('/ai/knowledge-index.json')<0)failures.push('/ai knowledge entry unavailable');if(!llmsResponse.ok||(await llmsResponse.text()).indexOf('bmec knowledge')<0)failures.push('/llms.txt is missing AI command guidance');for(const item of index.catalogs){const response=await fetch(item.href);if(!response.ok){failures.push(`${item.id} unavailable`);continue;}const catalog=await response.json();if(catalog.schemaVersion!==item.schemaVersion)failures.push(`${item.id} schema mismatch`);for(const pointer of item.jsonPointers??[]){const value=pointer.slice(1).split('/').map(part=>part.replaceAll('~1','/').replaceAll('~0','~')).reduce((parent,key)=>parent?.[key],catalog);if(value===undefined)failures.push(`${item.id} pointer ${pointer} unavailable`);}}return failures;});
@@ -44,8 +50,6 @@ try{
     await page.addScriptTag({url:`${url}/_test/axe.min.js`});
     const axe=await page.evaluate(async()=>window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
     if(axe.violations.length)throw new Error(`${name}: accessibility violations: ${axe.violations.map(item=>`${item.id} (${item.impact}) ${item.nodes.map(node=>`${node.target.join(', ')}: ${node.failureSummary}`).join('; ')}`).join(' | ')}`);
-    for(const image of await page.locator('.showcase-image img').all())await image.scrollIntoViewIfNeeded();
-    await page.waitForFunction(()=>[...document.querySelectorAll('.showcase-image img')].every(image=>image.complete&&image.naturalWidth>0));
     await page.evaluate(()=>{document.activeElement?.blur();window.scrollTo(0,0);});
     await page.screenshot({path:join(evidence,`${name}.png`),fullPage:true});
     if(name==='mobile'){
@@ -55,7 +59,7 @@ try{
       if(!page.url().endsWith('/docs/'))throw new Error('Mobile navigation did not open the selected route');
     }
     if(name==='desktop'){
-      const routes=[['/docs/','Documentation'],['/learn/','Learn BMEC'],['/playground/','BMEC playground'],['/examples/','Examples'],['/ai/','AI knowledge'],['/benchmarks/','Benchmarking BMEC'],['/architecture/','How BMEC works'],['/security/','Security and trust boundaries'],['/deploy/','Deployment and operations'],['/roadmap/','Project status'],['/support/','Support BMEC'],['/contact/','Contact'],['/showcase/','Built with BMEC']];
+      const routes=[['/docs/','Guides for building with BMEC'],['/docs/how-bmec-works/','How BMEC works'],['/learn/','Learn BMEC'],['/library/','BMEC code library'],['/playground/','BMEC playground'],['/ai/','Build with BMEC and coding tools'],['/benchmarks/','Benchmarking BMEC'],['/architecture/','How BMEC works'],['/security/','Security and trust boundaries'],['/deploy/','Deployment and operations'],['/roadmap/','Project status'],['/support/','Support BMEC'],['/contact/','Contact'],['/showcase/','Built with BMEC']];
       for(const [path,title] of routes){
         const response=await page.goto(`${url}${path}`,{waitUntil:'networkidle'});
         if(!response?.ok())throw new Error(`Required website route ${path} returned ${response?.status()}`);
@@ -74,18 +78,21 @@ try{
     page.on('request',request=>playgroundRequests.push({url:request.url(),method:request.method(),postData:request.postData()}));
     const playgroundResponse=await page.goto(`${url}/playground/`,{waitUntil:'networkidle'});
     if(!playgroundResponse?.ok())throw new Error(`${name}: playground route returned ${playgroundResponse?.status()}`);
-    await page.getByRole('heading',{name:'Check BMEC source in your browser.'}).waitFor();
+    await page.getByRole('heading',{name:'A real BMEC check. A safe place to run a function.'}).waitFor();
     const policy=await page.locator('meta[http-equiv="Content-Security-Policy"]').getAttribute('content');
     if(!policy?.includes("default-src 'self'")||!policy.includes("connect-src 'self'")||!policy.includes("worker-src 'self'")||!policy.includes("script-src 'self'"))throw new Error(`${name}: playground content security policy is missing required local-only directives`);
-    await page.getByRole('button',{name:'Check source'}).waitFor();
+    await page.getByRole('button',{name:'Check code'}).waitFor();
     const exampleIds=await page.locator('#playground-example option').evaluateAll(options=>options.map(option=>option.value).filter(Boolean));
     if(exampleIds.length!==6)throw new Error(`${name}: expected six checked playground examples, received ${exampleIds.length}`);
     for(const id of exampleIds){
       await page.locator('#playground-example').selectOption(id);
-      await page.getByRole('button',{name:'Check source'}).click();
+      await page.getByRole('button',{name:'Check code'}).click();
       await page.waitForFunction(()=>document.querySelector('#playground-status')?.textContent?.startsWith('Check complete'));
       if(!await page.locator('#playground-summary').innerText().then(text=>text.includes('Source checks successfully')))throw new Error(`${name}: playground example ${id} did not compile successfully`);
       if(id==='EXAMPLE-HELLO-001'){
+        await page.getByRole('button',{name:'Run function'}).click();
+        await page.waitForFunction(()=>document.querySelector('#playground-status')?.textContent?.startsWith('Run complete'));
+        if(await page.locator('#playground-run-output').innerText()==='No result yet')throw new Error(`${name}: playground did not execute the checked pure function`);
         await page.getByRole('button',{name:'Typed IR'}).click();
         const typedIr=await page.locator('#playground-ir').textContent();
         if(!typedIr||!typedIr.includes('"app"')&&!typedIr.includes('"name"'))throw new Error(`${name}: playground did not return typed IR`);
@@ -100,8 +107,8 @@ try{
     const context=await page.locator('#playground-context').textContent();
     if(!context?.includes('bmec.knowledge-context.v1'))throw new Error(`${name}: playground did not return the BMEC AI context format`);
     await page.locator('#playground-source').fill('app PrivatePlaygroundMarker\nfunction greeting() -> text { return 42 }');
-    await page.getByRole('button',{name:'Check source'}).click();
-    await page.getByRole('button',{name:'Diagnostics'}).click();
+    await page.getByRole('button',{name:'Check code'}).click();
+    await page.getByRole('button',{name:'Errors and hints'}).click();
     await page.locator('#playground-diagnostics strong').first().waitFor();
     if(!await page.locator('#playground-diagnostics').innerText())throw new Error(`${name}: compiler diagnostics were empty`);
     const origin=new URL(url).origin;

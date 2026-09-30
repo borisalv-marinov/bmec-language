@@ -14,6 +14,10 @@ Start here:
 - /ai/capabilities.json
 - /ai/diagnostics.json
 - /ai/examples.json
+- /playground/
+- /docs/PLAYGROUND_GUIDE.md
+- /docs/HOW_BMEC_WORKS.md
+- /docs/BMEC_EDITOR_SETUP.md
 - /docs/AI_AGENT_GUIDE.md
 - /docs/CAPABILITY_COVERAGE.md
 - /docs/GETTING_STARTED.md
@@ -22,3 +26,5 @@ Start here:
 
 For task-specific machine-readable context, use `bmec knowledge "TASK" --json`.
 Use `bmec check FILE --json` to validate BMEC source and inspect stable diagnostics.
+The browser playground checks BMEC locally and can run only bounded pure functions.
+The VS Code extension connects to the locally installed BMEC CLI and language server.

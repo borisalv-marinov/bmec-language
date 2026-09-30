@@ -2,6 +2,7 @@
   "name": "bmec-language-support",
   "displayName": "BMEC Language Support",
   "description": "BMEC language tooling backed by the BMEC compiler and stdio language server.",
+  "icon": "images/bmec-icon.png",
   "version": "0.9.1-beta.1",
   "publisher": "bmec",
   "license": "SEE LICENSE IN LICENSE",

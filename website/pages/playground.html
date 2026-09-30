@@ -1,49 +1,70 @@
 <section class="route-section playground" aria-labelledby="playground-title">
   <div class="playground-intro">
     <div>
-      <h2 id="playground-title">Check BMEC source in your browser.</h2>
-      <p>Use the same BMEC checker to see diagnostics, typed IR, and an AI context pack from the project’s published language knowledge.</p>
+      <h2 id="playground-title">A real BMEC check. A safe place to run a function.</h2>
+      <p>Start with a checked program or write your own. BMEC checks it in your browser, then the local runner shows what a supported pure function returns.</p>
     </div>
-    <p class="playground-privacy"><strong>Private by design</strong><br>Your source stays in this browser. It is checked, never executed, saved, or sent to a server.</p>
+    <aside class="playground-privacy">
+      <strong>Your code stays here.</strong>
+      <span>The compiler and runner use a short-lived worker on this device. Nothing is uploaded.</span>
+      <a href="/docs/bmec-editor-setup/">Continue in VS Code</a>
+    </aside>
   </div>
+  <ol class="playground-steps" aria-label="How to use the playground">
+    <li><span>1</span>Load a program</li><li><span>2</span>Check the code</li><li><span>3</span>Run its function</li>
+  </ol>
   <div class="playground-layout">
     <section class="playground-editor" aria-labelledby="playground-editor-title">
       <div class="playground-toolbar">
-        <div>
-          <label for="playground-example">Start from a checked example</label>
+        <div class="playground-example-picker">
+          <label for="playground-example">Start with a checked program</label>
           <select id="playground-example" disabled>
-            <option value="">Loading examples…</option>
+            <option value="">Loading programs…</option>
           </select>
         </div>
-        <button id="playground-check" class="button button-dark" type="button" disabled>Check source</button>
+        <div class="playground-actions">
+          <button id="playground-check" class="button button-dark" type="button" disabled>Check code</button>
+          <button id="playground-run" class="button button-primary" type="button" disabled>Run function</button>
+        </div>
       </div>
-      <label class="playground-source-label" id="playground-editor-title" for="playground-source">BMEC source <span>main.bmec</span></label>
+      <div class="playground-function-row">
+        <label>Function to run <select id="playground-function" disabled aria-label="Function to run"><option value="">Check code first</option></select></label>
+        <label>Arguments <input id="playground-args" value="[]" maxlength="2000" spellcheck="false" autocomplete="off" aria-describedby="playground-args-help" aria-label="Function arguments as a JSON array"></label>
+        <span id="playground-args-help" class="playground-field-help">Use a JSON array in parameter order, such as <code>[21]</code>.</span>
+      </div>
+      <label class="playground-source-label" id="playground-editor-title" for="playground-source">Your BMEC program <span>main.bmec</span></label>
       <textarea id="playground-source" name="source" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off" maxlength="50000" rows="20" aria-describedby="playground-source-help" placeholder="Write BMEC source here…"></textarea>
       <div class="playground-editor-footer">
-        <p id="playground-source-help">Up to 50,000 characters · Tab indents · Ctrl+Enter (⌘+Enter on Mac) checks</p>
-        <span id="playground-status" role="status" aria-live="polite">Loading the local checker…</span>
+        <p id="playground-source-help">Up to 50,000 characters · Tab indents · Ctrl+Enter checks</p>
+        <span id="playground-status" role="status" aria-live="polite">Loading the local compiler…</span>
+      </div>
+      <div class="playground-file-actions">
+        <button id="playground-copy-context" type="button" class="text-button" disabled>Copy context for AI</button>
+        <button id="playground-download-source" type="button" class="text-button">Download .bmec</button>
+        <a href="/docs/playground-guide/">How this page works</a>
       </div>
     </section>
-    <section class="playground-output" aria-label="Checker output">
+    <section class="playground-output" aria-label="BMEC compiler and function results">
       <div class="playground-output-heading">
-        <span>Local check</span>
-        <p id="playground-summary" aria-live="polite">Choose an example or enter BMEC source, then select Check source.</p>
+        <span>What BMEC found</span>
+        <p id="playground-summary" aria-live="polite">Load a program, check it, then run one of its functions.</p>
       </div>
-      <div class="playground-tabs" aria-label="Output views">
+      <div class="playground-tabs" role="group" aria-label="Compiler result views">
         <button type="button" data-playground-panel="result" aria-controls="playground-result-panel" aria-pressed="true">Result</button>
-        <button type="button" data-playground-panel="diagnostics" aria-controls="playground-diagnostics" aria-pressed="false">Diagnostics</button>
+        <button type="button" data-playground-panel="diagnostics" aria-controls="playground-diagnostics" aria-pressed="false">Errors and hints</button>
         <button type="button" data-playground-panel="ir" aria-controls="playground-ir" aria-pressed="false">Typed IR</button>
         <button type="button" data-playground-panel="context" aria-controls="playground-context" aria-pressed="false">AI context</button>
       </div>
-      <div class="playground-panel" id="playground-result-panel" role="region" aria-label="Check result">
-        <p>The playground runs BMEC’s parser, type checker, and analyzer in a short-lived browser worker. It does not run BMEC functions or access your device.</p>
+      <div class="playground-panel" id="playground-result-panel" role="region" aria-label="Function result">
+        <p>Check valid code and run a function to see its return value.</p>
+        <pre class="playground-run-output" id="playground-run-output" aria-live="polite">No result yet</pre>
       </div>
-      <div class="playground-panel" id="playground-diagnostics" role="region" aria-label="Diagnostics" hidden>No diagnostics yet.</div>
-      <pre class="playground-panel playground-json" id="playground-ir" role="region" aria-label="Typed intermediate representation" hidden>No typed IR yet.</pre>
-      <pre class="playground-panel playground-json" id="playground-context" role="region" aria-label="AI context" hidden>No AI context yet.</pre>
+      <div class="playground-panel" id="playground-diagnostics" role="region" aria-label="Compiler errors and hints" hidden>No compiler messages yet.</div>
+      <pre class="playground-panel playground-json" id="playground-ir" role="region" aria-label="Typed intermediate representation" hidden>No typed structure yet.</pre>
+      <pre class="playground-panel playground-json" id="playground-context" role="region" aria-label="Compiler-generated AI context" hidden>No AI context yet. Check source to create it.</pre>
     </section>
   </div>
-  <noscript><p class="route-callout">JavaScript is needed to run the local browser checker. You can use the <a href="/examples/">checked source examples</a> and follow the <a href="/docs/GETTING_STARTED.md">local install guide</a>.</p></noscript>
-  <p class="playground-footnote">This page downloads only the checked example catalog and BMEC’s public knowledge index. The source editor does not send code over the network.</p>
+  <p class="playground-footnote">The compiler checks the full BMEC source. The browser can run only bounded pure functions; code that needs files, a database, network, or host capabilities must run in your local project. <a href="/docs/PLAYGROUND_GUIDE.md" download>Download the playground guide</a>.</p>
+  <noscript><p class="route-callout">JavaScript is needed for local checking. Read the <a href="/docs/getting-started/">local install guide</a> to use BMEC from your computer.</p></noscript>
   <script type="module" src="/playground.js"></script>
 </section>

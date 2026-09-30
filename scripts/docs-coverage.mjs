@@ -20,7 +20,7 @@ const contractFunctions=new Set(ai.constructs.flatMap(construct=>[...construct.s
 const exampleByName=new Map(examples.map(item=>[item.name,item]));
 const registeredCapabilities=new Set(capabilityRegistry.map(item=>item.name));
 const capabilityTopics={http:'http',database:'database',environment:'configuration-secrets',time:'email-time-random-base64-crypto',random:'email-time-random-base64-crypto',secureRandom:'email-time-random-base64-crypto',filesystem:'filesystem-path',email:'email-time-random-base64-crypto'};
-const publicDocs=['README.md','docs/INSTALL.md','docs/GETTING_STARTED.md','docs/LANGUAGE_BASICS.md','docs/FULL_STACK_GUIDE.md','docs/CUSTOM_APP_READING_QUEUE.md','docs/STYLING_GUIDE.md','docs/AI_AGENT_GUIDE.md','docs/AI_WEBSITE.md','docs/CAPABILITIES.md','docs/NATIVE_BACKEND_COVERAGE.md','docs/DATABASE_PRODUCTION.md','docs/DEPLOYMENT.md','docs/CLI_REFERENCE.md','docs/STANDARD_LIBRARY.md','docs/CAPABILITY_COVERAGE.md','docs/SHOWCASE.md','spec/language.md','spec/types.md','spec/semantics.md','spec/invariants.md','spec/diagnostics.md','ai/ai-spec.md'];
+const publicDocs=['README.md','docs/INSTALL.md','docs/GETTING_STARTED.md','docs/HOW_BMEC_WORKS.md','docs/LANGUAGE_BASICS.md','docs/FULL_STACK_GUIDE.md','docs/CUSTOM_APP_READING_QUEUE.md','docs/STYLING_GUIDE.md','docs/AI_AGENT_GUIDE.md','docs/AI_WEBSITE.md','docs/CAPABILITIES.md','docs/NATIVE_BACKEND_COVERAGE.md','docs/DATABASE_PRODUCTION.md','docs/DEPLOYMENT.md','docs/CLI_REFERENCE.md','docs/STANDARD_LIBRARY.md','docs/CAPABILITY_COVERAGE.md','docs/SHOWCASE.md','spec/language.md','spec/types.md','spec/semantics.md','spec/invariants.md','spec/diagnostics.md','ai/ai-spec.md'];
 const diagnosticsText=readFileSync(join(root,'spec','diagnostics.md'),'utf8');
 const generatedDocs=new Set(['docs/CLI_REFERENCE.md','docs/STANDARD_LIBRARY.md','docs/CAPABILITY_COVERAGE.md']);
 const errors=[];
@@ -101,12 +101,12 @@ for(const file of publicDocs.filter(file=>file.endsWith('.md')&&!(process.argv.i
 }finally{rmSync(temp,{recursive:true,force:true});}
 
 const published=new Set([
-  '/','/index.html','/styles.css','/app.js','/README.md','/SECURITY.md','/showcase.json','/version.json','/site-data.json',
+  '/','/index.html','/styles.css','/app.js','/README.md','/SECURITY.md','/showcase.json','/version.json','/site-data.json','/playground/','/ai/',
   '/ai/ai-spec.md','/ai/ai-spec.json','/ai/index.json','/ai/index.schema.json','/ai/commands.json','/ai/capabilities.json','/ai/diagnostics.json','/ai/examples.json',
   ...publicDocs.map(file=>`/${file}`),
   ...['language.md','types.md','semantics.md','invariants.md','diagnostics.md'].map(file=>`/spec/${file}`),
   ...[...verifiedExamples].map(file=>`/${file}`),
-  '/docs/capability-coverage.json','/docs/CAPABILITY_COVERAGE.md'
+  '/docs/capability-coverage.json','/docs/CAPABILITY_COVERAGE.md','/docs/how-bmec-works/'
 ]);
 const slug=heading=>heading.toLowerCase().replace(/<[^>]+>/g,'').replace(/[`*_~]/g,'').replace(/[^\p{L}\p{N}\s-]/gu,'').trim().replace(/\s+/g,'-');
 for(const file of publicDocs.filter(file=>file.endsWith('.md')&&existsSync(join(root,file))&&!(process.argv.includes('--write')&&file==='docs/CAPABILITY_COVERAGE.md'))){

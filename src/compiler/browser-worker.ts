@@ -3,10 +3,11 @@ import {
   createKnowledgeContext,
   type KnowledgeIndex,
 } from "../cli/knowledge.js";
+import { runPureFunction } from "./playground-runner.js";
 
 type InitMessage = { type: "init"; index: KnowledgeIndex };
-type CheckMessage = { type: "check"; id: number; source: string };
-type PlaygroundMessage = InitMessage | CheckMessage;
+type SourceMessage = { type: "check" | "run"; id: number; source: string; functionName?: string; args?: unknown[] };
+type PlaygroundMessage = InitMessage | SourceMessage;
 
 const maxSourceLength = 50_000;
 let index: KnowledgeIndex | undefined;
@@ -46,12 +47,26 @@ workerScope.addEventListener("message", (event) => {
 
   try {
     const result = compile(message.source, "playground.bmec");
+    if (message.type === "run") {
+      if (result.diagnostics.length || !result.ir) {
+        workerScope.postMessage({ type: "run-result", id: message.id, ok: false, message: "Fix the BMEC diagnostics before running this function." });
+        return;
+      }
+      try {
+        const value = runPureFunction(result.ir.functions, message.functionName ?? "", message.args ?? []);
+        workerScope.postMessage({ type: "run-result", id: message.id, ok: true, value });
+      } catch (error) {
+        workerScope.postMessage({ type: "run-result", id: message.id, ok: false, message: error instanceof Error ? error.message : "The selected function could not run." });
+      }
+      return;
+    }
     const context = createKnowledgeContext(message.source.slice(0, 3_000), index);
     workerScope.postMessage({
       type: "result",
       id: message.id,
       diagnostics: result.diagnostics,
       ir: result.ir ?? null,
+      functions: (result.ir?.functions ?? []).map(fn => ({ id: fn.id, name: fn.name, parameters: fn.parameters.map(parameter => ({ name: parameter.name, type: parameter.type })), async: Boolean(fn.async) })),
       context,
     });
   } catch {
