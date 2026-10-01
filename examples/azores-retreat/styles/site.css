@@ -1,0 +1,229 @@
+:root {
+  /* AI edit controls: tune these first for precise sizing and spacing. */
+  --tide-content-max: 1380px;
+  --tide-content-gutter: clamp(18px, 5vw, 80px);
+  --tide-content-top: 34px;
+  --tide-hero-gap: 45px;
+  --tide-hero-columns: .86fr 1.14fr;
+  --tide-hero-photo-height: clamp(340px, 45vw, 570px);
+  --tide-hero-photo-height-mobile: 340px;
+  --tide-room-photo-height: 340px;
+  --tide-mobile-photo-height: 310px;
+  --tide-coast-focus: center 53%;
+  --tide-room-focus: center 53%;
+  --tide-breakfast-focus: center 57%;
+  --tide-photo-radius: 3px 3px 70px 3px;
+  --tide-heading-size: clamp(52px, 5.2vw, 82px);
+  --tide-card-gap: 40px;
+  --tide-mobile-gutter: 16px;
+  --tide-ink: #142321;
+  --tide-paper: #f4f5f0;
+  --tide-moss: #5c725e;
+  --tide-line: #d3dbd4;
+  --tide-lime: #d6f36a;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  max-width: none;
+  padding: 0 0 5rem;
+  color: var(--tide-ink);
+  background: var(--tide-paper);
+}
+main { max-width: var(--tide-content-max); margin: 0 auto; padding: var(--tide-content-top) var(--tide-content-gutter) 4rem; }
+main > h1 {
+  display: inline-block;
+  margin: 0 2rem 1.15rem 0;
+  color: var(--tide-ink);
+  font: 600 1.45rem/1 Georgia, "Times New Roman", serif;
+  letter-spacing: -.04em;
+}
+nav[data-pipe-nav] {
+  display: inline-flex;
+  gap: .25rem;
+  margin: 0 0 1.15rem;
+  padding: .25rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  vertical-align: middle;
+}
+nav[data-pipe-nav] a {
+  padding: .62rem .9rem;
+  border-radius: 999px;
+  color: #465b50;
+  font-size: .78rem;
+  font-weight: 600;
+}
+nav[data-pipe-nav] a:hover,
+nav[data-pipe-nav] a[aria-current="page"] { background: #e5eade; color: var(--tide-ink); }
+section[data-pipe-page] {
+  display: none;
+  max-width: 1200px;
+  margin: .6rem auto 0;
+  padding: 0;
+}
+section[data-pipe-page]:target { display: grid; }
+body:not(:has(section[data-pipe-page]:target)) section[data-pipe-page]:first-of-type { display: grid; }
+section[data-pipe-page] > h2 {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+section[data-pipe-page] > [data-bmec-component] { min-width: 0; }
+[data-bmec-component="stay-introduction"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+  padding: clamp(1rem, 3vw, 2.6rem) clamp(1rem, 4vw, 3.5rem) clamp(1.5rem, 4vw, 3rem) 0;
+}
+[data-bmec-component="stay-introduction"] [data-pipe-text]:first-child,
+[data-bmec-component="stay-note"] [data-pipe-text]:first-child,
+[data-bmec-component="breakfast-note"] [data-pipe-text]:first-child,
+[data-bmec-component="room-introduction"] [data-pipe-text]:first-child,
+[data-bmec-component="room-one"] [data-pipe-text]:first-child,
+[data-bmec-component="room-two"] [data-pipe-text]:first-child,
+[data-bmec-component="island-introduction"] [data-pipe-text]:first-child,
+[data-bmec-component="island-details"] [data-pipe-text]:first-child {
+  margin: 0 0 .9rem;
+  color: var(--tide-moss);
+  font: 600 .67rem/1.5 "Cascadia Code", Consolas, monospace;
+  letter-spacing: .11em;
+  text-transform: uppercase;
+}
+[data-bmec-component="stay-introduction"] [data-pipe-text]:nth-child(2),
+[data-bmec-component="room-introduction"] [data-pipe-text]:nth-child(2),
+[data-bmec-component="island-introduction"] [data-pipe-text]:nth-child(2) {
+  max-width: 11ch;
+  margin: 0 0 1rem;
+  color: var(--tide-ink);
+  font: 500 var(--tide-heading-size)/.96 Georgia, "Times New Roman", serif;
+  letter-spacing: -.065em;
+}
+[data-bmec-component="stay-introduction"] [data-pipe-text]:nth-child(3),
+[data-bmec-component="room-introduction"] [data-pipe-text]:nth-child(3),
+[data-bmec-component="island-introduction"] [data-pipe-text]:nth-child(3) {
+  max-width: 34rem;
+  margin: 0 0 1.45rem;
+  color: #55635a;
+  font-size: clamp(.94rem, 1.25vw, 1.08rem);
+  line-height: 1.75;
+}
+[data-bmec-component="stay-introduction"] a,
+[data-bmec-component="room-introduction"] a,
+[data-bmec-component="island-introduction"] a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.9rem;
+  padding: .75rem 1.1rem;
+  border-radius: 999px;
+  background: var(--tide-ink);
+  color: white;
+  font-size: .77rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+[data-bmec-component="stay-introduction"] a:hover,
+[data-bmec-component="room-introduction"] a:hover,
+[data-bmec-component="island-introduction"] a:hover { background: #345148; }
+[data-bmec-component="coast-photo"] {
+  min-height: var(--tide-hero-photo-height);
+  border-radius: var(--tide-photo-radius);
+  background: var(--tide-coast-focus) / cover no-repeat url("bmec-asset:coast");
+}
+[data-bmec-component="stay-note"],
+[data-bmec-component="island-details"] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem clamp(1rem, 5vw, 4rem) 3rem 0;
+}
+[data-bmec-component="stay-note"] [data-pipe-text]:nth-child(2),
+[data-bmec-component="island-details"] [data-pipe-text]:nth-child(2) {
+  max-width: 14ch;
+  margin: 0 0 .8rem;
+  font: 500 clamp(2rem, 3.3vw, 3.5rem)/1.04 Georgia, "Times New Roman", serif;
+  letter-spacing: -.045em;
+}
+[data-bmec-component="stay-note"] [data-pipe-text]:nth-child(3),
+[data-bmec-component="island-details"] [data-pipe-text]:nth-child(3) {
+  max-width: 38rem;
+  margin: 0;
+  color: #59675e;
+  font-size: .9rem;
+  line-height: 1.8;
+}
+[data-bmec-component="room-photo"] {
+  min-height: var(--tide-room-photo-height);
+  background: var(--tide-room-focus) / cover no-repeat url("bmec-asset:room");
+}
+[data-bmec-component="breakfast-note"] {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  flex-direction: column;
+  padding: 2rem 2rem 2rem 0;
+}
+[data-bmec-component="breakfast-note"] [data-pipe-text]:nth-child(2) {
+  max-width: 22ch;
+  margin: 0;
+  font: 500 clamp(1.65rem, 2.6vw, 2.5rem)/1.18 Georgia, "Times New Roman", serif;
+  letter-spacing: -.035em;
+}
+[data-bmec-component="breakfast-photo"] {
+  min-height: 320px;
+  background: var(--tide-breakfast-focus) / cover no-repeat url("bmec-asset:breakfast");
+}
+[data-bmec-page="home"] { grid-template-columns: var(--tide-hero-columns); gap: 0 var(--tide-hero-gap); }
+[data-bmec-page="home"] > [data-bmec-component="stay-introduction"] { grid-column: 1; grid-row: 1; }
+[data-bmec-page="home"] > [data-bmec-component="coast-photo"] { grid-column: 2; grid-row: 1 / span 2; }
+[data-bmec-page="home"] > [data-bmec-component="stay-note"] { grid-column: 1; }
+[data-bmec-page="home"] > [data-bmec-component="room-photo"] { grid-column: 2; }
+[data-bmec-page="home"] > [data-bmec-component="breakfast-note"] { grid-column: 1; }
+[data-bmec-page="home"] > [data-bmec-component="breakfast-photo"] { grid-column: 2; }
+[data-bmec-page="rooms"], [data-bmec-page="island"] { grid-template-columns: 1fr 1fr; gap: 1.2rem var(--tide-card-gap); }
+[data-bmec-page="rooms"] > [data-bmec-component="room-introduction"],
+[data-bmec-page="island"] > [data-bmec-component="island-introduction"] { grid-column: 1 / -1; padding: 3.5rem 0 1rem; }
+[data-bmec-component="room-one"], [data-bmec-component="room-two"] { padding: 1.4rem 0; }
+[data-bmec-component="room-one"] [data-pipe-text]:nth-child(2), [data-bmec-component="room-two"] [data-pipe-text]:nth-child(2) {
+  margin: 0 0 .8rem; font: 500 clamp(1.5rem, 2.2vw, 2.25rem)/1.15 Georgia, "Times New Roman", serif;
+}
+[data-bmec-component="room-one"] [data-pipe-text]:nth-child(3), [data-bmec-component="room-two"] [data-pipe-text]:nth-child(3) {
+  margin: 0; color: #5a675f; font-size: .74rem; letter-spacing: .025em;
+}
+[data-bmec-page="rooms"] > [data-bmec-component="room-photo"] { min-height: 420px; grid-column: 1 / -1; }
+[data-bmec-page="island"] > [data-bmec-component="island-photo"] {
+  min-height: 440px;
+  border-radius: 3px 70px 3px 3px;
+  background: var(--tide-coast-focus) / cover no-repeat url("bmec-asset:coast");
+}
+[data-bmec-page="island"] > [data-bmec-component="island-details"] { padding: 2rem; }
+::selection { color: var(--tide-ink); background: var(--tide-lime); }
+a:focus-visible { outline: 3px solid #397260; outline-offset: 4px; }
+@media (max-width: 720px) {
+  main { padding: 16px var(--tide-mobile-gutter) 3rem; }
+  main > h1 { display: block; margin: 0 0 .8rem; font-size: 1.35rem; }
+  nav[data-pipe-nav] { margin: 0 0 .9rem; padding: 0; }
+  nav[data-pipe-nav] a { padding: .5rem .68rem; font-size: .73rem; }
+  section[data-pipe-page] { margin-top: .2rem; }
+  [data-bmec-page="home"], [data-bmec-page="rooms"], [data-bmec-page="island"] { grid-template-columns: 1fr; gap: .8rem; }
+  [data-bmec-page="home"] > [data-bmec-component="stay-introduction"] { order: 1; padding: 1.4rem 0 1rem; }
+  [data-bmec-page="home"] > [data-bmec-component="coast-photo"] { grid-row: auto; grid-column: 1; min-height: var(--tide-hero-photo-height-mobile); order: 2; }
+  [data-bmec-component="stay-introduction"] [data-pipe-text]:nth-child(2), [data-bmec-component="room-introduction"] [data-pipe-text]:nth-child(2), [data-bmec-component="island-introduction"] [data-pipe-text]:nth-child(2) { max-width: 9ch; font-size: clamp(3.25rem, 15vw, 5rem); }
+  [data-bmec-page="home"] > [data-bmec-component="stay-note"] { order: 3; padding: 2.3rem .25rem 1rem; }
+  [data-bmec-page="home"] > [data-bmec-component="room-photo"] { order: 4; grid-column: 1; min-height: var(--tide-mobile-photo-height); }
+  [data-bmec-page="home"] > [data-bmec-component="breakfast-note"] { order: 5; padding: 2.3rem .25rem 1rem; }
+  [data-bmec-page="home"] > [data-bmec-component="breakfast-photo"] { order: 6; grid-column: 1; min-height: var(--tide-mobile-photo-height); }
+  [data-bmec-page="rooms"] > [data-bmec-component="room-introduction"], [data-bmec-page="island"] > [data-bmec-component="island-introduction"] { grid-column: 1; padding: 2.2rem 0 1rem; }
+  [data-bmec-page="rooms"] > [data-bmec-component="room-photo"] { min-height: 300px; grid-column: 1; }
+  [data-bmec-page="island"] > [data-bmec-component="island-photo"] { min-height: 320px; grid-column: 1; }
+  [data-bmec-page="island"] > [data-bmec-component="island-details"] { padding: 1.2rem .25rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+}

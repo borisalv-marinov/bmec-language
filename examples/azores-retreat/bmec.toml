@@ -1,0 +1,13 @@
+[package]
+name = "tidehouse-retreat"
+version = "0.1.0"
+language = "0.1"
+entry = "main.bmec"
+
+[ui]
+stylesheet = "styles/site.css"
+
+[ui.assets]
+coast = "assets/coast.jpg"
+room = "assets/room.jpg"
+breakfast = "assets/breakfast.jpg"

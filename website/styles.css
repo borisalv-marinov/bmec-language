@@ -53,6 +53,7 @@
 .route-showcase-card h2{margin:13px 0 7px;font:600 clamp(1.6rem,3vw,2.2rem)/1.12 var(--display);letter-spacing:-.045em}
 .route-showcase-card p{color:#53625d;font-size:.88rem;line-height:1.65}
 .route-showcase-card .route-disclosure{padding-left:12px;border-left:2px solid #9db884;font-size:.8rem}
+.route-showcase-card .route-project-tagline{margin:0 0 10px;color:var(--site-text);font-size:1.04rem;font-weight:700;line-height:1.4}
 .route-showcase-image{padding:12px;border:1px solid #cbd5cd;background:#e9ede6}
 .route-showcase-image img{width:100%;height:auto;max-height:420px;object-fit:cover;object-position:top;border:1px solid #d5ded9;box-shadow:0 12px 26px #10252216}
 .route-footer-links{display:flex;flex-wrap:wrap;gap:16px;font-size:.75rem}

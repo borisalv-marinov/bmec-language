@@ -34,6 +34,8 @@ try{
     const sharingImage=await page.locator('meta[property="og:image"]').getAttribute('content');
     if(!sharingImage?.endsWith('/assets/bmec-social.png'))throw new Error(`${name}: sharing image must use BMEC branding`);
     await page.getByRole('heading',{name:'One language. Real applications.'}).waitFor();
+    await page.getByRole('heading',{name:'Tests and security checked for BMEC 0.9.1-beta.2.'}).waitFor();
+    await page.getByText('1,260 tests, with 7 skipped',{exact:false}).waitFor();
     for(const section of ['Your data, server, database, and interface share one contract.','Start small. Connect the pieces when you’re ready.','The compiler connects your application layers.','Ask for language facts that fit the task.','Start with the CLI. Keep the compiler close.','Write, check, and run a function.','Follow a clear path into the language.','Readable source. Checked behavior.','Know what BMEC checks—and what your host owns.','Read the source and its contracts.'])await page.getByRole('heading',{name:section}).waitFor();
     if(await page.locator('#showcase, .showcase-card').count())throw new Error(`${name}: removed example showcase is still visible on the homepage`);
     const initialOverflow=await page.evaluate(()=>{const nodes=[...document.body.querySelectorAll('*')].map(el=>({el,rect:el.getBoundingClientRect(),text:(el.textContent??'').trim().replace(/\s+/g,' ').slice(0,70)})).filter(item=>item.rect.right>innerWidth+1||item.rect.left< -1).sort((a,b)=>Math.max(b.rect.right-innerWidth,-b.rect.left)-Math.max(a.rect.right-innerWidth,-a.rect.left)).slice(0,8);return `document=${document.documentElement.scrollWidth} body=${document.body.scrollWidth} client=${innerWidth}; ${nodes.map(item=>`${item.el.tagName.toLowerCase()}${item.el.className&&typeof item.el.className==='string'?'.'+item.el.className.split(' ').filter(Boolean).join('.'):''} left=${Math.round(item.rect.left)} right=${Math.round(item.rect.right)} text="${item.text}"`).join(' | ')}`;});
@@ -74,6 +76,19 @@ try{
         await page.addScriptTag({url:`${url}/_test/axe.min.js`});
         const routeAxe=await page.evaluate(async()=>window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
         if(routeAxe.violations.length)throw new Error(`Route ${path} has accessibility violations: ${routeAxe.violations.map(item=>item.id).join(', ')}`);
+      }
+      const tidehouse=page.locator('.route-showcase-card').filter({hasText:'Tidehouse'});
+      await tidehouse.getByRole('heading',{name:'Tidehouse'}).waitFor();
+      await tidehouse.getByText('A little closer to the Atlantic.',{exact:true}).waitFor();
+      await tidehouse.getByText('A photo-led guesthouse experience',{exact:false}).waitFor();
+      await tidehouse.scrollIntoViewIfNeeded();
+      const tidehouseImage=tidehouse.locator('img');
+      if(!await tidehouseImage.evaluate(image=>image.complete&&image.naturalWidth>0))throw new Error('Tidehouse showcase image did not load');
+      const tidehouseSource=await tidehouse.getByRole('link',{name:'Read project source and notes'}).getAttribute('href');
+      if(tidehouseSource!=='/examples/azores-retreat/README.md')throw new Error(`Tidehouse showcase source points to ${tidehouseSource}`);
+      for(const path of [tidehouseSource,'/examples/azores-retreat/main.bmec','/examples/azores-retreat/bmec.toml','/examples/azores-retreat/styles/site.css','/examples/azores-retreat/assets/coast.jpg','/examples/azores-retreat/assets/room.jpg','/examples/azores-retreat/assets/breakfast.jpg']){
+        const response=await fetch(`${url}${path}`,{method:'HEAD'});
+        if(!response.ok)throw new Error(`Tidehouse public example file ${path} returned ${response.status}`);
       }
       const guide=await page.goto(`${url}/docs/how-bmec-works/`,{waitUntil:'networkidle'});
       if(!guide?.ok())throw new Error('Rendered How BMEC works guide did not load');

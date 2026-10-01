@@ -60,6 +60,21 @@
         "alt": "Community Issues app listing three repository issues with state, reporter, and detail links"
       },
       "disclosure": "This is not a GitHub replacement. It has no Git integration, pull requests, or audit history."
+    },
+    {
+      "id": "tidehouse",
+      "name": "Tidehouse",
+      "tagline": "A little closer to the Atlantic.",
+      "description": "A photo-led guesthouse experience inspired by São Miguel in the Azores, with sample pages for the house, rooms, and island.",
+      "category": "Travel and hospitality",
+      "status": "Demo",
+      "builtWith": ["BMEC pages", "Responsive CSS", "Local photo assets"],
+      "source": "/examples/azores-retreat/README.md",
+      "preview": {
+        "src": "/assets/tidehouse.png",
+        "alt": "Photo-led guesthouse on São Miguel, with a stone house, room, coast, and breakfast photography"
+      },
+      "disclosure": "Visual example only. It does not provide live availability, booking, payment, or a real guesthouse service."
     }
   ]
 }

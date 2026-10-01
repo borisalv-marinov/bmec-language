@@ -1,0 +1,83 @@
+app Tidehouse {
+  description "A visual guide to Tidehouse, a fictional guesthouse on São Miguel in the Azores. Explore sample rooms, local scenery, and island notes."
+}
+
+component StayIntroduction {
+  text "São Miguel · Azores"
+  text "A little closer to the Atlantic."
+  text "A quiet basalt house on the green edge of the island, made for long mornings and unplanned walks."
+  link "Explore the rooms" to Rooms
+}
+
+component CoastPhoto {}
+
+component StayNote {
+  text "THE HOUSE"
+  text "Built from the island."
+  text "Dark volcanic stone, warm timber, and windows that keep the ocean in view. A small place to settle into the weather and the slower rhythm of São Miguel."
+}
+
+component RoomPhoto {}
+
+component BreakfastNote {
+  text "MORNING, MADE LOCAL"
+  text "Bread from down the road. Fruit from the garden. No rush to finish."
+}
+
+component BreakfastPhoto {}
+
+component RoomIntroduction {
+  text "STAY A WHILE"
+  text "Room to exhale."
+  text "Two simple rooms share the same quiet palette: linen, oak, and the black stone that shaped the house."
+  link "Back to the house" to Home
+}
+
+component RoomOne {
+  text "01 · THE GARDEN ROOM"
+  text "Wake with the hydrangeas outside your window and a soft Atlantic light across the linen."
+  text "Queen bed · Garden view · Breakfast for two"
+}
+
+component RoomTwo {
+  text "02 · THE COAST ROOM"
+  text "A wide horizon, a deep window seat, and enough quiet to make a book last all weekend."
+  text "King bed · Ocean view · Private terrace"
+}
+
+component IslandIntroduction {
+  text "A SMALL ISLAND, OPEN WIDE"
+  text "Follow the weather."
+  text "Walk the crater rim, stop at a roadside tea field, or stay close and watch the Atlantic change its mind."
+  link "Return to Tidehouse" to Home
+}
+
+component IslandPhoto {}
+
+component IslandDetails {
+  text "CLOSE BY"
+  text "The coast trail begins at the lane. Lagoa do Fogo is a short drive inland. Ribeira Grande is nearby for a slow lunch and a strong coffee."
+}
+
+page Home {
+  use StayIntroduction
+  use CoastPhoto
+  use StayNote
+  use RoomPhoto
+  use BreakfastNote
+  use BreakfastPhoto
+}
+
+page Rooms {
+  use RoomIntroduction
+  use RoomOne
+  use RoomTwo
+  use RoomPhoto
+}
+
+page Island {
+  use IslandIntroduction
+  use IslandPhoto
+  use IslandDetails
+  use BreakfastPhoto
+}
