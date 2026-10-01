@@ -93,6 +93,7 @@
     "docs:coverage": "npm run build && node scripts/docs-coverage.mjs --write",
     "test:docs": "npm run build && node scripts/docs-coverage.mjs && node scripts/build-website.mjs && vitest run tests/documentation-coverage.test.ts",
     "build:website": "npm run build && node scripts/build-website.mjs",
+    "build:vercel": "node scripts/vercel-build.mjs",
     "test:website": "npm run build:website && node scripts/website-smoke.mjs",
     "capture:community-issues-showcase": "npm run build && node scripts/capture-community-issues-showcase.mjs",
     "benchmark:ai": "npm run build && node scripts/ai-benchmark.mjs",

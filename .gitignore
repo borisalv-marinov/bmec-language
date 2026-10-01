@@ -21,3 +21,4 @@ docs/evidence/
 /release-artifacts/
 .vercel/
 .vercel
+.env.local
