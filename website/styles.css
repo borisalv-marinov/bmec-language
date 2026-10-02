@@ -99,6 +99,8 @@
 .playground-panel[hidden]{display:none}
 .playground-panel p{margin:0 0 12px}
 .playground-json{max-height:520px;background:#10201e;color:#e5eee5;font:400 .68rem/1.6 var(--mono);white-space:pre;overflow:auto}
+.playground-json:focus-visible{outline:3px solid #397260;outline-offset:3px}
+.download-sha256{overflow-wrap:anywhere;word-break:break-word}
 .playground-diagnostic-list{margin:0;padding-left:1.4rem}
 .playground-diagnostic-list li{padding:0 0 15px 3px}
 .playground-diagnostic-list strong{color:#233c31;font:600 .7rem var(--mono)}

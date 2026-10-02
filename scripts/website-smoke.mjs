@@ -70,9 +70,16 @@ try{
       if(await toggle.getAttribute('aria-expanded')!=='true')throw new Error('Mobile navigation did not open');
       await page.getByRole('navigation',{name:'Main navigation'}).getByRole('link',{name:'Docs'}).click();
       if(!page.url().endsWith('/docs/'))throw new Error('Mobile navigation did not open the selected route');
+      const downloads=await page.goto(`${url}/downloads/`,{waitUntil:'networkidle'});
+      if(!downloads?.ok()||await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth))throw new Error('Mobile downloads route is missing or overflows horizontally');
+      const checksumWidths=await page.locator('.download-sha256').evaluateAll(items=>items.map(item=>({wrap:getComputedStyle(item).overflowWrap,width:item.getBoundingClientRect().width,scrollWidth:item.scrollWidth,clientWidth:item.clientWidth})));
+      if(checksumWidths.length!==2||checksumWidths.some(item=>item.wrap!=='anywhere'||item.scrollWidth>item.clientWidth))throw new Error(`Mobile release checksums do not wrap: ${JSON.stringify(checksumWidths)}`);
+      await page.addScriptTag({url:`${url}/_test/axe.min.js`});
+      const downloadAxe=await page.evaluate(async()=>window.axe.run(document,{runOnly:{type:'tag',values:['wcag2a','wcag2aa','wcag21a','wcag21aa']}}));
+      if(downloadAxe.violations.length)throw new Error(`Mobile downloads accessibility violations: ${downloadAxe.violations.map(item=>item.id).join(', ')}`);
     }
     if(name==='desktop'){
-        const routes=[['/docs/','Guides for building with BMEC'],['/docs/how-bmec-works/','How BMEC works'],['/learn/','Learn BMEC'],['/library/','BMEC code library'],['/playground/','BMEC playground'],['/ai/','Build with BMEC and coding tools'],['/benchmarks/','Benchmarking BMEC'],['/architecture/','How BMEC works'],['/security/','Security and trust boundaries'],['/deploy/','Deployment and operations'],['/roadmap/','Project status'],['/support/','Support BMEC'],['/contact/','Contact'],['/showcase/','Built with BMEC']];
+      const routes=[['/docs/','Guides for building with BMEC'],['/docs/how-bmec-works/','How BMEC works'],['/learn/','Learn BMEC'],['/library/','BMEC code library'],['/playground/','BMEC playground'],['/ai/','Build with BMEC and coding tools'],['/benchmarks/','Benchmarking BMEC'],['/downloads/','BMEC downloads'],['/architecture/','How BMEC works'],['/security/','Security and trust boundaries'],['/deploy/','Deployment and operations'],['/roadmap/','Project status'],['/support/','Support BMEC'],['/contact/','Contact'],['/showcase/','Built with BMEC']];
       for(const [path,title] of routes){
         const response=await page.goto(`${url}${path}`,{waitUntil:'networkidle'});
         if(!response?.ok())throw new Error(`Required website route ${path} returned ${response?.status()}`);
@@ -80,6 +87,14 @@ try{
           await page.getByRole('heading',{name:'App-level browser workload'}).waitFor();
           await page.getByText(/not wrapped in a transaction/).waitFor();
           await page.getByText(/benchmark:interpreter-ranking/).waitFor();
+        }
+        if(path==='/downloads/'){
+          const siteData=JSON.parse(readFileSync(join(site,'site-data.json'),'utf8'));
+          const manifest=JSON.parse(readFileSync(join(site,'release-manifest.json'),'utf8'));
+          const downloadLinks=await page.locator('a[download]').evaluateAll(links=>links.map(link=>link.getAttribute('href')));
+          if(!downloadLinks.includes(siteData.cliDownload)||!downloadLinks.includes(siteData.vscodeDownload)||manifest.artifacts.some(artifact=>!downloadLinks.includes(`/downloads/${artifact.file}`)))throw new Error('Downloads page does not link to all version-aligned release artifacts');
+          for(const artifact of manifest.artifacts)await page.getByText(artifact.sha256,{exact:false}).waitFor();
+          await page.getByText(/has not been published to npm/).waitFor();
         }
         const metadata=await page.evaluate(()=>({canonical:document.querySelector('link[rel="canonical"]')?.href,ogTitle:document.querySelector('meta[property="og:title"]')?.content,ogUrl:document.querySelector('meta[property="og:url"]')?.content,description:document.querySelector('meta[name="description"]')?.content}));
         if(!metadata.canonical?.endsWith(path)||metadata.ogUrl!==metadata.canonical||!metadata.ogTitle||!metadata.description)throw new Error(`Route ${path} has incomplete or inconsistent metadata`);
@@ -145,6 +160,10 @@ try{
     await page.getByRole('button',{name:'AI context'}).click();
     const context=await page.locator('#playground-context').textContent();
     if(!context?.includes('bmec.knowledge-context.v1'))throw new Error(`${name}: playground did not return the BMEC AI context format`);
+    const contextPanel=page.locator('#playground-context');
+    if(await contextPanel.getAttribute('tabindex')!=='0')throw new Error(`${name}: scrollable AI context is not keyboard focusable`);
+    await page.keyboard.press('Tab');
+    if(!await contextPanel.evaluate(element=>element===document.activeElement&&element.matches(':focus-visible')&&getComputedStyle(element).outlineStyle!=='none'))throw new Error(`${name}: scrollable AI context has no visible keyboard focus`);
     await page.locator('#playground-source').fill('app PrivatePlaygroundMarker\nfunction greeting() -> text { return 42 }');
     await page.getByRole('button',{name:'Check code'}).click();
     await page.getByRole('button',{name:'Errors and hints'}).click();
