@@ -2,7 +2,7 @@
 
 Generated from `bmec ai-spec --json` standard-library contracts. Do not edit the function list by hand.
 
-Package version: **0.9.1-beta.2**<br>
+Package version: **0.9.1-beta.3**<br>
 Language version: **0.1**
 
 | Function | Arguments | Returns | Required capabilities |

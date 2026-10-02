@@ -9,8 +9,8 @@ permissions:
 
 env:
   BMEC_SITE_BASE_URL: https://bmec-review.invalid
-  BMEC_PACKAGE_ARCHIVE: ${{ github.workspace }}/.tmp/release-artifacts/b.marinov-bmec-0.9.1-beta.2.tgz
-  BMEC_VSIX_ARCHIVE: ${{ github.workspace }}/.tmp/release-artifacts/bmec-language-support-0.9.1-beta.2.vsix
+  BMEC_PACKAGE_ARCHIVE: ${{ github.workspace }}/.tmp/release-artifacts/b.marinov-bmec-0.9.1-beta.3.tgz
+  BMEC_VSIX_ARCHIVE: ${{ github.workspace }}/.tmp/release-artifacts/bmec-language-support-0.9.1-beta.3.vsix
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -48,7 +48,7 @@ jobs:
           npm pack --pack-destination .tmp/release-artifacts
           npm ci --prefix vscode-extension
           cd vscode-extension
-          npx --yes --package @vscode/vsce@4.0.0 vsce package --pre-release --out ../.tmp/release-artifacts/bmec-language-support-0.9.1-beta.2.vsix
+          npx --yes --package @vscode/vsce@4.0.0 vsce package --pre-release --out ../.tmp/release-artifacts/bmec-language-support-0.9.1-beta.3.vsix
       - run: npm run test:docs
       - run: npm test -- --reporter=dot --testTimeout=20000
         env:
@@ -109,7 +109,7 @@ jobs:
           npm pack --pack-destination .tmp/release-artifacts
           npm ci --prefix vscode-extension
           cd vscode-extension
-          npx --yes --package @vscode/vsce@4.0.0 vsce package --pre-release --out ../.tmp/release-artifacts/bmec-language-support-0.9.1-beta.2.vsix
+          npx --yes --package @vscode/vsce@4.0.0 vsce package --pre-release --out ../.tmp/release-artifacts/bmec-language-support-0.9.1-beta.3.vsix
       - run: npm run test:docs
       - run: npm test -- --reporter=dot --testTimeout=20000
       - run: npm run test:native

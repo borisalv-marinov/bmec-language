@@ -7,13 +7,14 @@ installed package smoke test.
 
 ## 1. Install BMEC
 
-**Solve:** Install the published beta CLI without building the BMEC
-repository: `npm install -g @b.marinov/bmec@0.9.1-beta.2`. Then run `bmec --version` and
-`bmec doctor`.
+**Solve:** Install the reviewed beta.3 archive from the BMEC website without
+building the BMEC repository:
+`npm install -g https://bmec-language.vercel.app/downloads/b.marinov-bmec-0.9.1-beta.3.tgz`.
+Then run `bmec --version` and `bmec doctor`.
 
-**Explanation:** Node.js 22 or newer is required. The pinned version selects
-the `0.9.1-beta.2` prerelease; the registry tag is `beta`. Use the exact archive and hash
-from the release manifest when reviewing an unpublished local candidate.
+**Explanation:** Node.js 22 or newer is required. The candidate archive is
+hosted on the BMEC website and has not been published to npm. The archive
+includes the built CLI and its runtime.
 
 **Common mistake:** Installing the repository checkout as if it were the
 compiled consumer package. The archive contains the built CLI and its runtime.

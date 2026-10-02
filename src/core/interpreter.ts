@@ -39,6 +39,15 @@ export class DateTimeValue { readonly kind='datetime'; constructor(public readon
 export class IdValue { readonly kind='id'; constructor(public readonly value:string){if(!/^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$/.test(value))fail('PIPE-RUNTIME-002','Invalid id value')}toString(){return this.value}}
 export class UploadValue { readonly kind='upload'; constructor(public readonly filename:string,public readonly mediaType:string,public readonly size:number,public readonly data:Buffer){if(!Number.isSafeInteger(size)||size<0||data.length!==size)fail('PIPE-UPLOAD-001','Invalid upload value')}}
 const INT_MIN=-(2n**63n),INT_MAX=2n**63n-1n;
+const integerLiteralCache=new WeakMap<CoreExpr,{source:string;value:bigint}>();
+function integerLiteral(e:CoreExpr):bigint{
+ const source=String(e.value),cached=integerLiteralCache.get(e);
+ if(cached?.source===source)return cached.value;
+ let value:bigint;
+ try{value=integerResult(BigInt(source))}catch{fail('PIPE-RUNTIME-004','Invalid integer value')}
+ integerLiteralCache.set(e,{source,value});
+ return value;
+}
 const isFiniteNumber=(x:number)=>Number.isFinite(x);
 const isNone=(v:Value)=>v instanceof NoneValue;
 const optional=(t:CoreType)=>isOptional(t);
@@ -312,7 +321,7 @@ function evalExpr(e:CoreExpr,env:BindingEnv,by:Map<string,CoreFunction>,state:{s
  if(e.kind==='await')fail('PIPE-ASYNC-001','await must be evaluated through executeAsyncValue');
  if(e.kind==='propagate'){const value=evalExpr(e.operand!,env,by,state);if(!(value instanceof ResultValue))fail('PIPE-RUNTIME-002','Postfix ? requires a Result value');if(value.state==='err')throw new ResultPropagation(value.payload);return value.payload;}
  if(e.kind==='none')return PIPE_NONE;
- if(e.kind==='literal'){const type=e.typeRef.kind==='primitive'?e.typeRef.name:undefined;if(type==='money')return new Money(BigInt(String(e.value)));if(type==='date')return new DateValue(String(e.value));if(type==='datetime')return new DateTimeValue(String(e.value));if(type==='id')return new IdValue(String(e.value));if(type==='integer'){try{return integerResult(BigInt(String(e.value)))}catch{fail('PIPE-RUNTIME-004','Invalid integer value')}}if(type==='number'&&!isFiniteNumber(Number(e.value)))fail('PIPE-RUNTIME-005','Invalid numeric value');return type==='number'?Number(e.value):e.value!}
+ if(e.kind==='literal'){const type=e.typeRef.kind==='primitive'?e.typeRef.name:undefined;if(type==='money')return new Money(BigInt(String(e.value)));if(type==='date')return new DateValue(String(e.value));if(type==='datetime')return new DateTimeValue(String(e.value));if(type==='id')return new IdValue(String(e.value));if(type==='integer')return integerLiteral(e);if(type==='number'&&!isFiniteNumber(Number(e.value)))fail('PIPE-RUNTIME-005','Invalid numeric value');return type==='number'?Number(e.value):e.value!}
  if(e.kind==='list')return new ListValue((e.elements??[]).map(x=>evalExpr(x,env,by,state)),e.typeRef.kind==='list'?e.typeRef.element:undefined);
   if(e.kind==='record')return new RecordValue(new Map((e.fields??[]).map(x=>[x.name,evalExpr(x.value,env,by,state)])),e.typeRef.kind==='record'||e.typeRef.kind==='model'?e.typeRef:undefined);
   if(e.kind==='enum'){if(e.typeRef.kind!=='enum'||!e.variant)fail('PIPE-RUNTIME-002','Invalid enum constructor');const variant=e.typeRef.variants.find(item=>item.name===e.variant);if(!variant)fail('PIPE-RUNTIME-002','Invalid enum variant');const payload=e.args?.[0]?evalExpr(e.args[0],env,by,state):undefined;return new VariantValue(e.typeRef.name,e.variant,payload)}

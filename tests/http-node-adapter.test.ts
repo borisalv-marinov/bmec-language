@@ -1,4 +1,7 @@
 import {afterEach, describe, expect, it} from 'vitest';
+import {mkdtempSync,rmSync,symlinkSync,writeFileSync} from 'node:fs';
+import {join} from 'node:path';
+import {tmpdir} from 'node:os';
 import {primitive} from '../src/types/type-ref.js';
 import {startNodeHttp, type NodeHttpHandle} from '../src/http/node-adapter.js';
 import {authenticatedSession, sessionUser} from '../src/http/auth-policy.js';
@@ -12,12 +15,26 @@ afterEach(async () => {for (const handle of handles.splice(0)) await handle.clos
 describe('Node HTTP adapter', () => {
   it('keeps liveness available while readiness is false', async () => {
     const store=new MemoryRateLimitStore();
-    const handle=await startNodeHttp({routes:[]},undefined,{operations:{readiness:()=>false},rateLimit:{store,limit:1,windowMs:60000}});
+    let readinessChecks=0;
+    const handle=await startNodeHttp({routes:[]},undefined,{operations:{readiness:()=>{readinessChecks++;return false}},rateLimit:{store,limit:1,windowMs:60000}});
     handles.push(handle);
     const live=await fetch(`${handle.url}/healthz`),ready=await fetch(`${handle.url}/readyz`),readyAgain=await fetch(`${handle.url}/readyz`);
     expect(live.status).toBe(200);expect(await live.json()).toEqual({status:'ok'});
     expect(ready.status).toBe(503);expect(await ready.json()).toEqual({status:'unavailable'});
-    expect(readyAgain.status).toBe(503);
+    expect(readyAgain.status).toBe(429);expect(await readyAgain.json()).toEqual({error:'rate_limited'});
+    expect(readinessChecks).toBe(1);
+  });
+
+  it('does not serve an allowlisted static file through a symlink',async()=>{
+    const publicDir=mkdtempSync(join(tmpdir(),'bmec-public-root-')),outside=mkdtempSync(join(tmpdir(),'bmec-public-outside-')),sentinel=join(outside,'secret.html');
+    writeFileSync(sentinel,'outside sentinel');
+    try { symlinkSync(sentinel,join(publicDir,'index.html'),'file'); }
+    catch(error) { rmSync(publicDir,{recursive:true,force:true});rmSync(outside,{recursive:true,force:true});if(process.platform==='win32')return;throw error; }
+    try {
+      const handle=await startNodeHttp({routes:[]},undefined,{publicDirectory:publicDir});handles.push(handle);
+      const response=await fetch(handle.url);
+      expect(response.status).toBe(404);expect(await response.text()).not.toContain('outside sentinel');
+    } finally { rmSync(publicDir,{recursive:true,force:true});rmSync(outside,{recursive:true,force:true}); }
   });
 
   it('crosses the real socket boundary while preserving router contracts', async () => {

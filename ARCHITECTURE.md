@@ -1,7 +1,7 @@
 # BMEC architecture
 
 BMEC is a typed language, compiler, command-line tool, and reference runtime
-for small full-stack applications. The current package is 0.9.1-beta.2; its
+for small full-stack applications. The current package is 0.9.1-beta.3; its
 language contract is version 0.1.
 
 ## Compiler and runtime

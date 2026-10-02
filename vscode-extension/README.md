@@ -16,7 +16,7 @@ If VS Code opens an untrusted workspace in Restricted Mode, the extension
 stays disabled until you explicitly trust that workspace. Review the folder
 before granting trust.
 
-Install the CLI with `npm install -g @b.marinov/bmec@0.9.1-beta.2`. This extension's
+Install the CLI with `npm install -g https://bmec-language.vercel.app/downloads/b.marinov-bmec-0.9.1-beta.3.tgz`. This extension's
 version tracks the matching BMEC beta; its language contract remains version
 0.1. Download the matching `.vsix` from the BMEC website. In VS Code, open
 **Extensions**, choose **Install from VSIX**, and select the file. Updates use

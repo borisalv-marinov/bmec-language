@@ -1,6 +1,6 @@
 {
   "name": "@b.marinov/bmec",
-  "version": "0.9.1-beta.2",
+  "version": "0.9.1-beta.3",
   "description": "A statically typed language and compiler for full-stack applications, with compiler-backed AI discovery.",
   "license": "Apache-2.0",
   "homepage": "https://bmec-language.vercel.app",
@@ -117,6 +117,7 @@
     "test:security": "npm run build && node scripts/security-gate.mjs",
     "test:soak": "npm run build && node scripts/inventory-soak.mjs",
     "benchmark": "npm run build && node scripts/benchmark.mjs",
+    "benchmark:interpreter-ranking": "npm run build && node scripts/interpreter-ranking-benchmark.mjs",
     "benchmark:comparison-extended": "npm run build && node scripts/comparison-benchmark-extended.mjs",
     "performance:gate": "node scripts/performance-gate.mjs",
     "dev": "tsx src/cli/index.ts"

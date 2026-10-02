@@ -1,6 +1,6 @@
 # Security policy
 
-BMEC 0.9.1-beta.2 is a developer beta. It is not security certified, and the
+BMEC 0.9.1-beta.3 is a developer beta. It is not security certified, and the
 project has not had an independent penetration test. The
 [security model](docs/SECURITY_MODEL.md) describes the reference runtime,
 tested controls, and operator responsibilities.

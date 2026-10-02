@@ -11,6 +11,7 @@ if(!output.startsWith(`${website}${process.platform==='win32'?'\\':'/'}`))throw 
 if(existsSync(output))rmSync(output,{recursive:true,force:true});
 mkdirSync(output,{recursive:true});
 for(const file of ['index.html','styles.css','redesign.css','app.js','site.js','playground.js'])cpSync(join(website,file),join(output,file));
+copyFileSync(join(website,'google05e64d7af06055a9.html'),join(output,'google05e64d7af06055a9.html'));
 mkdirSync(join(output,'assets'),{recursive:true});
 copyFileSync(join(website,'assets','bmec-mark.svg'),join(output,'assets','bmec-mark.svg'));
 copyFileSync(join(website,'assets','bmec-mark.png'),join(output,'assets','bmec-mark.png'));

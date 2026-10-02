@@ -98,7 +98,8 @@ describe('BMEC AI command specification',()=>{
   expect(dynamic.commands).toContain('doctor');
   expect(dynamic.commandUsage.repl).toBe('bmec repl');
   expect(dynamic.commandUsage.examples).toBe('bmec examples --json');
-  expect(dynamic.commandUsage.knowledge).toBe('bmec knowledge "QUERY" [--json]');
+  expect(dynamic.commandUsage.knowledge).toBe('bmec knowledge "QUERY" [--json] [--category CATEGORY] [--limit N]');
+  expect(dynamic.commandUsage.ai).toBe('bmec ai context "TASK" [--json] [--category CATEGORY] [--limit N]');
   expect(dynamic.commandUsage.doctor).toBe('bmec doctor [path] [--json]');
   const staticSpec=JSON.parse(readFileSync('ai/commands.json','utf8'));
   expect(staticSpec).toMatchObject({schemaVersion:'bmec.commands.v1',languageVersion:dynamic.languageVersion});
@@ -134,7 +135,7 @@ async function createJob(db capability<database>, time capability<time>, body Jo
  it('lists the AI introspection commands in CLI help',()=>{
   const cli=process.cwd()+'/dist/cli/index.js';
   const help=execFileSync(process.execPath,[cli,'--help'],{encoding:'utf8'});
-  for(const command of ['repl','expand','graph','project','symbols','inspect','affected','types','models','routes','pages','styles','capabilities','stdlib','examples','knowledge','doctor']) expect(help).toContain(`  ${command}`);
+  for(const command of ['repl','expand','graph','project','symbols','inspect','affected','types','models','routes','pages','styles','capabilities','stdlib','examples','knowledge','ai context','doctor']) expect(help).toContain(`  ${command}`);
  });
  it('projects the compiler-owned standard-library names without a source file',()=>{
   const cli=process.cwd()+'/dist/cli/index.js';

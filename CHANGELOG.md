@@ -4,6 +4,23 @@ This file records notable user-facing changes. Package and language versions
 are separate. Beta entries are prereleases and do not imply registry
 publication.
 
+## 0.9.1-beta.3 — prepared website candidate
+
+- Carries the current public `bmec-language` source forward without changing
+  language contract 0.1, typed IR 2, the browser playground runner, or graph
+  identifiers.
+- Fixes task-filtered knowledge limits and adds local-auth workflow discovery
+  to both `bmec knowledge` and `bmec ai context`.
+- Tightens performance-gate input validation and adds synthetic app-level
+  SQLite/PostgreSQL browser measurements with bounded concurrency and repeat
+  controls.
+- Fixes static-file symlink escapes and readiness rate-limit bypasses; clarifies
+  development authentication setup and database benchmark transaction scope.
+- Adds a local interpreter workload ranking to the website, based on matched
+  measurements; it does not rank native, hosted, or general BMEC workloads.
+- Prepares matching website package and VSIX downloads. The candidate is not
+  published to npm, and its deployment is reviewed separately.
+
 ## 0.9.1-beta.2
 
 - Fixes `bmec inspect` and `bmec affected` to accept app and module roots, as

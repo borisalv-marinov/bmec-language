@@ -811,7 +811,7 @@
       "id": "UI-PAGE-ACTION-001",
       "name": "typed page action",
       "purpose": "Submit typed form values, typed page state, or repeated-list item fields from a generated browser page to a declared server route.",
-      "syntax": "event Name(pathField Type, bodyField Type, ...) sends POST|PUT|PATCH|DELETE \"/items/:id\" [with idempotency key]; button \"Add\" on add with productId from product.id; button \"Checkout\" on checkout with items from cart; [then clears stateName on success]",
+      "syntax": "event Name(pathField Type, bodyField Type, ...) sends POST|PUT|PATCH|DELETE \"/items/:id\" [with idempotency key] [then clears stateName on success]; button \"Add\" on add with productId from product.id; button \"Checkout\" on checkout with items from cart",
       "types": [
         "typed event parameters",
         "declared record/model request body",
@@ -1360,6 +1360,39 @@
       "effects": [
         "http"
       ]
+    },
+    {
+      "id": "DB-INDEX-001",
+      "name": "declared database index",
+      "purpose": "Declare a safe additive composite index for a persistent model.",
+      "syntax": "index name on Model by field, field",
+      "types": [
+        "model name",
+        "one or more model fields"
+      ],
+      "constraints": [
+        "Every indexed field must exist on the declared model.",
+        "SQLite startup migrations and transactional PostgreSQL startup migrations create declared indexes.",
+        "Declared indexes are safe additive migrations; a changed definition under the same name fails migration. Add a new index name and review old-index cleanup separately."
+      ],
+      "errors": [
+        "Unknown models, unknown fields, duplicate index names, and invalid index declarations are rejected."
+      ],
+      "example": "model Record { region text required name text required }\nindex record_region_name on Record by region, name",
+      "related": [
+        "model declaration",
+        "safe additive migration",
+        "keyset pagination"
+      ],
+      "properties": [
+        "name",
+        "model",
+        "fields"
+      ],
+      "events": [],
+      "effects": [
+        "database"
+      ]
     }
   ],
   "projectionSchemas": {
@@ -1426,6 +1459,14 @@
     "examples": {
       "schemaVersion": "bmec.examples.v1",
       "payload": "examples"
+    },
+    "knowledge": {
+      "schemaVersion": "bmec.knowledge-context.v1",
+      "payload": "task-specific BMEC context"
+    },
+    "aiTaskContext": {
+      "schemaVersion": "bmec.ai-task-context.v1",
+      "payload": "task-matched BMEC knowledge"
     }
   },
   "releaseBoundarySchema": {
@@ -2884,7 +2925,10 @@
     "examples",
     "ai-spec",
     "lock",
-    "doctor"
+    "doctor",
+    "lsp",
+    "knowledge",
+    "ai"
   ],
   "commandUsage": {
     "new": "bmec new DIR [--force]",
@@ -2912,7 +2956,10 @@
     "affected": "bmec affected NODE file.bmec [--json]",
     "repl": "bmec repl",
     "ai-spec": "bmec ai-spec [--json]",
-    "build": "bmec build file.bmec"
+    "build": "bmec build file.bmec",
+    "lsp": "bmec lsp",
+    "knowledge": "bmec knowledge \"QUERY\" [--json] [--category CATEGORY] [--limit N]",
+    "ai": "bmec ai context \"TASK\" [--json] [--category CATEGORY] [--limit N]"
   },
   "commandOptions": {
     "check": [

@@ -12,6 +12,7 @@ the task you need to do:
 bmec --version
 bmec ai-spec --json
 bmec knowledge "authenticated custom route" --json
+bmec ai context "authenticated custom route" --json
 ```
 
 `bmec knowledge` returns matching syntax, types, capabilities, diagnostics,
@@ -25,6 +26,49 @@ bmec knowledge "SQLite database transaction" --json
 
 The command searches the local compiler-owned catalog. It does not send the
 prompt or source code to a BMEC service.
+
+## Start and run a generated project
+
+The public `bmec new DIR` command creates a generic local-app starter. Run
+subsequent project commands after changing into the generated directory:
+
+```sh
+bmec new task-api
+cd task-api
+bmec check main.bmec
+bmec test main.bmec
+bmec build main.bmec
+bmec run main.bmec
+```
+
+`bmec run` starts a local development server with local SQLite. It does not
+create a hosted service or configure deployment infrastructure. Hosting needs
+its own configured host, persistent database, secrets, network policy, process
+supervision, and deployment checks. See [deployment guidance](DEPLOYMENT.md).
+
+## Verify local authentication behavior
+
+The development server starts with no configured users, so its built-in auth
+routes are disabled. To test the authenticated local-user setup, set synthetic
+users in the same process environment before starting BMEC:
+
+```powershell
+$env:BMEC_AUTH_USERS = '[{"id":"local-admin","password":"replace-with-a-local-test-password","role":"admin"}]'
+bmec run main.bmec
+```
+
+Clear the setting with `Remove-Item Env:BMEC_AUTH_USERS` after the check. BMEC
+does not load `.env` files automatically. This local development setup is
+separate from production's insert-only startup seed and persistent user
+storage. Authentication does not add owner filters to database operations;
+applications must derive ownership from the authenticated principal. See
+[authentication and authorization](CAPABILITIES.md#authentication-and-authorization).
+
+Both `bmec knowledge` and `bmec ai context` accept `--category workflow` to
+focus on task recipes and `--limit 1` to keep the number of returned records
+small. Local-authentication recipes distinguish running without configured
+users from supplying synthetic `BMEC_AUTH_USERS` in the local process
+environment.
 
 ## Use a compiler-backed change loop
 

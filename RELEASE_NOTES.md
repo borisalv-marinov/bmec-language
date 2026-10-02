@@ -1,30 +1,31 @@
 # BMEC 0.9.1 beta
 
-`0.9.1-beta.2` is a prepared prerelease candidate for public developer
-evaluation. It carries forward the frozen BMEC 0.8 product source at
-`6176f33254f2c978c691566ddb6696234e5bc3b1`; this release-preparation pass
-does not change the language (0.1) or typed IR (2) compatibility versions.
+`0.9.1-beta.3` is a prepared public website candidate for developer evaluation.
+It continues the `0.9.1` beta line and keeps language compatibility `0.1` and
+typed IR compatibility `2` unchanged. It does not add a language feature
+program.
 
-This patch fixes `inspect` and `affected` for app and module graph IDs. The
-first public npm version, `0.9.1-beta.1`, remains available; install the matching
-`0.9.1-beta.2` CLI and website-distributed VSIX for this patch.
+This candidate carries forward the current public `bmec-language` source,
+including its browser-local compiler and bounded playground Worker, complete
+graph identifiers, responsive site, and current learning and showcase pages.
+It includes verified fixes for small-limit knowledge discovery, the
+performance-gate input contract, development-authentication guidance, static
+asset symlink handling, readiness rate limiting, and benchmark wording and
+measurements. A local interpreter performance ranking is included with its
+workload and machine scope stated on the site.
 
-The release work focuses on clean installation, an official VS Code
-extension, a clearer product website and custom-app learning path, accurate
-security and AI guidance, and fresh Windows/Linux validation. It does not add
-language features or claim universal target parity.
-
-The VS Code extension is distributed only through the website as a downloadable
-VSIX. Install it using **Extensions → Install from VSIX**. The release manifest
-records the exact downloadable artifact hashes. Public launch status is verified
-separately for GitHub, npm, and the production website.
+The matching package archive and VS Code extension are served as website
+downloads. This candidate has not been published to npm or the VS Code
+Marketplace. Install the package archive from the [BMEC downloads page](https://bmec-language.vercel.app/downloads/).
 
 ## Known boundaries
 
 - Node.js 22 or newer is required for the CLI and reference runtime.
 - The native backend supports a documented subset and needs a compatible C
   toolchain.
-- Windows and Linux checks are recorded against the exact candidate; macOS
-  remains unvalidated without an available environment.
-- No independent external security audit or production certification is
-  claimed.
+- The playground checks full BMEC source but runs only its documented bounded
+  pure-function subset in a short-lived browser Worker.
+- Human onboarding and actual screen-reader sessions remain unverified unless
+  they occur; automated checks do not replace those sessions.
+- This is a developer beta, not an independent external security audit or
+  production certification.

@@ -505,3 +505,19 @@ textarea:focus-visible,
 .quality-update-limit{grid-column:1/-1;margin:3px 0 0;padding:12px 14px;border-left:3px solid var(--site-mint);background:var(--site-raised);color:var(--site-muted);font-size:.72rem;line-height:1.6}
 .quality-update-limit strong{color:var(--site-text)}
 @media(max-width:760px){.quality-update{padding-block:2rem}.quality-update-layout{grid-template-columns:1fr;gap:22px}.quality-update-heading h2{max-width:560px}.quality-update-details{gap:16px}}
+
+.interpreter-ranking{padding-block:clamp(2.4rem,5vw,4rem);border-bottom:1px solid var(--site-line);background:var(--site-bg)}
+.interpreter-ranking-layout{display:grid;grid-template-columns:minmax(240px,.72fr) minmax(0,1.28fr);gap:20px 56px;align-items:start}
+.interpreter-ranking-layout>.section-kicker{grid-column:1/-1;margin:0;color:var(--site-muted);font-size:.73rem;font-weight:700}
+.interpreter-ranking h2{margin:0;color:var(--site-text);font:600 clamp(1.75rem,3vw,2.4rem)/1.1 var(--display);letter-spacing:-.05em}
+.interpreter-ranking-layout>div>p:not(.section-kicker){color:var(--site-muted);font-size:.82rem;line-height:1.65}
+.interpreter-ranking-table-wrap{overflow-x:auto;border:1px solid var(--site-line);border-radius:12px;background:var(--site-surface)}
+.interpreter-ranking table{width:100%;border-collapse:collapse;text-align:left;font-size:.78rem;white-space:nowrap}
+.interpreter-ranking caption{padding:13px 15px;text-align:left;color:var(--site-muted);font-weight:650}
+.interpreter-ranking th,.interpreter-ranking td{padding:11px 13px;border-top:1px solid var(--site-line)}
+.interpreter-ranking thead th{color:var(--site-muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.04em}
+.interpreter-ranking tbody th{color:var(--site-text);font-weight:650}
+.interpreter-ranking tbody td:last-child{color:var(--site-blue);font-weight:750}
+.interpreter-ranking-method{grid-column:1/-1;margin:0;color:var(--site-muted);font-size:.72rem;line-height:1.65}
+.interpreter-ranking-method a{color:var(--site-blue);text-underline-offset:3px}
+@media(max-width:760px){.interpreter-ranking-layout{grid-template-columns:1fr;gap:14px}.interpreter-ranking-layout>.section-kicker,.interpreter-ranking-method{grid-column:auto}.interpreter-ranking table{font-size:.71rem}.interpreter-ranking th,.interpreter-ranking td{padding:10px 9px}}

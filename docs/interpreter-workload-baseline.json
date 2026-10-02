@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "bmec.interpreter-benchmark-baseline.v1",
+  "sourceCommit": "8737d052daf1b8d8ff741321443624b55dda9707",
+  "packageVersion": "0.9.1-beta.2",
+  "node": "v24.18.0",
+  "platform": "win32/x64",
+  "iterations": 200000,
+  "warmups": 1,
+  "samples": 5,
+  "workloads": {
+    "Counter": 51.221,
+    "Checksum": 68.927,
+    "Function calls": 111.126,
+    "Collection": 157.276
+  }
+}

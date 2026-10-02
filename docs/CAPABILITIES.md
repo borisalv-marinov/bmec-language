@@ -1,6 +1,6 @@
 # BMEC capabilities and support boundaries
 
-This guide describes the public BMEC **0.9.1-beta.2 package** and **0.1 language**
+This guide describes the public BMEC **0.9.1-beta.3 package** and **0.1 language**
 surface. The compiler-owned specification and catalogs are the authoritative
 symbol lists; this guide explains how to use them and where the host remains
 responsible. The [generated coverage inventory](CAPABILITY_COVERAGE.md) links
@@ -129,9 +129,27 @@ Routes can require `authenticated`, a named `role`, or a named `attribute`.
 Generated model CRUD APIs are public unless they declare `requiring ...` or
 the host applies a default policy. The host must register matching policies;
 unknown policies deny access. Authorization runs before body validation and
-route capabilities. Local development can seed users through
-`BMEC_AUTH_USERS`; do not use that convenience setting for production. The
-host owns durable user storage and identity-provider integration. Sessions
+route capabilities. In the default local development setup, no users are
+configured, authentication is disabled, and the built-in `/auth/register`,
+`/auth/login`, and `/auth/logout` routes return 404. To test authenticated
+local-user flows, set `BMEC_AUTH_USERS` in the process environment to a JSON
+array of synthetic users with text `id`, `password`, and `role` fields before
+running the app:
+
+```powershell
+$env:BMEC_AUTH_USERS = '[{"id":"local-admin","password":"replace-with-a-local-test-password","role":"admin"},{"id":"local-owner","password":"replace-with-another-local-test-password","role":"owner"}]'
+bmec run main.bmec
+```
+
+This development setting enables the authentication routes and seeds the
+listed process-memory users. The CLI reads process environment variables; it
+does not load `.env` files automatically. Use synthetic credentials and do not
+commit them. This differs from production's insert-only startup seed, which
+uses persistent user storage and does not replace an existing password or
+role. The host owns durable user storage and identity-provider integration.
+Authentication does not add database owner filters: derive the owner from the
+authenticated principal and include owner/workspace predicates in every
+read and write. Sessions
 are server-managed and use HttpOnly cookies; configure trusted origins when a
 browser frontend has a separate public origin.
 
@@ -294,7 +312,7 @@ language behavior; backend parity is verified only for the tested constructs.
 ## Known limitations
 
 - BMEC is a developer preview. The package and language versions are separate;
-  this guide labels package 0.9.1-beta.2 and language 0.1.
+  this guide labels package 0.9.1-beta.3 and language 0.1.
 - The reference runtime creates SQLite and PostgreSQL model schemas and applies
   safe additive changes. Destructive migration still requires a separate,
   reviewed recovery procedure.

@@ -34,8 +34,17 @@ try{
     const sharingImage=await page.locator('meta[property="og:image"]').getAttribute('content');
     if(!sharingImage?.endsWith('/assets/bmec-social.png'))throw new Error(`${name}: sharing image must use BMEC branding`);
     await page.getByRole('heading',{name:'One language. Real applications.'}).waitFor();
-    await page.getByRole('heading',{name:'Tests and security checked for BMEC 0.9.1-beta.2.'}).waitFor();
-    await page.getByText('1,260 tests, with 7 skipped',{exact:false}).waitFor();
+    await page.getByRole('heading',{name:'Tests and security checked for BMEC 0.9.1-beta.3.'}).waitFor();
+    await page.getByText('1,278 tests, with 7 skipped',{exact:false}).waitFor();
+    await page.getByRole('heading',{name:'Integer-literal caching reduced interpreter time across four workloads.'}).waitFor();
+    const installCommand=await page.locator('#download pre').innerText();
+    if(!installCommand.includes('npm install -g https://bmec-language.vercel.app/downloads/b.marinov-bmec-0.9.1-beta.3.tgz')||installCommand.includes('@b.marinov/bmec@0.9.1-beta.3'))throw new Error(`${name}: the website must install the exact hosted candidate archive, not an unpublished npm version`);
+    const learning=await fetch(`${url}/docs/learning-path/`).then(response=>response.text());
+    if(!learning.includes('https://bmec-language.vercel.app/downloads/b.marinov-bmec-0.9.1-beta.3.tgz')||learning.includes('Install the published beta CLI'))throw new Error(`${name}: the learning path install instructions do not match the website-only beta candidate`);
+    const ranking=page.getByRole('table',{name:'Local BMEC reference-interpreter measurements'});
+    await ranking.getByRole('row',{name:/Counter.*46\.6%/}).waitFor();
+    const googleVerification=await page.evaluate(async()=>{const response=await fetch('/google05e64d7af06055a9.html');return {status:response.status,body:await response.text(),meta:document.querySelector('meta[name="google-site-verification"]')?.getAttribute('content')}});
+    if(googleVerification.status!==200||!googleVerification.body.includes('google05e64d7af06055a9.html')||!googleVerification.meta)throw new Error(`${name}: preserved search verification metadata/file did not build`);
     for(const section of ['Your data, server, database, and interface share one contract.','Start small. Connect the pieces when you’re ready.','The compiler connects your application layers.','Ask for language facts that fit the task.','Start with the CLI. Keep the compiler close.','Write, check, and run a function.','Follow a clear path into the language.','Readable source. Checked behavior.','Know what BMEC checks—and what your host owns.','Read the source and its contracts.'])await page.getByRole('heading',{name:section}).waitFor();
     if(await page.locator('#showcase, .showcase-card').count())throw new Error(`${name}: removed example showcase is still visible on the homepage`);
     const initialOverflow=await page.evaluate(()=>{const nodes=[...document.body.querySelectorAll('*')].map(el=>({el,rect:el.getBoundingClientRect(),text:(el.textContent??'').trim().replace(/\s+/g,' ').slice(0,70)})).filter(item=>item.rect.right>innerWidth+1||item.rect.left< -1).sort((a,b)=>Math.max(b.rect.right-innerWidth,-b.rect.left)-Math.max(a.rect.right-innerWidth,-a.rect.left)).slice(0,8);return `document=${document.documentElement.scrollWidth} body=${document.body.scrollWidth} client=${innerWidth}; ${nodes.map(item=>`${item.el.tagName.toLowerCase()}${item.el.className&&typeof item.el.className==='string'?'.'+item.el.className.split(' ').filter(Boolean).join('.'):''} left=${Math.round(item.rect.left)} right=${Math.round(item.rect.right)} text="${item.text}"`).join(' | ')}`;});
@@ -67,6 +76,11 @@ try{
       for(const [path,title] of routes){
         const response=await page.goto(`${url}${path}`,{waitUntil:'networkidle'});
         if(!response?.ok())throw new Error(`Required website route ${path} returned ${response?.status()}`);
+        if(path==='/benchmarks/'){
+          await page.getByRole('heading',{name:'App-level browser workload'}).waitFor();
+          await page.getByText(/not wrapped in a transaction/).waitFor();
+          await page.getByText(/benchmark:interpreter-ranking/).waitFor();
+        }
         const metadata=await page.evaluate(()=>({canonical:document.querySelector('link[rel="canonical"]')?.href,ogTitle:document.querySelector('meta[property="og:title"]')?.content,ogUrl:document.querySelector('meta[property="og:url"]')?.content,description:document.querySelector('meta[name="description"]')?.content}));
         if(!metadata.canonical?.endsWith(path)||metadata.ogUrl!==metadata.canonical||!metadata.ogTitle||!metadata.description)throw new Error(`Route ${path} has incomplete or inconsistent metadata`);
         await page.getByRole('heading',{level:1,name:title}).waitFor();

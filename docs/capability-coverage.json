@@ -1,6 +1,6 @@
 {
   "schemaVersion": "bmec.documentation-coverage.v1",
-  "packageVersion": "0.9.1-beta.2",
+  "packageVersion": "0.9.1-beta.3",
   "languageVersion": "0.1",
   "capabilities": [
     {
@@ -8,7 +8,7 @@
       "title": "Installation",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -65,7 +65,7 @@
       "title": "Command-line interface",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -139,7 +139,7 @@
       "title": "Language syntax",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -320,7 +320,7 @@
       "title": "Type system",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -384,7 +384,7 @@
       "title": "Functions",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -437,7 +437,7 @@
       "title": "Control flow",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -492,7 +492,7 @@
       "title": "Collections",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -547,7 +547,7 @@
       "title": "Records",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -601,7 +601,7 @@
       "title": "Enums",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -655,7 +655,7 @@
       "title": "Result and optionals",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -711,7 +711,7 @@
       "title": "JSON",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -774,7 +774,7 @@
       "title": "Filesystem and paths",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -873,7 +873,7 @@
       "title": "HTTP",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -945,7 +945,7 @@
       "title": "Database",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1026,7 +1026,7 @@
       "title": "SQLite",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1081,7 +1081,7 @@
       "title": "PostgreSQL",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1138,7 +1138,7 @@
       "title": "Migrations, indexes, and transactions",
       "support": "limited",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1195,7 +1195,7 @@
       "title": "Authentication and authorization",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1252,7 +1252,7 @@
       "title": "Security",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1313,7 +1313,7 @@
       "title": "UI",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1379,7 +1379,7 @@
       "title": "Design system",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1433,7 +1433,7 @@
       "title": "Frontend state",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1493,7 +1493,7 @@
       "title": "Forms",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1549,7 +1549,7 @@
       "title": "Responsive design",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1603,7 +1603,7 @@
       "title": "Accessibility",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1659,7 +1659,7 @@
       "title": "Money",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1710,7 +1710,7 @@
       "title": "Configuration and secrets",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1795,7 +1795,7 @@
       "title": "Email, time, random, Base64, and cryptography",
       "support": "limited",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1888,7 +1888,7 @@
       "title": "Testing",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1939,7 +1939,7 @@
       "title": "Diagnostics",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -1997,7 +1997,7 @@
       "title": "Native compilation",
       "support": "limited",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2048,7 +2048,7 @@
       "title": "Packaging",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2101,7 +2101,7 @@
       "title": "Deployment",
       "support": "limited",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2154,7 +2154,7 @@
       "title": "Docker and Linux",
       "support": "limited",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2207,7 +2207,7 @@
       "title": "Logging and operations",
       "support": "limited",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2259,7 +2259,7 @@
       "title": "AI discovery",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2319,7 +2319,7 @@
       "title": "Architecture",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2376,7 +2376,7 @@
       "title": "Limitations",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2423,7 +2423,7 @@
       "title": "Examples",
       "support": "supported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2482,7 +2482,7 @@
       "title": "Realtime and WebSockets",
       "support": "unsupported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {
@@ -2523,7 +2523,7 @@
       "title": "General binary buffers and cryptographic primitives",
       "support": "unsupported",
       "availability": {
-        "packageVersion": "0.9.1-beta.2",
+        "packageVersion": "0.9.1-beta.3",
         "languageVersion": "0.1"
       },
       "canonical": {

@@ -1,6 +1,6 @@
 import {createServer, type IncomingMessage, type Server, type ServerResponse} from 'node:http';
 import {randomUUID} from 'node:crypto';
-import {existsSync,readFileSync,statSync} from 'node:fs';
+import {lstatSync,readFileSync,realpathSync} from 'node:fs';
 import {isAbsolute,relative,resolve} from 'node:path';
 import type {HttpProgram} from './ir.js';
 import type {ProjectIR} from '../ir/ir.js';
@@ -113,6 +113,18 @@ function writeResponse(response: ServerResponse, result: HttpResponse, requestId
   response.end(contentType.toLowerCase().startsWith('application/json') ? JSON.stringify(result.body) : String(result.body));
 }
 
+function safePublicFile(rootPath:string,name:string):string|undefined {
+  try {
+    const root=realpathSync(rootPath),parts=name.split('/');
+    if(!parts.length||parts.some(part=>!part||part==='.'||part==='..'))return undefined;
+    let current=root;
+    for(const part of parts){current=resolve(current,part);if(lstatSync(current).isSymbolicLink())return undefined;}
+    const canonical=realpathSync(current),rel=relative(root,canonical);
+    if(isAbsolute(rel)||rel==='..'||rel.startsWith('..\\')||rel.startsWith('../')||!lstatSync(canonical).isFile())return undefined;
+    return canonical;
+  } catch { return undefined; }
+}
+
 const securityHeaders:Record<string,string>={'x-content-type-options':'nosniff','referrer-policy':'strict-origin-when-cross-origin','x-frame-options':'DENY','permissions-policy':'camera=(), microphone=(), geolocation=()'};
 
 /** Node transport adapter. BMEC routing, validation, policies, and contracts
@@ -137,6 +149,7 @@ export async function startNodeHttp(program: HttpProgram, configure?: (router: H
     const log = (status: number, outcome: HttpLogEvent['outcome']) => options.logger?.({requestId, method: request.method ?? 'GET', path:safePath, status, durationMs: Math.max(0, Math.round(performance.now() - started)), outcome});
     try {
       if(options.operations&&(path==='/healthz'||path==='/readyz')){
+        if(path==='/readyz'&&options.rateLimit){const result=await options.rateLimit.store.consume(`http:${request.socket.remoteAddress??'unknown'}`,options.rateLimit.limit,options.rateLimit.windowMs);if(!result.allowed){const denied={status:429,headers:{'retry-after':String(result.retryAfterSeconds),'cache-control':'no-store'},body:{error:'rate_limited'}};writeResponse(response,denied,requestId,policyHeaders);log(429,'response');return}}
         const ready=path==='/healthz'?true:await Promise.resolve().then(options.operations.readiness).catch(()=>false);
         const status=ready?200:503;
         writeResponse(response,{status,headers:{'cache-control':'no-store'},body:{status:ready?'ok':'unavailable'}},requestId,policyHeaders);
@@ -154,9 +167,9 @@ export async function startNodeHttp(program: HttpProgram, configure?: (router: H
       if (options.publicDirectory && (request.method === 'GET' || request.method === 'HEAD')) {
         const pathname = new URL(request.url ?? '/', 'http://pipe.local').pathname;
         const name = pathname === '/' ? 'index.html' : pathname.slice(1);
-        const root = resolve(options.publicDirectory), target = resolve(root, name), rel = relative(root, target);
+        const target=safePublicFile(options.publicDirectory,name);
         const publicNames = new Set(['index.html', 'app.js', 'pipe-release.json']);
-        if (publicNames.has(name) && !isAbsolute(rel) && rel !== '..' && !rel.startsWith('..\\') && !rel.startsWith('../') && existsSync(target) && statSync(target).isFile()) {
+        if (publicNames.has(name) && target) {
           const contentType = target.endsWith('.html') ? 'text/html; charset=utf-8' : target.endsWith('.js') ? 'text/javascript; charset=utf-8' : 'application/json; charset=utf-8';
           response.writeHead(200, {...securityHeaders,...policyHeaders,'content-type': contentType,'x-request-id':requestId});
           response.end(request.method === 'HEAD' ? undefined : readFileSync(target));
